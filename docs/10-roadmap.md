@@ -52,7 +52,7 @@ flowchart LR
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P0.1 | Khung monorepo | pnpm workspaces + Turborepo, TypeScript, Biome, Vitest. App rỗng chạy được: `web` (Vite + React + R3F, một khối xoay), `api` (Fastify, `/health`), `realtime` (Colyseus, phòng thử), `admin` (trang trống). Gói `shared`, `map-data`, `core`, `db`. Docker Compose cho Postgres + Redis. `.env.example`. GitHub Actions: lint, typecheck, test, build. README hướng dẫn chạy | M | Chưa làm |
+| P0.1 | Khung monorepo | pnpm workspaces + Turborepo, TypeScript, Biome, Vitest. App rỗng chạy được: `web` (Vite + React + R3F, một khối xoay), `api` (Fastify, `/health`), `realtime` (Colyseus, phòng thử), `admin` (trang trống). Gói `shared`, `map-data`, `core`, `db`. Docker Compose cho Postgres + Redis. `.env.example`. GitHub Actions: lint, typecheck, test, build. README hướng dẫn chạy | M | Xong |
 
 **Nghiệm thu:** `pnpm install && pnpm dev` chạy cả ba app; `pnpm test` và `pnpm build` qua; CI xanh trên nhánh.
 

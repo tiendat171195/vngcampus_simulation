@@ -15,6 +15,38 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-12 — Mặc định chỉ lắng nghe trên 127.0.0.1
+
+- Gói việc: P0.1
+- Bối cảnh: `api` và `realtime` lúc dev không cần mở ra mạng LAN; điện thoại thử nghiệm đi qua Vite (`--host`), Vite proxy tiếp vào localhost.
+- Quyết định: `API_HOST` và `REALTIME_HOST` mặc định là `127.0.0.1`.
+- Khác plan ở đâu: plan chưa nói tới; ghi lại để P7.1 nhớ.
+- Hệ quả: Dockerfile/Compose production phải đặt hai biến này thành `0.0.0.0`.
+
+## 2026-11-12 — Dùng `@colyseus/core` trực tiếp, state khai báo bằng builder
+
+- Gói việc: P0.1
+- Bối cảnh: gói gộp `colyseus` export lại cả `@colyseus/auth`, `playground`, `monitor`, `redis-*` và nạp chúng ngay khi import. Plan đã quyết không dùng các gói còn beta. Ngoài ra decorator `@type()` cần `experimentalDecorators`, không hợp với `erasableSyntaxOnly`.
+- Quyết định: `apps/realtime` phụ thuộc `@colyseus/core` + `@colyseus/ws-transport` + `@colyseus/schema`. State khai báo bằng `schema({...})` và `t.*`. Route HTTP (health) dùng `createRouter`/`createEndpoint` của core, không cài express.
+- Khác plan ở đâu: đã sửa bảng tech stack ở `02-architecture.md` và ví dụ schema ở `05-multiplayer.md` §3.
+- Hệ quả: khi cần Redis presence/driver, monitor, loadtest thì cài từng gói riêng.
+
+## 2026-11-12 — Gói nội bộ xuất mã TypeScript; app Node bundle bằng tsdown
+
+- Gói việc: P0.1
+- Bối cảnh: plan ghi "build bằng `tsc`". Với `tsc`, mỗi gói nội bộ phải có bước build riêng ra `dist/` và phải chạy watch song song lúc dev.
+- Quyết định: gói trong `packages/` xuất thẳng `src/index.ts`. `api` và `realtime` dùng `tsx watch` lúc dev và bundle bằng tsdown ra `dist/index.mjs` cho production (gộp mã gói nội bộ, để thư viện npm bên ngoài). Thêm `pnpm smoke` chạy thử bản build.
+- Khác plan ở đâu: đã sửa `02-architecture.md` §3 và §5.
+- Hệ quả: thư viện npm mà gói nội bộ dùng phải được khai báo cả trong `dependencies` của app bundle nó. TypeScript 7.0.2 chạy tốt với toàn bộ toolchain, không phải lùi về 6.x.
+
+## 2026-11-12 — Biome không format Markdown
+
+- Gói việc: P0.1
+- Bối cảnh: Biome 2.6 format cả Markdown và căn đều cột của bảng, làm mọi thay đổi nhỏ trong bảng (ví dụ cột trạng thái ở roadmap) thành diff lớn.
+- Quyết định: loại `**/*.md` khỏi Biome.
+- Khác plan ở đâu: đã ghi chú ở bảng công cụ trong `02-architecture.md`.
+- Hệ quả: tài liệu giữ dạng bảng gọn, viết tay.
+
 ## 2026-11-12 — Lập plan v0.1
 - Gói việc: —
 - Bối cảnh: khởi tạo dự án, chưa có code.

@@ -16,6 +16,23 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 - Open product decisions D1–D12 and their defaults are in `docs/11-risks-open-questions.md`. Build to the default unless the user has said otherwise.
 - After finishing a package: set its status in `docs/10-roadmap.md`, and record anything built differently from the design in `docs/DECISIONS.md` (and fix the design doc itself).
 
+## Commands
+
+- `pnpm dev` runs web (5173), admin (5174), api (3001) and realtime (2567) together.
+- `pnpm check` runs lint → typecheck → test → build → smoke, the same chain as CI. Run it before every commit; `pnpm format` fixes formatting.
+- One package: `pnpm --filter @campus/realtime test`.
+- UI changes are verified by running `pnpm dev` and driving the page in a browser, not by tests alone.
+
+## How the workspace is built
+
+- Packages in `packages/` export TypeScript source (`exports` → `./src/index.ts`) and have no build step.
+- `apps/api` and `apps/realtime` are bundled with tsdown: workspace code is inlined, npm packages stay external. So an npm package imported by a workspace package must also be listed in the dependencies of every app that bundles it. `pnpm smoke` starts the built servers and fails if one is missing.
+- `erasableSyntaxOnly` is on: no `enum`, `namespace` or parameter properties. Colyseus state is declared with the `schema({...})` builder from `@colyseus/schema`, not decorators.
+- The realtime app depends on `@colyseus/core` directly, not the `colyseus` meta-package.
+- Versions used by more than one package live in the `catalog:` of `pnpm-workspace.yaml`.
+- The browser only calls its own origin: `/api` (REST) and `/rt` (realtime). Vite proxies both in development.
+- Biome does not format Markdown; keep doc tables compact.
+
 ## Rules that are easy to get wrong
 
 - The server decides mission progress and rewards. The client only sends intents (`move`, `interact`, `quiz:answer`); never add a "client reports completion" path.

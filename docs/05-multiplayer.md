@@ -23,46 +23,51 @@
 
 ## 3. State của phòng (minh hoạ)
 
-Cú pháp chốt theo tài liệu Colyseus 0.18 lúc implement; mỗi lớp schema tối đa 63 trường.
+State khai báo bằng builder `schema({...})` của `@colyseus/schema` 5 (không dùng decorator, xem [02](02-architecture.md#5-cấu-trúc-monorepo)); mỗi schema tối đa 63 trường.
 
 ```ts
-class PlayerState extends Schema {
-  @type("string") userId: string;
-  @type("string") name: string;
-  @type("string") avatar: string;     // chuỗi cấu hình avatar
-  @type("string") tag: string;        // nhãn phòng ban (tuỳ chọn)
-  @type("uint8")  level: number;
-  @type("uint8")  status: number;     // 0 bình thường · 1 AFK · 2 tạm mất kết nối
-  @type("int16")  x: number;          // 1/32 m
-  @type("int16")  y: number;
-  @type("int16")  z: number;
-  @type("uint8")  yaw: number;        // 256 nấc
-  @type("uint8")  anim: number;       // idle · walk · run · jump · sit · emote
-  @type("uint8")  emote: number;      // id emote đang diễn, 0 = không
-  @type("uint16") emoteSeq: number;   // tăng mỗi lần diễn để client phát lại
-  @type("string") seatId: string;     // ghế đang ngồi, rỗng nếu không
-}
+import { schema, t, type SchemaType } from '@colyseus/schema';
 
-class EntityState extends Schema {    // NPC, kiosk, vật phẩm dùng chung, bảng tiến độ…
-  @type("string") id: string;
-  @type("uint8")  kind: number;
-  @type("int16")  x: number;
-  @type("int16")  y: number;
-  @type("int16")  z: number;
-  @type("uint8")  yaw: number;
-  @type("uint8")  state: number;
-  @type("string") data: string;       // JSON nhỏ: nhãn, missionId…
-}
+const PlayerState = schema({
+  userId: t.string(),
+  name: t.string(),
+  avatar: t.string(),      // chuỗi cấu hình avatar
+  tag: t.string(),         // nhãn phòng ban (tuỳ chọn)
+  level: t.uint8(),
+  status: t.uint8(),       // 0 bình thường · 1 AFK · 2 tạm mất kết nối
+  x: t.int16(),            // 1/32 m
+  y: t.int16(),
+  z: t.int16(),
+  yaw: t.uint8(),          // 256 nấc
+  anim: t.uint8(),         // idle · walk · run · jump · sit · emote
+  emote: t.uint8(),        // id emote đang diễn, 0 = không
+  emoteSeq: t.uint16(),    // tăng mỗi lần diễn để client phát lại
+  seatId: t.string(),      // ghế đang ngồi, rỗng nếu không
+}, 'PlayerState');
+type PlayerState = SchemaType<typeof PlayerState>;
 
-class RoomState extends Schema {
-  @type("string") channel: string;
-  @type("uint32") tick: number;                                   // mốc thời gian cho nội suy
-  @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
-  @type({ map: EntityState }) entities = new MapSchema<EntityState>();
-  @type({ map: "string" })    seats = new MapSchema<string>();    // seatId → sessionId
-  @type({ map: "uint32" })    counters = new MapSchema<number>(); // tiến độ mục tiêu cộng đồng
-}
+const EntityState = schema({ // NPC, kiosk, vật phẩm dùng chung, bảng tiến độ…
+  id: t.string(),
+  kind: t.uint8(),
+  x: t.int16(),
+  y: t.int16(),
+  z: t.int16(),
+  yaw: t.uint8(),
+  state: t.uint8(),
+  data: t.string(),        // JSON nhỏ: nhãn, missionId…
+}, 'EntityState');
+
+const RoomState = schema({
+  channel: t.string(),
+  tick: t.uint32(),                 // mốc thời gian cho nội suy
+  players: t.map(PlayerState),
+  entities: t.map(EntityState),
+  seats: t.map('string'),           // seatId → sessionId
+  counters: t.map('uint32'),        // tiến độ mục tiêu cộng đồng
+}, 'RoomState');
 ```
+
+Ghi chú cho P2.1: schema 5 có sẵn kiểu `t.quantized({ min, max, bits })` — code đọc/ghi số thực, đường truyền mang số nguyên. Cân nhắc dùng nó cho `x/y/z/yaw` thay cho việc tự mã hoá bằng `encodePosition()` trong `packages/shared`.
 
 Dữ liệu **riêng tư của từng người** (tiến độ nhiệm vụ, vật phẩm chỉ mình thấy, câu hỏi quiz) không nằm trong state chung mà gửi bằng message tới đúng client.
 

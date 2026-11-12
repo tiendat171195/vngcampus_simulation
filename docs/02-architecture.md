@@ -79,8 +79,8 @@ Phiên bản là ảnh chụp từ npm ngày 12/11/2026, sẽ chốt lại và g
 
 | Mảng | Công nghệ | Phiên bản | Ghi chú |
 |---|---|---|---|
-| Runtime | Node.js | 24 LTS (tối thiểu 22) | Build bằng `tsc`, chạy JS đã biên dịch |
-| Realtime | colyseus, @colyseus/schema | 0.18, 5.0 | + `@colyseus/redis-presence`, `@colyseus/redis-driver` khi scale; `@colyseus/monitor`, `@colyseus/loadtest`, `@colyseus/testing` |
+| Runtime | Node.js | 24 LTS (tối thiểu 22.12) | Bundle bằng tsdown, chạy JS đã biên dịch bằng `node` (không dùng tsx ở production) |
+| Realtime | @colyseus/core, @colyseus/ws-transport, @colyseus/schema | 0.18, 0.18, 5.0 | Không dùng gói gộp `colyseus` (nó kéo theo auth, playground, monitor). Thêm `@colyseus/redis-presence`, `@colyseus/redis-driver` khi scale; `@colyseus/monitor`, `@colyseus/loadtest`, `@colyseus/testing` khi cần |
 | REST | Fastify | 5.x | + rate-limit, cookie, cors, type provider zod |
 | ORM | Drizzle ORM | 0.45 | Migration bằng drizzle-kit |
 | DB | PostgreSQL | 17+ | |
@@ -92,8 +92,9 @@ Phiên bản là ảnh chụp từ npm ngày 12/11/2026, sẽ chốt lại và g
 
 | Mảng | Công nghệ |
 |---|---|
-| Monorepo | pnpm workspaces + Turborepo |
-| Lint/format | Biome |
+| Monorepo | pnpm workspaces (phiên bản dùng chung khai báo ở `catalog:`) + Turborepo |
+| Lint/format | Biome (không format Markdown — bảng trong tài liệu giữ dạng gọn) |
+| Build / chạy dev app Node | tsdown / tsx watch |
 | Test | Vitest (unit/integration), Playwright (e2e), @colyseus/testing (phòng), @colyseus/loadtest (tải) |
 | Asset | Blender → glTF/GLB; gltf-transform 4.x (Meshopt, KTX2/Basis), tuỳ chọn công cụ image-to-3D cho đạo cụ |
 | CI/CD | GitHub Actions, Docker, GHCR |
@@ -145,6 +146,13 @@ vngcampus_simulation/
 ```
 
 Quy tắc phụ thuộc: `apps/*` → `packages/*`; `core` → `db`, `shared`, `map-data`; `shared` và `map-data` không phụ thuộc gói nội bộ nào khác. `apps/web` và `apps/admin` không được import `core` hay `db`.
+
+**Cách các gói được build:**
+
+- Gói trong `packages/` **xuất thẳng mã TypeScript** (`exports` trỏ tới `src/index.ts`), không có bước build riêng. Vite, Vitest và tsx đọc trực tiếp.
+- `apps/api` và `apps/realtime` được **bundle bằng tsdown**: mã của các gói nội bộ được gộp vào `dist/index.mjs`, còn thư viện npm để ngoài. Hệ quả: thư viện npm mà một gói nội bộ dùng cũng phải được khai báo trong `dependencies` của app. `pnpm smoke` (khởi động bản build, gọi health) bắt được trường hợp khai báo thiếu.
+- TypeScript bật `erasableSyntaxOnly`: không dùng `enum`, `namespace`, parameter property. State của Colyseus khai báo bằng builder `schema({...})`, không dùng decorator.
+- Trang web chỉ gọi origin của chính nó (`/api`, `/rt`); Vite proxy lúc dev, Caddy lúc triển khai.
 
 ## 6. Quy ước xuyên suốt
 
