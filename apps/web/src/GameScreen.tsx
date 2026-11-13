@@ -63,9 +63,11 @@ export default function GameScreen() {
     // Dressed in the account's avatar, or the one everybody else derives from the user id.
     const user = currentUser();
     if (user) session.setAvatar(user.avatar || formatAvatar(avatarFromSeed(user.id)));
-    const spawn = new URLSearchParams(window.location.search).get('spawn') ?? undefined;
+    const params = new URLSearchParams(window.location.search);
+    const spawn = params.get('spawn') ?? undefined;
+    const preview = params.get('preview') ?? undefined;
     await net.leave();
-    await net.connect({ spawn });
+    await net.connect({ spawn, preview });
   }, []);
 
   useEffect(() => {

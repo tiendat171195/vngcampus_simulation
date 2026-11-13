@@ -10,6 +10,8 @@ export interface Identity {
   avatar: string;
   /** Asked to be kept out of the online list (still seen in the world). */
   hidden: boolean;
+  /** player, editor, moderator or admin. */
+  role: string;
 }
 
 export type TokenVerifier = (token: string) => Promise<Identity>;
@@ -37,6 +39,7 @@ export function createTokenVerifier(keys: JWTVerifyGetKey | URL): TokenVerifier 
       guest: payload.guest === true,
       avatar,
       hidden: payload.hidden === true,
+      role: typeof payload.role === 'string' ? payload.role : 'player',
     };
   };
 }

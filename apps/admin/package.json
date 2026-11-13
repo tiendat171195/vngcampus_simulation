@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@campus/map-data": "workspace:*",
     "@campus/shared": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"

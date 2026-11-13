@@ -30,7 +30,8 @@ export function usePath(): [string, (path: string) => void] {
   }, []);
   const go = useCallback((next: string) => {
     window.history.pushState(null, '', next);
-    setPath(next);
+    // The query (`?date=`) stays in the address; routes match on the path alone.
+    setPath(window.location.pathname);
   }, []);
   return [path, go];
 }

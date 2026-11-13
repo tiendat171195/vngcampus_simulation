@@ -15,6 +15,19 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Trình soạn nhiệm vụ
+
+- Gói việc: P5.2
+- Quyết định:
+  - Form viết tay cho 4 loại objective MVP thay vì sinh từ zod schema: nhãn và lựa chọn dễ hiểu hơn cho người không biết code; schema vẫn là chuẩn kiểm tra ở server.
+  - Bản đồ chọn vị trí chỉ chọn khu vực/POI có sẵn (đủ cho 4 loại MVP); thả điểm tự do, chỉnh bán kính, vẽ đường chạy để V1 khi có `race`/`deliver`.
+  - Kiểm tra trước khi xuất bản chạy ở server (`checkMissionForPublish`), gọi lại sau mỗi lần sửa (trễ 0,5 giây); chưa làm cảnh báo ước lượng thời gian hoàn thành.
+  - Nhiệm vụ đã bắt đầu chỉ được sửa chữ và tăng thưởng; muốn đổi cấu trúc thì kết thúc sớm rồi nhân bản (đúng docs/06 §6).
+  - Xem thử: tiến độ chỉ trong bộ nhớ, không ghi DB với `is_preview` — đơn giản hơn và vẫn đảm bảo không vào BXH, không trao thưởng.
+  - Admin nhập `@campus/map-data` (bản đồ và bộ điểm) để vẽ và chọn vị trí.
+- Khác plan ở đâu: `08-admin-cms.md` §4.1, §4.2, §4.4.
+- Hệ quả: e2e có thêm bản build admin (cổng 4174) và tài khoản quản trị e2e qua IdP giả lập.
+
 ## 2026-11-13 — Admin: vỏ, phân quyền, người dùng, án phạt
 
 - Gói việc: P5.1

@@ -10,8 +10,8 @@ import {
   saveProgress,
   seededOrder,
 } from '@campus/core';
-import { type Db, quizQuestions } from '@campus/db';
-import { type QuizQuestion, quizQuestionSchema } from '@campus/shared';
+import { type Db, missions, quizQuestions } from '@campus/db';
+import { missionDefinitionSchema, type QuizQuestion, quizQuestionSchema } from '@campus/shared';
 import { eq } from 'drizzle-orm';
 
 /** The question bank, in memory: small, and read on every answer. */
@@ -38,6 +38,8 @@ export function bankOf(questions: readonly QuizQuestion[]): QuestionBank {
 /** Where missions and progress live: PostgreSQL in production, memory in tests. */
 export interface MissionSource {
   loadActive(now: Date): Promise<ActiveMission[]>;
+  /** Any mission by id, drafts included, for previews. */
+  loadMission(id: string): Promise<ActiveMission | null>;
   loadQuestions(): Promise<QuizQuestion[]>;
   loadProgress(missionId: string, userId: string): Promise<StoredProgress | null>;
   saveProgress(input: {
@@ -58,6 +60,18 @@ export function dbSource(db: Db, log?: (message: string) => void): MissionSource
   return {
     loadActive: (now) =>
       loadActiveMissions(db, now, (id, problem) => log?.(`mission ${id} skipped: ${problem}`)),
+    async loadMission(id) {
+      const [row] = await db.select().from(missions).where(eq(missions.id, id));
+      const parsed = missionDefinitionSchema.safeParse(row?.definition);
+      if (!row || !parsed.success) return null;
+      return {
+        id: row.id,
+        kind: row.kind,
+        startsAt: row.startsAt,
+        endsAt: row.endsAt,
+        definition: parsed.data,
+      };
+    },
     async loadQuestions() {
       const rows = await db.select().from(quizQuestions).where(eq(quizQuestions.active, true));
       return rows.flatMap((row) => {
@@ -89,6 +103,7 @@ export function memorySource(missions: ActiveMission[], questions: QuizQuestion[
     fail: false,
     loadActive: async (now) =>
       source.missions.filter((mission) => mission.startsAt <= now && now < mission.endsAt),
+    loadMission: async (id) => source.missions.find((mission) => mission.id === id) ?? null,
     loadQuestions: async () => questions,
     loadProgress: async (missionId, userId) => progress.get(key(missionId, userId)) ?? null,
     async saveProgress(input) {

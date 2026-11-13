@@ -40,6 +40,8 @@ export interface RoomHooks {
 }
 
 interface MissionSlot {
+  /** A preview: kept in memory only, no rewards (docs/08 §4.4). */
+  preview: boolean;
   progress: Progress;
   /** When the first progress was made; null until then (docs/06 §3). */
   startedAt: Date | null;
@@ -57,6 +59,8 @@ interface PlayerMissions {
   /** One write at a time per player: progress has a single writer (docs/06 §5.3). */
   queue: Promise<void>;
   lastInteract: number;
+  /** The mission an editor is trying out, when previewing. */
+  preview: ActiveMission | null;
 }
 
 /** A place a visit objective watches: an area, or a POI with a radius. */
@@ -110,10 +114,18 @@ export class RoomMissionBinding {
     return this.runtime.missions.filter((mission) => mission.endsAt.getTime() > now);
   }
 
+  /** The missions this player plays: the running ones, and the one they preview. */
+  private missionsFor(player: PlayerMissions): ActiveMission[] {
+    const running = this.running();
+    return player.preview && !running.some((mission) => mission.id === player.preview?.id)
+      ? [...running, player.preview]
+      : running;
+  }
+
   // ---------- players ----------
 
   /** Loads the player's progress (they may be coming back) and sends their mission state. */
-  join(sessionId: string, userId: string, name: string): Promise<void> {
+  join(sessionId: string, userId: string, name: string, preview?: string): Promise<void> {
     const player: PlayerMissions = {
       userId,
       name,
@@ -122,13 +134,25 @@ export class RoomMissionBinding {
       inside: new Map(),
       queue: Promise.resolve(),
       lastInteract: Number.NEGATIVE_INFINITY,
+      preview: null,
     };
     this.players.set(sessionId, player);
-    player.ready = this.loadSlots(player).then(() => {
-      if (this.players.get(sessionId) !== player) return;
-      this.sendState(sessionId);
-      this.move(sessionId);
-    });
+    const previewing = preview
+      ? this.runtime.source.loadMission(preview).then(
+          (mission) => {
+            player.preview = mission;
+            this.watch();
+          },
+          () => {},
+        )
+      : Promise.resolve();
+    player.ready = previewing
+      .then(() => this.loadSlots(player))
+      .then(() => {
+        if (this.players.get(sessionId) !== player) return;
+        this.sendState(sessionId);
+        this.move(sessionId);
+      });
     player.queue = player.ready;
     return player.ready;
   }
@@ -138,13 +162,16 @@ export class RoomMissionBinding {
   }
 
   private async loadSlots(player: PlayerMissions): Promise<void> {
-    for (const mission of this.running()) {
+    for (const mission of this.missionsFor(player)) {
       if (player.slots.has(mission.id)) continue;
-      // Guest ids from development identities are not database users.
-      const stored = isUuid(player.userId)
-        ? await this.runtime.source.loadProgress(mission.id, player.userId).catch(() => null)
-        : null;
+      const preview = player.preview?.id === mission.id;
+      // Guest ids from development identities are not database users; previews start afresh.
+      const stored =
+        isUuid(player.userId) && !preview
+          ? await this.runtime.source.loadProgress(mission.id, player.userId).catch(() => null)
+          : null;
       player.slots.set(mission.id, {
+        preview,
         progress: stored?.progress ?? startProgress(this.ctx(mission), { userId: player.userId }),
         startedAt: stored?.startedAt ?? null,
         completed: Boolean(stored?.completedAt),
@@ -155,8 +182,8 @@ export class RoomMissionBinding {
   /** The set of running missions changed: new ones get entities and slots, ended ones go away. */
   private async missionsChanged(): Promise<void> {
     this.watch();
-    const ids = new Set(this.runtime.missions.map((mission) => mission.id));
     for (const [sessionId, player] of this.players) {
+      const ids = new Set(this.missionsFor(player).map((mission) => mission.id));
       for (const id of player.slots.keys()) if (!ids.has(id)) player.slots.delete(id);
       await this.loadSlots(player);
       this.sendState(sessionId);
@@ -166,14 +193,18 @@ export class RoomMissionBinding {
   }
 
   private watch(): void {
-    const ids = new Set(this.running().flatMap((mission) => watchedPlaces(mission.definition)));
+    const previews = [...this.players.values()].flatMap((player) =>
+      player.preview ? [player.preview] : [],
+    );
+    const all = [...this.running(), ...previews];
+    const ids = new Set(all.flatMap((mission) => watchedPlaces(mission.definition)));
     this.watched = [];
     for (const id of ids) {
       if (this.map.areas.has(id)) this.watched.push({ id, kind: 'area' });
       const poi = this.map.pois.get(id);
       if (!poi) continue;
       const radius =
-        this.running()
+        all
           .flatMap((mission) => mission.definition.objectives)
           .flatMap((objective) => (objective.type === 'visit' ? objective.params.targets : []))
           .find((target) => 'poiId' in target && target.poiId === id) ?? null;
@@ -284,7 +315,7 @@ export class RoomMissionBinding {
     )
       return 'Lại gần hơn một chút.';
 
-    const mission = this.running().find((candidate) => candidate.id === entity.missionId);
+    const mission = this.missionsFor(player).find((candidate) => candidate.id === entity.missionId);
     const objective = mission?.definition.objectives.find((o) => o.id === entity.objectiveId);
     if (!mission || !objective) return null;
     const sharedItem =
@@ -316,7 +347,7 @@ export class RoomMissionBinding {
     const player = this.players.get(sessionId);
     if (!player) return;
     await player.ready;
-    const mission = this.running().find((candidate) => candidate.id === input.missionId);
+    const mission = this.missionsFor(player).find((candidate) => candidate.id === input.missionId);
     const slot = player.slots.get(input.missionId);
     if (!mission || !slot) return;
     const asked = this.currentQuestion(mission, slot, input.objectiveId);
@@ -356,7 +387,7 @@ export class RoomMissionBinding {
     if (!player) return Promise.resolve(false);
     let changedAny = false;
     const run = async () => {
-      for (const mission of this.running()) {
+      for (const mission of this.missionsFor(player)) {
         const slot = player.slots.get(mission.id);
         if (!slot || slot.completed) continue;
         const outcome = applyEvent(this.ctx(mission), slot.progress, event, {
@@ -364,7 +395,7 @@ export class RoomMissionBinding {
         });
         if (!outcome) continue;
         const startedAt = slot.startedAt ?? new Date();
-        const persistent = isUuid(player.userId);
+        const persistent = isUuid(player.userId) && !slot.preview;
         try {
           if (outcome.completed) {
             const result = persistent
@@ -388,7 +419,10 @@ export class RoomMissionBinding {
               level: result?.level ?? 1,
               durationMs: result?.durationMs ?? Date.now() - startedAt.getTime(),
             } satisfies MissionCompletedMessage);
-            this.toast(`${player.name} vừa hoàn thành nhiệm vụ "${mission.definition.title.vi}"!`);
+            if (!slot.preview)
+              this.toast(
+                `${player.name} vừa hoàn thành nhiệm vụ "${mission.definition.title.vi}"!`,
+              );
           } else {
             if (persistent)
               await this.runtime.source.saveProgress({
@@ -455,7 +489,7 @@ export class RoomMissionBinding {
     const player = this.players.get(sessionId);
     if (!player) return;
     const missions: MissionView[] = [];
-    for (const mission of this.running()) {
+    for (const mission of this.missionsFor(player)) {
       const slot = player.slots.get(mission.id);
       if (!slot) continue;
       const def = mission.definition;
@@ -470,6 +504,7 @@ export class RoomMissionBinding {
         objectives: this.objectiveViews(mission, slot),
         rewards: sumRewards(def.rewards),
         completed: slot.completed,
+        ...(slot.preview ? { preview: true } : {}),
       });
     }
     this.hooks.send(sessionId, MSG.missionState, { missions } satisfies MissionStateMessage);
@@ -479,7 +514,7 @@ export class RoomMissionBinding {
   /** Entities this player can see now: shared ones still there, and their own. */
   private visibleEntities(player: PlayerMissions): MissionEntity[] {
     const entities: MissionEntity[] = [];
-    for (const mission of this.running()) {
+    for (const mission of this.missionsFor(player)) {
       const slot = player.slots.get(mission.id);
       if (!slot || slot.completed) continue;
       const { shared, own } = entitiesFor(this.ctx(mission), slot.progress, {

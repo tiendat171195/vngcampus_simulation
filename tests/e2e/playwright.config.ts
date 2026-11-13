@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  * End-to-end tests against the production builds (run `pnpm build` first): the API, the realtime
  * server and the web app served by `vite preview`, which proxies /api and /rt like in development.
  */
-const PORTS = { web: 4173, api: 3911, realtime: 3912, idp: 3913 };
+const PORTS = { web: 4173, api: 3911, realtime: 3912, idp: 3913, admin: 4174 };
 
 export default defineConfig({
   testDir: './specs',
@@ -49,6 +49,7 @@ export default defineConfig({
         OIDC_CLIENT_SECRET: 'campus-dev-secret',
         OIDC_LABEL: 'Mock IdP',
         AUTH_EMAIL_DOMAINS: 'vng.com.vn',
+        ADMIN_EMAILS: 'e2e.admin@vng.com.vn',
       },
       url: `http://127.0.0.1:${PORTS.api}/api/health`,
       reuseExistingServer: false,
@@ -67,6 +68,12 @@ export default defineConfig({
         CHANNEL_SOFT_CAP: '3',
       },
       url: `http://127.0.0.1:${PORTS.realtime}/health`,
+      reuseExistingServer: false,
+    },
+    {
+      command: `pnpm --filter @campus/admin exec vite preview --port ${PORTS.admin} --strictPort`,
+      env: { API_PORT: String(PORTS.api) },
+      url: `http://localhost:${PORTS.admin}`,
       reuseExistingServer: false,
     },
     {

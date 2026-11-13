@@ -250,6 +250,7 @@ export class CampusRoom extends Room<{
         guest: true,
         avatar: '',
         hidden: false,
+        role: 'player',
       };
     throw new ServerError(401, 'Cần đăng nhập.');
   }
@@ -292,7 +293,12 @@ export class CampusRoom extends Room<{
 
     await this.updateListing();
     await this.updateDirectory(client.sessionId);
-    void this.missions?.join(client.sessionId, identity.userId, identity.name);
+    // Editors may try a mission out, drafts included (docs/08 §4.4).
+    const preview =
+      joinOptions?.preview && (identity.role === 'editor' || identity.role === 'admin')
+        ? joinOptions.preview
+        : undefined;
+    void this.missions?.join(client.sessionId, identity.userId, identity.name, preview);
     // One person, one session: any older session of this user, in any channel, is closed.
     this.presence.publish(SESSION_TOPIC, { userId: identity.userId, sessionId: client.sessionId });
   }

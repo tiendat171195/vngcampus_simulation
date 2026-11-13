@@ -163,6 +163,8 @@ export const joinOptionsSchema = z.object({
    * keeps their place. Honoured only on walkable ground.
    */
   resume: z.object({ x: z.number(), y: z.number(), z: z.number() }).optional(),
+  /** Editors only: play this mission (even a draft) alone, without saving or rewards (docs/08 §4.4). */
+  preview: z.uuid().optional(),
 });
 export type JoinOptions = z.infer<typeof joinOptionsSchema>;
 
@@ -243,6 +245,8 @@ export interface MissionView {
   /** Points and xp for completing it. */
   rewards: { points: number; xp: number };
   completed: boolean;
+  /** An editor trying the mission out: only they see it, nothing is saved. */
+  preview?: boolean;
 }
 
 export interface MissionStateMessage {

@@ -105,6 +105,8 @@ export class NetClient {
   onCorrect: ((x: number, y: number, z: number) => void) | null = null;
 
   private client: Client | null = null;
+  /** Kept across channel switches. */
+  private preview: string | undefined;
   private lastTransform: { x: number; y: number; z: number } | null = null;
   private room: Room<unknown, WireState> | null = null;
   private sessionId = '';
@@ -127,7 +129,13 @@ export class NetClient {
   }
 
   async connect(
-    options: { spawn?: string; roomId?: string; resume?: { x: number; y: number; z: number } } = {},
+    options: {
+      spawn?: string;
+      roomId?: string;
+      resume?: { x: number; y: number; z: number };
+      /** An editor trying a mission out (docs/08 §4.4). */
+      preview?: string;
+    } = {},
   ): Promise<void> {
     if (this.room) return;
     this.setStatus('connecting');
@@ -135,7 +143,13 @@ export class NetClient {
       const token = await this.getToken();
       if (!token) throw new Error('signed out');
       this.client ??= new Client(`${window.location.origin}/rt`);
-      const joinOptions = { token, spawn: options.spawn, resume: options.resume };
+      this.preview = options.preview ?? this.preview;
+      const joinOptions = {
+        token,
+        spawn: options.spawn,
+        resume: options.resume,
+        ...(this.preview ? { preview: this.preview } : {}),
+      };
       const room = options.roomId
         ? await this.client.joinById<WireState>(options.roomId, joinOptions)
         : await this.client.joinOrCreate<WireState>(CAMPUS_ROOM, { ...joinOptions, open: true });

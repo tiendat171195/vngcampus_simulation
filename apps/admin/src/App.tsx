@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { ApiFailure, api, gameUrl } from './api';
 import { usePath } from './hooks';
 import { AuditPage } from './pages/Audit';
+import { MissionEditorPage } from './pages/MissionEditor';
+import { MissionsPage } from './pages/Missions';
 import { OverviewPage } from './pages/Overview';
 import { UserDetailPage, UsersPage } from './pages/Users';
 
@@ -14,6 +16,7 @@ type Gate =
 
 const NAV: Array<{ path: string; label: string; needs: Permission }> = [
   { path: '/', label: 'Tổng quan', needs: 'dashboard' },
+  { path: '/missions', label: 'Nhiệm vụ', needs: 'missions' },
   { path: '/users', label: 'Người dùng', needs: 'moderation' },
   { path: '/audit', label: 'Nhật ký thao tác', needs: 'dashboard' },
 ];
@@ -56,8 +59,15 @@ export function App() {
   const { me } = gate;
   const allowed = NAV.filter((item) => me.permissions.includes(item.needs));
   const userId = /^\/users\/([0-9a-f-]{36})$/.exec(path)?.[1];
+  const missionId = /^\/missions\/([0-9a-f-]{36})$/.exec(path)?.[1];
+  const missions = me.permissions.includes('missions');
   let page = <OverviewPage me={me} />;
-  if (userId && me.permissions.includes('moderation'))
+  if (missions && path === '/missions') page = <MissionsPage go={go} />;
+  else if (missions && path === '/missions/new')
+    page = <MissionEditorPage key="new" id={null} go={go} />;
+  else if (missions && missionId)
+    page = <MissionEditorPage key={missionId} id={missionId} go={go} />;
+  else if (userId && me.permissions.includes('moderation'))
     page = <UserDetailPage id={userId} me={me} go={go} />;
   else if (path === '/users' && me.permissions.includes('moderation')) page = <UsersPage go={go} />;
   else if (path === '/audit') page = <AuditPage me={me} />;

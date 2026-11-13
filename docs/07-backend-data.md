@@ -134,8 +134,8 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 
 | Nhóm | Endpoint |
 |---|---|
-| Nhiệm vụ | CRUD `/missions`; `POST /missions/validate`; `POST /missions/:id/publish` · `unpublish` · `end` · `duplicate`; `GET /missions/:id/stats` |
-| Mẫu, quiz | CRUD `/templates`, `/quiz` (+ nhập CSV) |
+| Nhiệm vụ (đã làm, P5.2) | `GET /missions?from=&to=`; `GET` · `PUT` · `DELETE /missions/:id`; `POST /missions`; `POST /missions/validate`; `POST /missions/:id/publish` · `unpublish` · `end` · `duplicate`; `GET /missions/:id/stats` (P5.4) |
+| Mẫu, quiz | CRUD `/templates` (P5.3); `/quiz` (đã làm): `GET ?q=&tag=`, `PUT /quiz/:id`, `DELETE /quiz/:id` (tắt), `POST /quiz/import` `{ csv }` |
 | Thông báo | CRUD `/announcements`; `POST /announcements/:id/broadcast` |
 | Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id` |
 | Kiểm duyệt | `GET /reports`; `POST /reports/:id/resolve` |

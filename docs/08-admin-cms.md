@@ -50,14 +50,14 @@ Admin là một SPA riêng (`apps/admin`), dùng chung đăng nhập và REST AP
 
 ### 4.1 Trình soạn objective
 
-- Mỗi loại objective có **form sinh tự động từ zod schema** của nó (`paramsSchema`), nên thêm loại mới gần như không tốn công giao diện.
+- Mỗi loại objective có **form sinh tự động từ zod schema** của nó (`paramsSchema`), nên thêm loại mới gần như không tốn công giao diện. **Đã làm (P5.2):** form viết tay cho bốn loại MVP (ghé điểm, thu thập, quiz, chào hỏi) với chữ dễ hiểu cho người không biết code; server vẫn kiểm tra bằng zod schema. Sinh form tự động để dành cho khi có thêm loại (V1).
 - Các trường tham chiếu bản đồ (`areaId`, `poiId`, `spawnSet`, toạ độ) dùng widget **chọn trên bản đồ**.
 - Kéo thả để sắp thứ tự objective; chọn chế độ "tất cả / theo thứ tự / N trong số M".
 
 ### 4.2 Bản đồ chọn vị trí
 
 - Bản đồ 2D từng tầng, vẽ bằng chính hàm `renderFloorSvg()` của `packages/map-data` (cùng hàm với minimap trong game).
-- Thao tác: chuyển tầng; bấm chọn khu vực hoặc POI có sẵn; bấm để thả điểm mới; kéo để dời; kéo tay nắm để chỉnh bán kính; vẽ chuỗi checkpoint cho objective `race`.
+- Thao tác: chuyển tầng; bấm chọn khu vực hoặc POI có sẵn; bấm để thả điểm mới; kéo để dời; kéo tay nắm để chỉnh bán kính; vẽ chuỗi checkpoint cho objective `race`. **Đã làm (P5.2):** chuyển tầng, rê chuột thấy tên chỗ sẽ chọn, bấm chọn khu vực hoặc POI (POI gần nhất trong 4 m, nếu không thì khu vực); chỗ đã chọn được tô sáng. Thả điểm tự do, kéo bán kính và vẽ đường chạy chưa làm — các loại objective MVP chỉ cần khu vực/POI có sẵn.
 - Điểm thả tự kiểm tra **nằm trong vùng đi được**; thả vào tường hoặc mặt nước thì báo lỗi ngay.
 - Hiện lớp phủ các objective khác của cùng nhiệm vụ để tránh đặt chồng.
 
@@ -79,7 +79,7 @@ API chạy cùng bộ kiểm tra này (`POST /admin/missions/validate` và khi x
 
 ### 4.4 Xem thử trong game
 
-Nút **Xem thử** mở game với `?preview=<missionId>`. Chỉ người đó thấy vật thể của bản nháp; tiến độ ghi với cờ `is_preview`, không vào BXH, không trao thưởng.
+Nút **Xem thử** mở game với `?preview=<missionId>`. Chỉ người đó thấy vật thể của bản nháp; tiến độ ghi với cờ `is_preview`, không vào BXH, không trao thưởng. **Đã làm (P5.2):** chỉ biên tập viên và quản trị viên (vai trò trong token) được xem thử; tiến độ xem thử **chỉ giữ trong bộ nhớ** của phòng, không ghi DB; không có thông báo cả phòng.
 
 ### 4.5 Mẫu và tự điền
 

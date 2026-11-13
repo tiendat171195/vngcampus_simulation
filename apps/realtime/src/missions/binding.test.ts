@@ -244,3 +244,37 @@ describe('room missions', () => {
     expect(objective('o3', 's9')?.current).toBe(4);
   });
 });
+
+describe('previews', () => {
+  it('let an editor play a mission that is not running, alone, without saving or telling the room', async () => {
+    const draft: ActiveMission = {
+      ...mission,
+      id: '0190f0c2-0000-7000-8000-0000000000d1',
+      startsAt: new Date(now + 86_400_000),
+      endsAt: new Date(now + 2 * 86_400_000),
+    };
+    source.missions = [draft];
+    const runtime = new MissionRuntime(source);
+    await runtime.refresh();
+    const room = new RoomMissionBinding(runtime, {
+      send: (to, type, payload) => sent.push({ to, type, payload }),
+      broadcast: (type, payload) => sent.push({ to: '*', type, payload }),
+      position: (sessionId) => positions.get(sessionId) ?? null,
+      players: () => [],
+      now: () => clock,
+    });
+    positions.set('s1', { x: 0, y: 0, z: -52 });
+    positions.set('s2', { x: 0, y: 0, z: -52 });
+    await room.join('s1', ME, 'Biên Tập', draft.id);
+    await room.join('s2', 'u2', 'Người Khác');
+    await settle();
+
+    const state = last<MissionStateMessage>(MSG.missionState);
+    expect(state.missions.map((m) => [m.id, m.preview])).toEqual([[draft.id, true]]);
+    expect(last<MissionStateMessage>(MSG.missionState, 's2').missions).toEqual([]);
+    // Standing at the gate counts, but nothing is written down.
+    expect(progressOf('o1')).toBe(1);
+    expect(source.progress.size).toBe(0);
+    expect(sent.some((m) => m.type === MSG.toast)).toBe(false);
+  });
+});

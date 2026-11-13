@@ -114,6 +114,7 @@ export function MissionTracker() {
             <button type="button" className="mission-title" onClick={() => setBanner(mission.id)}>
               {mission.completed ? '✓ ' : ''}
               {mission.title.vi}
+              {mission.preview && ' (xem thử)'}
             </button>
             <CommunityLine missionId={mission.id} />
             {!mission.completed && (
