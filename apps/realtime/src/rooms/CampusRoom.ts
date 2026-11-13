@@ -1,9 +1,13 @@
+import { maskProfanity, normaliseChat } from '@campus/core';
 import { distance, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import {
   CHANNEL,
+  CHAT,
+  type ChatMessage,
   CLOSE,
   type CorrectMessage,
+  chatSchema,
   decodePosition,
   emoteSchema,
   encodePosition,
@@ -60,6 +64,7 @@ interface Tracking {
   rate: RateLimiter;
   violations: WindowCounter;
   emotes: RateLimiter;
+  chat: RateLimiter;
 }
 
 /** Channel-wide pub/sub topic announcing that a user has just joined somewhere. */
@@ -124,6 +129,7 @@ export class CampusRoom extends Room<{
     this.onMessage(MSG.emote, (client, payload) => this.handleEmote(client, payload));
     this.onMessage(MSG.seatTake, (client, payload) => this.handleSeatTake(client, payload));
     this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
+    this.onMessage(MSG.chat, (client, payload) => this.handleChat(client, payload));
     const pings = new Map<string, RateLimiter>();
     this.onMessage(MSG.ping, (client, payload) => {
       const limiter = pings.get(client.sessionId) ?? new RateLimiter(PING_RATE, this.now());
@@ -167,6 +173,7 @@ export class CampusRoom extends Room<{
       rate: new RateLimiter(MOVE_RATE, now),
       violations: new WindowCounter(VIOLATION_WINDOW_MS),
       emotes: new RateLimiter(EMOTE_RATE, now),
+      chat: new RateLimiter(CHAT.burst / (CHAT.windowMs / 1000), now, CHAT.burst),
     });
 
     await this.updateListing();
@@ -255,6 +262,40 @@ export class CampusRoom extends Room<{
     player.emote = parsed.data.id;
     // The sequence number lets clients replay the same emote twice in a row.
     player.emoteSeq = (player.emoteSeq + 1) % 65536;
+  }
+
+  /**
+   * Nearby chat (docs/05-multiplayer.md §8): cleaned, filtered and sent only to people within
+   * earshot, sender included. Nothing is stored.
+   */
+  private handleChat(client: Client, payload: unknown): void {
+    const tracking = this.tracking.get(client.sessionId);
+    const player = this.state.players.get(client.sessionId);
+    const parsed = chatSchema.safeParse(payload);
+    if (!tracking || !player || !parsed.success) return;
+    const text = normaliseChat(parsed.data.text, CHAT.maxLength);
+    if (!text) return;
+    if (!tracking.chat.take(this.now())) {
+      client.send(MSG.notice, {
+        text: 'Bạn đang gửi hơi nhanh, chờ một chút nhé.',
+      } satisfies NoticeMessage);
+      return;
+    }
+    const message: ChatMessage = {
+      from: client.sessionId,
+      name: player.name,
+      text: maskProfanity(text),
+      ts: this.now(),
+    };
+    const origin = tracking.accepted;
+    for (const other of this.clients) {
+      const there = this.tracking.get(other.sessionId)?.accepted;
+      if (!there) continue;
+      const near =
+        Math.hypot(there.x - origin.x, there.z - origin.z) <= CHAT.radius &&
+        Math.abs(there.y - origin.y) < 3;
+      if (near) other.send(MSG.chat, message);
+    }
   }
 
   private handleSeatTake(client: Client, payload: unknown): void {

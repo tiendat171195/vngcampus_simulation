@@ -32,3 +32,44 @@ test('others see a wave and see someone sit down on a seat', async ({ browser })
   await actor.context.close();
   await audience.context.close();
 });
+
+test('nearby chat reaches people close by, filtered, and nobody far away', async ({ browser }) => {
+  const speaker = await enterAs(
+    browser,
+    'Người Nói',
+    {},
+    undefined,
+    '&spawn=poi.checkpoint.atrium',
+  );
+  const neighbour = await enterAs(
+    browser,
+    'Hàng Xóm',
+    {},
+    undefined,
+    '&spawn=poi.checkpoint.atrium',
+  );
+  const stranger = await enterAs(browser, 'Ở Xa', {}, undefined, '&spawn=poi.checkpoint.riverside');
+
+  await speaker.page.keyboard.press('Enter');
+  const field = speaker.page.getByLabel('Tin nhắn');
+  await expect(field).toBeFocused();
+  await field.fill('đm, trưa nay ăn gì?');
+  await field.press('Enter');
+
+  await expect(neighbour.page.locator('.chat-lines')).toContainText(
+    'Người Nói: **, trưa nay ăn gì?',
+  );
+  await expect(speaker.page.locator('.chat-lines li[data-mine="true"]')).toContainText(
+    'trưa nay ăn gì?',
+  );
+  await neighbour.page.waitForTimeout(1000);
+  await expect(stranger.page.locator('.chat-lines')).toHaveCount(0);
+
+  // Typing must not have moved the speaker: WASD letters went into the field, not the game.
+  await speaker.page.keyboard.press('Enter');
+  await speaker.page.getByLabel('Tin nhắn').fill('wasd wasd');
+  await speaker.page.getByLabel('Tin nhắn').press('Enter');
+  await expect(neighbour.page.locator('.chat-lines')).toContainText('wasd wasd');
+
+  for (const player of [speaker, neighbour, stranger]) await player.context.close();
+});

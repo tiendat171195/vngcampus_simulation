@@ -7,6 +7,7 @@ import { loadGuest } from './game/net/identity';
 import { net } from './game/net/net';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
 import { AreaToast } from './ui/AreaToast';
+import { ChatBox } from './ui/ChatBox';
 import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
 import { MiniMap } from './ui/MiniMap';
@@ -76,9 +77,10 @@ export default function GameScreen() {
       {playing && <AreaToast />}
       {playing && <NoticeToast />}
       {playing && following && <ActionBar />}
+      {playing && <ChatBox />}
       {playing && following && showHints && (
         <p className="hint">
-          WASD đi · Shift chạy · Space nhảy · 1–6 biểu cảm · E tương tác · kéo chuột xoay · lăn zoom
+          WASD đi · Shift chạy · Space nhảy · 1–6 biểu cảm · E tương tác · Enter trò chuyện
         </p>
       )}
       {playing && <ConnectionBanner onRetry={connect} />}

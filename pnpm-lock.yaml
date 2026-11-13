@@ -115,6 +115,9 @@ importers:
 
   apps/realtime:
     dependencies:
+      '@campus/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@campus/map-data':
         specifier: workspace:*
         version: link:../../packages/map-data

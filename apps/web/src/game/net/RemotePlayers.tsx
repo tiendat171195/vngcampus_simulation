@@ -17,6 +17,7 @@ import { QUALITY_PRESETS, type QualityLevel } from '../core/quality';
 import { useSession } from '../core/session';
 import { createLabelSprite } from '../world/labels';
 import { MeshBatch } from '../world/MeshBatch';
+import { BubbleView } from './bubbles';
 import type { Sample } from './Interpolator';
 import { net } from './net';
 
@@ -31,6 +32,7 @@ interface View {
   avatar: Avatar | null;
   tag: Sprite | null;
   tagText: string;
+  bubble: BubbleView;
   sample: Sample;
   x: number;
   z: number;
@@ -58,6 +60,7 @@ function createImpostors(): InstancedMesh {
 
 function disposeView(view: View): void {
   view.avatar?.dispose();
+  view.bubble.clear();
   if (view.tag) {
     view.tag.removeFromParent();
     view.tag.material.map?.dispose();
@@ -115,6 +118,7 @@ export function RemotePlayers() {
           avatar: null,
           tag: null,
           tagText: '',
+          bubble: new BubbleView(),
           sample: { x: 0, y: 0, z: 0, yaw: 0 },
           x: 0,
           z: 0,
@@ -139,6 +143,7 @@ export function RemotePlayers() {
         view.visible = false;
         if (view.avatar) view.avatar.object.visible = false;
         if (view.tag) view.tag.visible = false;
+        view.bubble.clear();
       }
     }
     order.sort((a, b) => (views.get(a)?.distance ?? 0) - (views.get(b)?.distance ?? 0));
@@ -209,6 +214,14 @@ export function RemotePlayers() {
         view.tag.visible = tagged;
         view.tag.position.set(sample.x, sample.y + HEAD_HEIGHT, sample.z);
       }
+
+      // Speech bubbles follow the speaker while they are close enough to read.
+      const bubble = net.bubbles.get(id);
+      const saying =
+        bubble && bubble.until > performance.now() && view.distance < TAG_DISTANCE
+          ? bubble.text
+          : null;
+      view.bubble.update(group, saying, sample.x, sample.y, sample.z);
     });
 
     impostors.count = impostorCount;

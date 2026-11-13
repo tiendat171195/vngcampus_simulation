@@ -1,6 +1,7 @@
 import {
   type AnimId,
   CAMPUS_ROOM,
+  type ChatMessage,
   CLOSE,
   type CorrectMessage,
   type DevGuest,
@@ -61,6 +62,8 @@ export interface Transform {
 }
 
 const SEND_INTERVAL_MS = 1000 / NET.clientSendHz;
+/** How long a speech bubble stays over someone's head. */
+const BUBBLE_MS = 6000;
 const PING_INTERVAL_MS = 5000;
 /** Three quick pings right after joining settle the clock before the first interpolation. */
 const WARMUP_PINGS = 3;
@@ -76,6 +79,8 @@ export class NetClient {
   readonly seats = new Map<string, string>();
   /** The seat the server says we occupy, or ''. */
   seatId = '';
+  /** Speech bubbles by session id: what was said and until when to show it (local ms). */
+  readonly bubbles = new Map<string, { text: string; until: number }>();
   /** Called once, with the position the server chose for us, right after joining. */
   onSpawn: ((transform: Omit<Transform, 'anim'>) => void) | null = null;
   /** Called when the server grants or takes away our seat ('' when standing). */
@@ -150,6 +155,15 @@ export class NetClient {
     if (this.status === 'online') this.room?.send(MSG.emote, { id });
   }
 
+  sendChat(text: string): void {
+    if (this.status === 'online') this.room?.send(MSG.chat, { text });
+  }
+
+  /** Our own session id in the current room, '' when not connected. */
+  get me(): string {
+    return this.room ? this.sessionId : '';
+  }
+
   takeSeat(seatId: string): void {
     if (this.status === 'online') this.room?.send(MSG.seatTake, { seatId });
   }
@@ -187,6 +201,16 @@ export class NetClient {
     room.onMessage(MSG.notice, (message: NoticeMessage) =>
       useSession.getState().showNotice(message.text),
     );
+    room.onMessage(MSG.chat, (message: ChatMessage) => {
+      this.bubbles.set(message.from, { text: message.text, until: performance.now() + BUBBLE_MS });
+      useSession.getState().addChat({
+        from: message.from,
+        name: message.name,
+        text: message.text,
+        at: Date.now(),
+        mine: message.from === this.sessionId,
+      });
+    });
     room.onDrop(() => this.setStatus('reconnecting'));
     room.onReconnect(() => this.setStatus('online'));
     room.onLeave((code) => {

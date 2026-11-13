@@ -9,6 +9,7 @@ import { input, readMove } from '../core/input';
 import { hudSink, useSession } from '../core/session';
 import { useSettings } from '../core/settings';
 import { playerSink, useDebugStore } from '../debug/debugStore';
+import { BubbleView } from '../net/bubbles';
 import { net } from '../net/net';
 import { useWorld } from '../world/CampusWorld';
 import { CameraRig } from './CameraRig';
@@ -35,6 +36,7 @@ export function Player() {
   const motor = useMemo(() => new CharacterMotor(world.bvh), [world]);
   const avatar = useMemo(() => new Avatar(), []);
   const rig = useMemo(() => new CameraRig(), []);
+  const bubble = useMemo(() => new BubbleView(), []);
   const state = useRef({
     yaw: 0,
     accumulator: 0,
@@ -54,6 +56,7 @@ export function Player() {
   });
 
   useEffect(() => () => avatar.dispose(), [avatar]);
+  useEffect(() => () => bubble.clear(), [bubble]);
 
   useEffect(() => {
     // `?spawn=poi.some_id` starts somewhere else, for testing one part of the campus.
@@ -197,6 +200,15 @@ export function Player() {
       yaw: s.yaw,
       anim,
     });
+
+    const said = net.bubbles.get(net.me);
+    bubble.update(
+      avatar.object.parent ?? avatar.object,
+      said && said.until > now ? said.text : null,
+      s.rendered.x,
+      s.rendered.y,
+      s.rendered.z,
+    );
 
     avatar.object.position.copy(s.rendered);
     avatar.object.rotation.y = s.yaw;

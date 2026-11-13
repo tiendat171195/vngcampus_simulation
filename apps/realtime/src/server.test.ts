@@ -3,6 +3,7 @@ import {
   ANIM,
   CAMPUS_ROOM,
   type ChannelInfo,
+  type ChatMessage,
   CLOSE,
   type CorrectMessage,
   decodePosition,
@@ -322,5 +323,44 @@ describe('emotes and seats', () => {
     await a.leave();
     await settle(250);
     expect(b.state.seats.size).toBe(0);
+  });
+});
+
+describe('chat', () => {
+  it('reaches people nearby, cleaned and filtered, but not people far away', async () => {
+    const speaker = await join(guest('Nói'), { spawn: 'poi.checkpoint.atrium' });
+    const neighbour = await join(guest('Gần'), { spawn: 'poi.checkpoint.atrium' });
+    const stranger = await join(guest('Xa'));
+
+    const heard = neighbour.waitForMessage(MSG.chat) as Promise<ChatMessage>;
+    const echoed = speaker.waitForMessage(MSG.chat) as Promise<ChatMessage>;
+    let strangerHeard = false;
+    stranger.onMessage(MSG.chat, () => {
+      strangerHeard = true;
+    });
+    speaker.send(MSG.chat, { text: '  đm   trưa nay ăn gì?  ' });
+
+    const message = await heard;
+    expect(message).toMatchObject({
+      from: speaker.sessionId,
+      name: 'Nói',
+      text: '** trưa nay ăn gì?',
+    });
+    expect((await echoed).text).toBe(message.text);
+    await settle(200);
+    expect(strangerHeard).toBe(false);
+  });
+
+  it('ignores empty lines and slows down a flood', async () => {
+    const a = await join(guest(), { spawn: 'poi.checkpoint.atrium' });
+    const b = await join(guest(), { spawn: 'poi.checkpoint.atrium' });
+    const received: string[] = [];
+    b.onMessage(MSG.chat, (message: ChatMessage) => received.push(message.text));
+    const warned = a.waitForMessage(MSG.notice) as Promise<{ text: string }>;
+    a.send(MSG.chat, { text: '   ' });
+    for (let i = 1; i <= 8; i++) a.send(MSG.chat, { text: `tin ${i}` });
+    expect((await warned).text).toContain('hơi nhanh');
+    await settle(250);
+    expect(received).toEqual(['tin 1', 'tin 2', 'tin 3', 'tin 4', 'tin 5']);
   });
 });

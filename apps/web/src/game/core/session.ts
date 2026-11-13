@@ -13,6 +13,16 @@ export interface NetSummary {
   players: number;
 }
 
+export interface ChatLine {
+  id: number;
+  from: string;
+  name: string;
+  text: string;
+  /** Local time it arrived, for fading old lines. */
+  at: number;
+  mine: boolean;
+}
+
 export interface PlayerLocation {
   areaId: string;
   name: string;
@@ -33,6 +43,9 @@ interface SessionState {
   notice: { text: string; id: number } | null;
   setPrompt(prompt: { seatId: string; label: string } | null): void;
   showNotice(text: string): void;
+  /** Recent nearby chat, newest last. Kept in memory only, never stored. */
+  chat: ChatLine[];
+  addChat(line: Omit<ChatLine, 'id'>): void;
   /** Name the player typed on the splash screen. */
   displayName: string;
   net: NetSummary;
@@ -50,6 +63,11 @@ export const useSession = create<SessionState>((set, get) => ({
   worldReadyMs: null,
   location: null,
   quality: { level: 'medium', dpr: 1 },
+  chat: [],
+  addChat: (line) =>
+    set((state) => ({
+      chat: [...state.chat.slice(-49), { ...line, id: (state.chat.at(-1)?.id ?? 0) + 1 }],
+    })),
   prompt: null,
   notice: null,
   setPrompt: (prompt) => set({ prompt }),

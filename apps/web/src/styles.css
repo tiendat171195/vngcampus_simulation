@@ -690,3 +690,91 @@ body {
 .notice-toast[data-visible="true"] {
   opacity: 1;
 }
+
+/* ---------- chat ---------- */
+
+.chat {
+  position: fixed;
+  left: calc(12px + env(safe-area-inset-left));
+  bottom: calc(48px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(360px, calc(100vw - 120px));
+  font-size: 13px;
+}
+
+.chat-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-lines li {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: rgb(16 20 24 / 62%);
+  color: #e9edf1;
+  overflow-wrap: anywhere;
+}
+
+.chat-lines li[data-mine="true"] b {
+  color: #f9b56b;
+}
+
+.chat-form {
+  display: flex;
+  gap: 6px;
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 10px;
+  background: rgb(16 20 24 / 85%);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.chat-form button,
+.chat-open {
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 10px;
+  background: rgb(16 20 24 / 70%);
+  color: #e9edf1;
+  font: inherit;
+  cursor: pointer;
+}
+
+.chat-open {
+  align-self: flex-start;
+}
+
+.chat-open kbd {
+  margin-left: 4px;
+  font: inherit;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+@media (pointer: coarse) {
+  .chat {
+    left: auto;
+    right: calc(108px + env(safe-area-inset-right));
+    bottom: calc(40px + env(safe-area-inset-bottom));
+    width: min(240px, calc(100vw - 130px));
+  }
+
+  .chat-open kbd {
+    display: none;
+  }
+}
