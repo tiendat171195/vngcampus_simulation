@@ -123,7 +123,10 @@ export async function authRoutes(app: FastifyInstance, deps: AppDeps): Promise<v
 
   app.post(
     '/auth/refresh',
-    { config: { rateLimit: { max: limit(30), timeWindow: '1 minute' } } },
+    // Per address, and a whole office may share one public IP: a thousand people refreshing
+    // every 15 minutes is about 70 a minute. Refresh tokens cannot be guessed, so this only
+    // caps load.
+    { config: { rateLimit: { max: limit(300), timeWindow: '1 minute' } } },
     async (request, reply): Promise<SessionResponse> => {
       const token = request.cookies[REFRESH_COOKIE];
       if (!token) throw new ApiError(401, 'no_session', 'Chưa đăng nhập.');

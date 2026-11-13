@@ -34,6 +34,8 @@ export default defineConfig({
         // A database of its own; the API applies migrations when it starts outside production.
         DATABASE_URL:
           process.env.E2E_DATABASE_URL ?? 'postgres://campus:campus@127.0.0.1:5432/campus_e2e',
+        // Every test signs up new guests from the same address.
+        RATE_LIMIT_SCALE: '10',
       },
       url: `http://127.0.0.1:${PORTS.api}/api/health`,
       reuseExistingServer: false,
@@ -43,7 +45,9 @@ export default defineConfig({
       env: {
         NODE_ENV: 'test',
         REALTIME_PORT: String(PORTS.realtime),
-        DEV_GUEST_AUTH: 'on',
+        // Players join with the API's access tokens, like in production.
+        DEV_GUEST_AUTH: 'off',
+        AUTH_JWKS_URL: `http://127.0.0.1:${PORTS.api}/api/v1/auth/jwks`,
         // Small channels, so a test can fill one and see a second open.
         CHANNEL_SOFT_CAP: '3',
       },

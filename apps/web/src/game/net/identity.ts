@@ -1,48 +1,33 @@
 // No zod here: this module is part of the splash screen chunk, which must stay small.
 
-const STORAGE_KEY = 'campus.guest.v1';
-const ID_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
-
-export interface Guest {
-  id: string;
-  name: string;
-}
-
-function randomId(): string {
-  const bytes = new Uint8Array(12);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => b.toString(36).padStart(2, '0')).join('');
-}
+const STORAGE_KEY = 'campus.name.v1';
+/** Before P3.1 the browser kept a self-made guest id next to the name; only the name is reused. */
+const LEGACY_KEY = 'campus.guest.v1';
 
 /**
- * The development identity of this browser (docs/DECISIONS.md, P2.1): a random id that stays the
- * same between visits and the name the player typed. Replaced by real sign-in in P3.
+ * The display name this browser last entered with, to prefill the splash screen. Who the player
+ * is lives on the server (services/auth.ts); this is only a convenience.
  */
-export function loadGuest(): Guest {
+export function loadName(): string {
   try {
-    const stored = JSON.parse(
-      window.localStorage.getItem(STORAGE_KEY) ?? 'null',
-    ) as Partial<Guest> | null;
-    if (stored && typeof stored.id === 'string' && ID_PATTERN.test(stored.id)) {
-      return { id: stored.id, name: typeof stored.name === 'string' ? stored.name : '' };
-    }
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored !== null) return stored;
+    const legacy = JSON.parse(window.localStorage.getItem(LEGACY_KEY) ?? 'null') as {
+      name?: unknown;
+    } | null;
+    return typeof legacy?.name === 'string' ? legacy.name : '';
   } catch {
-    // Unreadable storage: start over with a new id.
-  }
-  return { id: randomId(), name: '' };
-}
-
-export function saveGuest(guest: Guest): void {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(guest));
-  } catch {
-    // Private mode: the id changes next visit, which only costs the old session.
+    return '';
   }
 }
 
-/** A friendly default when someone enters without typing a name. */
-export function fallbackName(id: string): string {
-  return `Khách ${id.slice(0, 4).toUpperCase()}`;
+export function saveName(name: string): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, name);
+    window.localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    // Private mode: the splash screen just starts empty next time.
+  }
 }
 
 /** Validation message for a typed name, or null when it is fine. Mirrors the server's rule. */

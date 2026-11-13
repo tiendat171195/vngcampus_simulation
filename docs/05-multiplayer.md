@@ -167,7 +167,8 @@ sequenceDiagram
 
 - **Một người, một phiên:** vào từ tab/thiết bị thứ hai thì phiên cũ bị đóng với mã `4101`.
 - **Rời trang:** trình duyệt đóng kết nối với mã 1001 → server xoá người chơi ngay, không giữ chỗ.
-- **Rớt mạng:** server giữ chỗ 30 giây, avatar chuyển trạng thái "tạm mất kết nối". Client tự kết nối lại với độ trễ tăng dần và làm mới token trước.
+- **Rớt mạng:** server giữ chỗ 30 giây, avatar chuyển trạng thái "tạm mất kết nối". Client tự kết nối lại với độ trễ tăng dần, bằng reconnection token của Colyseus nên không cần access token. Vào phòng mới (lần đầu, chuyển kênh, quá 30 giây) thì client lấy access token mới qua `/auth/refresh` nếu token cũ còn dưới 60 giây.
+- **Tuỳ chọn khi vào phòng:** `token` (access JWT, bắt buộc ở production), `spawn` (id POI — chỉ nhận khi `DEV_SPAWN=on`, mặc định bật ngoài production, vì ở production nó cho phép tải lại trang để "dịch chuyển" tới đích nhiệm vụ), `resume` (vị trí khi chuyển kênh), `guest: { id, name }` (danh tính tự đặt cho bot thử tải và test, chỉ nhận khi `DEV_GUEST_AUTH=on`).
 - **Vị trí cuối:** lưu vào Redis khi rời (hết hạn sau 24 giờ). Vào lại trong ngày thì đứng ở chỗ cũ; lần đầu của ngày mới thì xuất hiện ở cổng.
 - **Deploy:** tiến trình cũ nhận tín hiệu tắt → báo client (`4001`) → client tự vào lại một tiến trình mới và gửi lại vị trí hiện tại. Người chơi thấy "đang kết nối lại" vài giây.
 

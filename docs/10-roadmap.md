@@ -116,7 +116,7 @@ Ngoài nghiệm thu: emote, ghế, chat gần có lọc từ, danh bạ online v
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P3.1 | DB + API nền + khách | Drizzle schema và migration (users, auth_identities, sessions, user_stats, settings). Khung Fastify: định dạng lỗi, zod, rate limit. Đăng nhập khách, JWT ký bất đối xứng, refresh xoay vòng. `/me`, `/world/bootstrap`. Realtime kiểm tra JWT thật | M | Chưa làm |
+| P3.1 | DB + API nền + khách | Drizzle schema và migration (users, auth_identities, sessions, settings; `user_stats` chuyển sang P4.1). Khung Fastify: định dạng lỗi, zod, rate limit. Đăng nhập khách, JWT ký bất đối xứng, refresh xoay vòng. `/me`, `/world/bootstrap`. Realtime kiểm tra JWT thật | M | Xong |
 | P3.2 | Đăng nhập OIDC | Google + OIDC tổng quát, danh sách domain cho phép, liên kết khách → tài khoản thật, màn hình đồng ý + thông báo quyền riêng tư | S | Chưa làm |
 | P3.3 | Avatar module | Các phần rời từ bộ nhân vật CC0, gộp thành một skinned mesh, bảng màu đỉnh, chuỗi cấu hình. Trình chỉnh avatar có xem trước 3D. Lưu và đồng bộ cho người khác. LOD1 + impostor | L | Chưa làm |
 | P3.4 | Hồ sơ và lần đầu vào game | Thẻ hồ sơ, phòng ban (script nhập CSV), tuỳ chọn ẩn khỏi danh sách online, luồng lần đầu (tên → avatar → hướng dẫn) | S | Chưa làm |
@@ -132,7 +132,7 @@ Ngoài nghiệm thu: emote, ghế, chat gần có lọc từ, danh bạ online v
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P4.1 | Mô hình và engine | Schema dùng chung (mission, objective). Bảng DB (missions, mission_progress, wallet_ledger, quiz_questions). `MissionEngine` + handler `visit`, `collect`, `quiz`, `social` kèm unit test. `RewardService` (sổ cái, streak theo ngày làm việc). Lệnh CLI nạp nhiệm vụ từ file JSON | L | Chưa làm |
+| P4.1 | Mô hình và engine | Schema dùng chung (mission, objective). Bảng DB (missions, mission_progress, wallet_ledger, user_stats, quiz_questions). `MissionEngine` + handler `visit`, `collect`, `quiz`, `social` kèm unit test. `RewardService` (sổ cái, streak theo ngày làm việc). Lệnh CLI nạp nhiệm vụ từ file JSON | L | Chưa làm |
 | P4.2 | Runtime trong phòng | Phát sự kiện game từ các system, `AreaTriggerSystem`, entity dùng chung và riêng, kiểm tra tương tác, các message nhiệm vụ, lưu và khôi phục khi vào lại. Test phòng đầu-cuối | M | Chưa làm |
 | P4.3 | Trải nghiệm phía client | Hệ tương tác, hiển thị vật phẩm/kiosk/NPC tạm, biểu ngữ, bảng theo dõi, chỉ đường, hộp thoại quiz, màn chúc mừng | M | Chưa làm |
 | P4.4 | Thưởng và bảng xếp hạng | Giao diện điểm/cấp/streak, BXH (Redis + API + UI), lịch sử nhiệm vụ, bộ đếm mục tiêu cộng đồng, worker + job chốt nhiệm vụ | M | Chưa làm |

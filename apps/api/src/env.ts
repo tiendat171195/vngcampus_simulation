@@ -13,6 +13,8 @@ const envSchema = z.object({
   JWT_PRIVATE_KEY: z.string().optional(),
   /** Who may sign in as a guest (docs/07 §5.2). */
   GUEST_MODE: z.enum(['off', 'limited', 'full']).default('full'),
+  /** Multiplies the per-address limits of the sign-in routes, e.g. for an office behind one NAT. */
+  RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
 });
 
 export type Env = z.infer<typeof envSchema>;

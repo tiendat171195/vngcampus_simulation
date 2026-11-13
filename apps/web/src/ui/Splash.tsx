@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { type Phase, useSession } from '../game/core/session';
-import { fallbackName, loadGuest, nameProblem, saveGuest } from '../game/net/identity';
+import { loadName, nameProblem, saveName } from '../game/net/identity';
+import { signIn } from '../services/auth';
 
 const STEPS: Array<{ phase: Phase; label: string }> = [
   { phase: 'loading', label: 'Tải trò chơi' },
@@ -19,28 +20,39 @@ export function Splash() {
   const readyMs = useSession((state) => state.worldReadyMs);
   const setPhase = useSession((state) => state.setPhase);
   const setDisplayName = useSession((state) => state.setDisplayName);
-  const [guest] = useState(loadGuest);
-  const [name, setName] = useState(guest.name);
+  const [name, setName] = useState(loadName);
   const [problem, setProblem] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const ready = phase === 'ready';
 
-  const enter = (chosen: string) => {
-    const issue = nameProblem(chosen);
+  /** Signs in (or up, as a guest) and steps in. `null` keeps the account's current name. */
+  const enter = async (chosen: string | null) => {
+    if (busy) return;
+    const trimmed = chosen?.trim() ?? null;
+    const issue = trimmed === null ? null : nameProblem(trimmed);
     if (issue) {
       setProblem(issue);
       return;
     }
-    const trimmed = chosen.trim();
-    saveGuest({ id: guest.id, name: trimmed });
-    setDisplayName(trimmed);
+    setBusy(true);
+    const result = await signIn(trimmed);
+    setBusy(false);
+    if (!result.ok && result.reason === 'refused') {
+      setProblem(result.message);
+      return;
+    }
+    // When the API cannot be reached the campus can still be explored alone; the connection
+    // banner offers to try again.
+    const shown = result.ok ? result.user.displayName : (trimmed ?? 'Khách');
+    if (result.ok) saveName(shown);
+    setDisplayName(shown);
     setPhase('playing');
   };
 
-  // `?enter` steps in automatically with the remembered (or a generated) name.
+  // `?enter` steps in automatically with the remembered name, or the account's own.
   useEffect(() => {
     if (!ready || !new URLSearchParams(window.location.search).has('enter')) return;
-    const remembered = loadGuest();
-    enter(remembered.name || fallbackName(remembered.id));
+    void enter(loadName() || null);
     // `enter` is recreated each render; running once when ready is what matters.
   }, [ready]);
 
@@ -48,7 +60,7 @@ export function Splash() {
   const current = ORDER.indexOf(phase);
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (ready) enter(name);
+    if (ready) void enter(name);
   };
 
   return (
@@ -89,8 +101,8 @@ export function Splash() {
         </label>
         {problem && <p className="splash-problem">{problem}</p>}
 
-        <button type="submit" className="splash-enter" disabled={!ready}>
-          {ready ? 'Vào campus' : 'Đang chuẩn bị…'}
+        <button type="submit" className="splash-enter" disabled={!ready || busy}>
+          {!ready ? 'Đang chuẩn bị…' : busy ? 'Đang vào…' : 'Vào campus'}
         </button>
         {readyMs !== null && (
           <p className="splash-meta">Sẵn sàng sau {(readyMs / 1000).toFixed(1)} giây</p>

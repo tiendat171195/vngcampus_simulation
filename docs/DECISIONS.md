@@ -15,6 +15,24 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Tài khoản khách thật, realtime nhận JWT
+
+- Gói việc: P3.1
+- Bối cảnh: thay danh tính tự đặt của P2 bằng tài khoản thật lưu ở Postgres.
+- Quyết định:
+  - Trình duyệt luôn vào phòng bằng access token của API (`services/auth.ts`): `/auth/refresh` bằng cookie, không có thì tạo khách. Tên trên màn hình chào chỉ còn là gợi ý điền sẵn (`localStorage` `campus.name.v1`).
+  - Các lần làm mới token được xếp hàng giữa các tab bằng Web Locks, vì refresh token xoay vòng và hai lần dùng đồng thời bị coi là bị đánh cắp.
+  - Realtime kiểm tra token bằng JWKS của API (`AUTH_JWKS_URL`). `DEV_GUEST_AUTH` vẫn giữ cho bot thử tải; e2e chạy với nó **tắt**.
+  - Chọn chỗ xuất hiện (`spawn`) tách thành cờ riêng `DEV_SPAWN` (mặc định bật ngoài production) để test vẫn dùng được khi danh tính dev tắt.
+  - Giới hạn làm mới token 300/phút/IP thay vì 30: cả văn phòng chung một IP NAT. Thêm `RATE_LIMIT_SCALE`. Khoá theo cookie không dùng được vì token đổi sau mỗi lần làm mới.
+  - Bản build của API mang theo thư mục migration (`dist/drizzle`) — trước đó bản bundle không tìm thấy migration khi tự migrate.
+  - Bảng `user_stats` làm cùng sổ cái ở P4.1, vì chỉ có nghĩa khi có phần thưởng.
+- Khác plan ở đâu: `07-backend-data.md` §5.1 (luồng phía trình duyệt, giới hạn tần suất), `05-multiplayer.md` §6 (tuỳ chọn khi vào phòng, vào lại), roadmap P3.1/P4.1.
+- Hệ quả:
+  - Tài khoản bị khoá không lấy được token mới (có test), nhưng token còn hạn (≤ 15 phút) vẫn vào được phòng cho tới khi P5 có tín hiệu moderation.
+  - Mã khôi phục của khách chưa có giao diện (P3.4); cookie bị xoá thì mất tài khoản khách.
+  - Mất phiên (cookie hết hạn, bị thu hồi) rồi bấm "Thử lại" sẽ tạo tài khoản khách mới.
+
 ## 2026-11-13 — Thử tải: chưa cần tinh chỉnh; số đo nội bộ qua `/rt/metrics`
 
 - Gói việc: P2.4

@@ -17,12 +17,16 @@ import {
 } from '@campus/shared';
 import type { Room as ClientRoom } from '@colyseus/sdk';
 import { boot, type ColyseusTestServer } from '@colyseus/testing';
+import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { createTokenVerifier } from './auth';
 import type { CampusRoom } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
 import { createServer } from './server';
 
 let colyseus: ColyseusTestServer;
+/** Signs tokens the way the API does, with a key only this test knows. */
+let signToken: (claims: { sub: string; name: string }, issuer?: string) => Promise<string>;
 let nextId = 0;
 const guest = (name = 'Đồng nghiệp') => ({
   id: `test-user-${String(++nextId).padStart(4, '0')}`,
@@ -30,9 +34,22 @@ const guest = (name = 'Đồng nghiệp') => ({
 });
 
 beforeAll(async () => {
+  const { privateKey, publicKey } = await generateKeyPair('ES256');
+  const jwks = createLocalJWKSet({
+    keys: [{ ...(await exportJWK(publicKey)), kid: 'test', alg: 'ES256' }],
+  });
+  signToken = (claims, issuer = 'campus-api') =>
+    new SignJWT({ name: claims.name, role: 'player', sid: 's' })
+      .setProtectedHeader({ alg: 'ES256', kid: 'test' })
+      .setSubject(claims.sub)
+      .setIssuer(issuer)
+      .setAudience('campus')
+      .setExpirationTime('5m')
+      .sign(privateKey);
   colyseus = await boot(
     createServer({
       devGuestAuth: true,
+      verifyToken: createTokenVerifier(jwks),
       softCap: 2,
       hardCap: 3,
       reconnectGraceSeconds: 1,
@@ -419,5 +436,27 @@ describe('presence', () => {
     expect(decodePosition(me(mover)?.z ?? 0)).toBeCloseTo(-20, 1);
     const swimmer = await join(guest(), { resume: { x: -2, y: 0, z: 30 } });
     expect(decodePosition(me(swimmer)?.z ?? 0)).toBeLessThan(-45);
+  });
+});
+
+describe('access tokens', () => {
+  it('lets a signed-in user join under their account name', async () => {
+    const token = await signToken({ sub: '0190f0c2-0000-7000-8000-000000000001', name: 'Từ API' });
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, { open: true, token });
+    await settle(150);
+    expect(me(room)).toMatchObject({
+      name: 'Từ API',
+      userId: '0190f0c2-0000-7000-8000-000000000001',
+    });
+  });
+
+  it('turns away forged or foreign tokens', async () => {
+    const foreign = await signToken({ sub: 'x', name: 'Giả' }, 'someone-else');
+    await expect(
+      colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token: foreign }),
+    ).rejects.toThrow();
+    await expect(
+      colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token: 'not.a.token' }),
+    ).rejects.toThrow();
   });
 });

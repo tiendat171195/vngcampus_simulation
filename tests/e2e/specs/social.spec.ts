@@ -6,8 +6,8 @@ const ANIM_EMOTE = 6;
 const WAVE = 1;
 
 test('others see a wave and see someone sit down on a seat', async ({ browser }) => {
-  const actor = await enterAs(browser, 'Diễn', {}, undefined, '&spawn=poi.seat.koi_01');
-  const audience = await enterAs(browser, 'Xem', {}, undefined, '&spawn=poi.checkpoint.koi');
+  const actor = await enterAs(browser, 'Diễn', {}, '&spawn=poi.seat.koi_01');
+  const audience = await enterAs(browser, 'Xem', {}, '&spawn=poi.checkpoint.koi');
   await expect
     .poll(async () => (await remotes(audience.page)).map((r) => r.name))
     .toEqual(['Diễn']);
@@ -34,21 +34,9 @@ test('others see a wave and see someone sit down on a seat', async ({ browser })
 });
 
 test('nearby chat reaches people close by, filtered, and nobody far away', async ({ browser }) => {
-  const speaker = await enterAs(
-    browser,
-    'Người Nói',
-    {},
-    undefined,
-    '&spawn=poi.checkpoint.atrium',
-  );
-  const neighbour = await enterAs(
-    browser,
-    'Hàng Xóm',
-    {},
-    undefined,
-    '&spawn=poi.checkpoint.atrium',
-  );
-  const stranger = await enterAs(browser, 'Ở Xa', {}, undefined, '&spawn=poi.checkpoint.riverside');
+  const speaker = await enterAs(browser, 'Người Nói', {}, '&spawn=poi.checkpoint.atrium');
+  const neighbour = await enterAs(browser, 'Hàng Xóm', {}, '&spawn=poi.checkpoint.atrium');
+  const stranger = await enterAs(browser, 'Ở Xa', {}, '&spawn=poi.checkpoint.riverside');
 
   await speaker.page.keyboard.press('Enter');
   const field = speaker.page.getByLabel('Tin nhắn');

@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { createDb, migrateDatabase } from '@campus/db';
 import { buildApp } from './app';
 import { createKeyRing } from './auth/keys';
@@ -7,14 +9,18 @@ const env = loadEnv();
 const { db, close } = createDb(env.DATABASE_URL);
 
 // Production applies migrations as a separate deploy step (docs/09 §4); development keeps the
-// local database current on its own.
-if (env.NODE_ENV !== 'production') await migrateDatabase(db);
+// local database current on its own. The bundle carries the migrations in dist/drizzle.
+if (env.NODE_ENV !== 'production') {
+  const bundled = fileURLToPath(new URL('./drizzle', import.meta.url));
+  await migrateDatabase(db, existsSync(bundled) ? bundled : undefined);
+}
 
 const app = await buildApp(
   {
     db,
     keys: await createKeyRing(env.JWT_PRIVATE_KEY),
     guestMode: env.GUEST_MODE,
+    rateLimitScale: env.RATE_LIMIT_SCALE,
     secureCookies: env.NODE_ENV === 'production',
   },
   {

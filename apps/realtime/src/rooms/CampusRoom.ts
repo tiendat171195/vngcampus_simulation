@@ -32,6 +32,7 @@ import {
   Room,
   ServerError,
 } from '@colyseus/core';
+import type { Identity, TokenVerifier } from '../auth';
 import { countMessage, recordPatch } from '../metrics';
 import {
   type Accepted,
@@ -43,8 +44,15 @@ import {
 import { PlayerState, RoomState } from './state';
 
 export interface CampusRoomOptions {
-  /** Accept `guest` identities from join options. Development only, until real sign-in (P3). */
+  /** Accept `guest` identities from join options. Development and load tests only. */
   devGuestAuth: boolean;
+  /**
+   * Honour `spawn` (a POI id) from join options. Development and tests only: in production it
+   * would let anyone reload their way to a mission's destination. Defaults to `devGuestAuth`.
+   */
+  devSpawn?: boolean;
+  /** Checks API access tokens; without it only development identities can join. */
+  verifyToken?: TokenVerifier;
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
@@ -58,11 +66,6 @@ export interface CampusMetadata {
   channel: number;
   /** Whether automatic assignment may still send new players here. */
   open: boolean;
-}
-
-interface Identity {
-  userId: string;
-  name: string;
 }
 
 interface Tracking {
@@ -113,7 +116,8 @@ export class CampusRoom extends Room<{
   override state = new RoomState();
   override patchRate = 1000 / NET.serverPatchHz;
 
-  private config!: Required<CampusRoomOptions>;
+  private config!: Required<Omit<CampusRoomOptions, 'verifyToken'>>;
+  private verifyToken: TokenVerifier | undefined;
   private readonly createdAt = Date.now();
   private readonly tracking = new Map<string, Tracking>();
   private housekeeping: ReturnType<typeof setInterval> | undefined;
@@ -132,12 +136,14 @@ export class CampusRoom extends Room<{
   override async onCreate(options: CampusRoomOptions): Promise<void> {
     this.config = {
       devGuestAuth: options.devGuestAuth,
+      devSpawn: options.devSpawn ?? options.devGuestAuth,
       softCap: options.softCap ?? CHANNEL.softCap,
       hardCap: options.hardCap ?? CHANNEL.hardCap,
       reconnectGraceSeconds: options.reconnectGraceSeconds ?? NET.reconnectGraceSeconds,
       idleAfkSeconds: options.idleAfkSeconds ?? 5 * 60,
       idleKickSeconds: options.idleKickSeconds ?? 30 * 60,
     };
+    this.verifyToken = options.verifyToken;
     this.maxClients = this.config.hardCap;
     this.state.channel = await this.freeChannelNumber();
     await this.updateListing();
@@ -167,12 +173,23 @@ export class CampusRoom extends Room<{
     });
   }
 
-  override onAuth(_client: Client, options: unknown, _context: AuthContext): Identity {
+  override async onAuth(
+    _client: Client,
+    options: unknown,
+    _context: AuthContext,
+  ): Promise<Identity> {
     const parsed = joinOptionsSchema.safeParse(options ?? {});
     if (!parsed.success) throw new ServerError(400, 'Thông tin vào phòng không hợp lệ.');
-    const { guest } = parsed.data;
-    if (!guest || !this.config.devGuestAuth) throw new ServerError(401, 'Cần đăng nhập.');
-    return { userId: `guest:${guest.id}`, name: guest.name };
+    const { token, guest } = parsed.data;
+    if (token && this.verifyToken) {
+      try {
+        return await this.verifyToken(token);
+      } catch {
+        throw new ServerError(401, 'Phiên đăng nhập đã hết hạn.');
+      }
+    }
+    if (guest && this.config.devGuestAuth) return { userId: `guest:${guest.id}`, name: guest.name };
+    throw new ServerError(401, 'Cần đăng nhập.');
   }
 
   override async onJoin(
@@ -456,10 +473,8 @@ export class CampusRoom extends Room<{
     if (resume && isWalkable(campusIndex, [resume.x, resume.z], floorAt(campusIndex, resume.y))) {
       return { ...resume, yaw: 0 };
     }
-    // Picking a spawn point is a development convenience until P3; it is only honoured when
-    // development identities are.
-    const wanted =
-      requested && this.config.devGuestAuth ? campusIndex.pois.get(requested) : undefined;
+    // Picking a spawn point is a development and test convenience.
+    const wanted = requested && this.config.devSpawn ? campusIndex.pois.get(requested) : undefined;
     if (wanted) return fromPoi(wanted);
     return fromPoi(this.gateSpawn());
   }

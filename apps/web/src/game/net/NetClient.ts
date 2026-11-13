@@ -4,7 +4,6 @@ import {
   type ChatMessage,
   CLOSE,
   type CorrectMessage,
-  type DevGuest,
   decodePosition,
   decodeYaw,
   encodePosition,
@@ -89,7 +88,6 @@ export class NetClient {
   onCorrect: ((x: number, y: number, z: number) => void) | null = null;
 
   private client: Client | null = null;
-  private guest: DevGuest | null = null;
   private lastTransform: { x: number; y: number; z: number } | null = null;
   private room: Room<unknown, WireState> | null = null;
   private sessionId = '';
@@ -100,20 +98,27 @@ export class NetClient {
   private lastPingAt = Number.NEGATIVE_INFINITY;
   private pingsSent = 0;
 
+  private readonly getToken: () => Promise<string | null>;
+
+  /** @param getToken a valid access token, or null when signed out (services/auth.ts). */
+  constructor(getToken: () => Promise<string | null>) {
+    this.getToken = getToken;
+  }
+
   get status(): NetStatus {
     return useSession.getState().net.status;
   }
 
   async connect(
-    guest: DevGuest,
     options: { spawn?: string; roomId?: string; resume?: { x: number; y: number; z: number } } = {},
   ): Promise<void> {
     if (this.room) return;
     this.setStatus('connecting');
     try {
+      const token = await this.getToken();
+      if (!token) throw new Error('signed out');
       this.client ??= new Client(`${window.location.origin}/rt`);
-      this.guest = guest;
-      const joinOptions = { guest, spawn: options.spawn, resume: options.resume };
+      const joinOptions = { token, spawn: options.spawn, resume: options.resume };
       const room = options.roomId
         ? await this.client.joinById<WireState>(options.roomId, joinOptions)
         : await this.client.joinOrCreate<WireState>(CAMPUS_ROOM, { ...joinOptions, open: true });
@@ -126,13 +131,13 @@ export class NetClient {
 
   /** Moves to another channel, keeping the player's place in the campus. */
   async switchChannel(roomId: string): Promise<void> {
-    if (!this.guest || roomId === this.room?.roomId) return;
+    if (!this.room || roomId === this.room.roomId) return;
     const resume = this.lastTransform ? { ...this.lastTransform } : undefined;
     await this.leave();
-    await this.connect(this.guest, { roomId, resume });
+    await this.connect({ roomId, resume });
     if (useSession.getState().net.status === 'offline') {
       useSession.getState().showNotice('Kênh đó đã đầy hoặc vừa đóng.');
-      await this.connect(this.guest, { resume });
+      await this.connect({ resume });
     }
   }
 

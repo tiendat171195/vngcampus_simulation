@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong phase P1 và P2 (mốc M2 "gặp nhau"): nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Đăng nhập tạm bằng tên tự đặt (thật ở P3).
+**Trạng thái:** xong phase P1, P2 (mốc M2 "gặp nhau") và P3.1: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản khách thật (lưu trong Postgres, nhớ qua cookie, mã khôi phục); đăng nhập Google/OIDC ở P3.2.
 
 ## Chạy thử
 
@@ -40,7 +40,7 @@ rồi mở địa chỉ "Network" mà Vite in ra.
 
 ### Postgres và Redis
 
-Chưa app nào dùng tới cho đến P2.3 / P3.1, nhưng đã có sẵn cấu hình. Cần Docker.
+`api` cần **PostgreSQL** (tài khoản, phiên đăng nhập); lúc dev nó tự chạy migration khi khởi động. Redis chưa dùng tới (P7). Có Docker thì:
 
 ```bash
 pnpm infra:up
@@ -49,6 +49,8 @@ pnpm infra:up
 ```bash
 pnpm infra:down
 ```
+
+Không có Docker thì dùng một Postgres cài sẵn, tạo user `campus` (mật khẩu `campus`) và ba database: `campus` (dev), `campus_test` (`pnpm test`, đổi bằng `TEST_DATABASE_URL`) và `campus_e2e` (`pnpm e2e`, đổi bằng `E2E_DATABASE_URL`) — như `infra/postgres-init.sql`. Không có Postgres thì game vẫn mở được nhưng chỉ đi một mình.
 
 ## Lệnh
 
@@ -63,7 +65,7 @@ pnpm infra:down
 | `pnpm budget` | Kiểm tra dung lượng JS của bản build web theo ngân sách tải (màn hình chào ≤ 120 KB, trước khi đi được ≤ 600 KB, gzip) |
 | `pnpm smoke` | Khởi động bản build của `api` và `realtime`, kiểm tra health |
 | `pnpm check` | Tất cả các bước trên theo thứ tự — chạy trước khi commit; CI chạy đúng chuỗi này |
-| `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước): hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang |
+| `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước, cần Postgres): đăng nhập khách, hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang, emote, chat, chuyển kênh |
 | `pnpm load -- --url http://127.0.0.1:2567 --bots 500` | Thử tải realtime bằng bot (server cần `DEV_GUEST_AUTH=on`); kết quả mẫu ở `docs/05-multiplayer.md` §11 |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
 

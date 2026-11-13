@@ -1,4 +1,4 @@
-import { devices, expect, test } from '@playwright/test';
+import { devices, expect, type Page, test } from '@playwright/test';
 import { enterAs, ownPosition, remotes } from './helpers';
 
 test('a desktop and a phone player see each other and each other moving', async ({ browser }) => {
@@ -43,6 +43,27 @@ test('the same person opening a second tab closes the first one', async ({ brows
   await expect(banner).toBeVisible();
   await expect(banner).toContainText('tab hoặc thiết bị khác');
   await first.context.close();
+});
+
+test('a returning visitor is the same account; another browser is someone else', async ({
+  browser,
+}) => {
+  const userId = (page: Page) =>
+    page.evaluate(
+      () => (window as unknown as { campus: { user(): { id: string } | null } }).campus.user()?.id,
+    );
+  const visitor = await enterAs(browser, 'Quay Lại');
+  const before = await userId(visitor.page);
+  expect(before).toBeTruthy();
+
+  await visitor.page.reload();
+  await visitor.page.getByTestId('channel-badge').waitFor();
+  expect(await userId(visitor.page)).toBe(before);
+
+  const other = await enterAs(browser, 'Người Khác');
+  expect(await userId(other.page)).not.toBe(before);
+  await visitor.context.close();
+  await other.context.close();
 });
 
 test('a player who loses the network for five seconds comes back on their own', async ({

@@ -3,8 +3,8 @@ import { useSession } from './game/core/session';
 import { useSettings } from './game/core/settings';
 import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
-import { loadGuest } from './game/net/identity';
 import { net } from './game/net/net';
+import { currentUser, signIn } from './services/auth';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
 import { AreaToast } from './ui/AreaToast';
 import { ChatBox } from './ui/ChatBox';
@@ -35,15 +35,20 @@ export default function GameScreen() {
   }, []);
 
   // Join a channel once the player has stepped in from the splash screen.
-  const connect = useCallback(() => {
-    const { id } = loadGuest();
-    const name = useSession.getState().displayName;
+  const connect = useCallback(async () => {
+    const session = useSession.getState();
+    // Entered alone because the API was down: sign in now, before joining.
+    if (!currentUser()) {
+      const result = await signIn(session.displayName);
+      if (result.ok) session.setDisplayName(result.user.displayName);
+    }
     const spawn = new URLSearchParams(window.location.search).get('spawn') ?? undefined;
-    void net.leave().then(() => net.connect({ id, name }, { spawn }));
+    await net.leave();
+    await net.connect({ spawn });
   }, []);
 
   useEffect(() => {
-    if (playing) connect();
+    if (playing) void connect();
   }, [playing, connect]);
 
   // A hidden tab shows as away to the others.
@@ -63,6 +68,7 @@ export default function GameScreen() {
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('debug')) return;
     (window as unknown as { campus: unknown }).campus = {
+      user: () => currentUser(),
       remotes: () =>
         [...net.remotes.values()].map((remote) => ({
           name: remote.name,
@@ -90,7 +96,7 @@ export default function GameScreen() {
           WASD đi · Shift chạy · Space nhảy · 1–6 biểu cảm · E tương tác · Enter trò chuyện
         </p>
       )}
-      {playing && <ConnectionBanner onRetry={connect} />}
+      {playing && <ConnectionBanner onRetry={() => void connect()} />}
       {playing && <Toolbar />}
     </>
   );

@@ -12,28 +12,23 @@ export interface Remote {
   z: number;
 }
 
-let counter = 0;
-
-/** Opens the game as a named guest, skipping the splash button, and waits until it is in a channel. */
+/**
+ * Opens the game in a fresh browser (so a new guest account), skipping the splash button, and
+ * waits until it is in a channel.
+ */
 export async function enterAs(
   browser: Browser,
   name: string,
   options: BrowserContextOptions = {},
-  id?: string,
   /** Extra query parameters, starting with `&`. */
   query = '',
 ) {
   const context = await browser.newContext(options);
-  const guestId = id ?? `e2e-${Date.now().toString(36)}-${(counter++).toString(36)}`;
-  await context.addInitScript(
-    ([guestId, name]) =>
-      window.localStorage.setItem('campus.guest.v1', JSON.stringify({ id: guestId, name })),
-    [guestId, name] as const,
-  );
+  await context.addInitScript((name) => window.localStorage.setItem('campus.name.v1', name), name);
   const page = await context.newPage();
   await page.goto(`/?enter&debug${query}`);
   await page.getByTestId('channel-badge').waitFor();
-  return { context, page, guestId };
+  return { context, page };
 }
 
 export const remotes = (page: Page) =>

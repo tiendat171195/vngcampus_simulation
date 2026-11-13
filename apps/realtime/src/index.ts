@@ -1,9 +1,12 @@
-import { devGuestAuthEnabled, loadEnv } from './env';
+import { createTokenVerifier } from './auth';
+import { devGuestAuthEnabled, devSpawnEnabled, loadEnv } from './env';
 import { createServer } from './server';
 
 const env = loadEnv();
 const server = createServer({
   devGuestAuth: devGuestAuthEnabled(env),
+  devSpawn: devSpawnEnabled(env),
+  verifyToken: createTokenVerifier(new URL(env.AUTH_JWKS_URL)),
   softCap: env.CHANNEL_SOFT_CAP,
   hardCap: env.CHANNEL_HARD_CAP,
 });

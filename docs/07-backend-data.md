@@ -149,7 +149,10 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 
 - API giữ khoá riêng để ký. Realtime chỉ có **khoá công khai** — kiểm tra được token nhưng không phát hành được.
 - WebSocket: access token nằm trong tuỳ chọn khi vào phòng (đi trong thân request, không nằm trên URL nên không lọt vào log).
-- Phiên đang mở không cần xác thực lại khi access token hết hạn. Khoá tài khoản có hiệu lực ngay nhờ tín hiệu `moderation` qua Redis.
+- Phiên đang mở không cần xác thực lại khi access token hết hạn. Khoá tài khoản có hiệu lực ngay nhờ tín hiệu `moderation` qua Redis (P5); trước đó, tài khoản bị khoá không lấy được token mới nhưng token đang còn hạn (≤ 15 phút) vẫn vào được phòng.
+- Realtime lấy khoá công khai từ `GET /api/v1/auth/jwks` (`AUTH_JWKS_URL`, có cache) và chỉ nhận token có `iss = campus-api`, `aud = campus`.
+- **Phía trình duyệt** (`apps/web/src/services/auth.ts`): khi bấm "Vào campus", client thử `/auth/refresh` trước; không có phiên thì tạo khách bằng `/auth/guest`; tên gõ khác tên tài khoản thì `PATCH /me`. Access token chỉ nằm trong bộ nhớ. Refresh token xoay vòng mỗi lần dùng, nên hai tab cùng làm mới một lúc sẽ bị coi là "dùng lại" và mất phiên: client xếp hàng các lần làm mới giữa các tab bằng Web Locks (`navigator.locks`). API không trả lời được thì vẫn cho vào campus một mình; nút "Thử lại" đăng nhập lại.
+- **Giới hạn tần suất** (theo IP): tạo khách 10/phút, khôi phục 5/phút, làm mới 300/phút — cả văn phòng có thể chung một IP công cộng (1.000 người làm mới mỗi 15 phút ≈ 70/phút). `RATE_LIMIT_SCALE` nhân tất cả các mức.
 
 ### 5.2 Nhà cung cấp danh tính (cắm rời)
 
