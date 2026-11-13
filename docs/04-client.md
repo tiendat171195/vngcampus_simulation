@@ -10,7 +10,7 @@
 ## 2. Cấu trúc mã nguồn (`apps/web/src`)
 
 ```
-app/          # vỏ React: route (/, /play, /auth/callback), provider, error boundary
+app/          # vỏ React: route (`/`, `/privacy`, `/debug/map`; đăng nhập OIDC quay về thẳng trang cũ, không cần route callback ở client), provider, error boundary
 ui/           # HUD và menu (DOM): MissionTracker, ChatBox, EmoteWheel, Joystick, MiniMap,
               # OnlineList, ProfileCard, AvatarEditor, Settings, Onboarding, Toasts
 game/

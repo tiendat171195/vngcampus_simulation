@@ -3,6 +3,8 @@ import { createRemoteJWKSet, type JWTVerifyGetKey, jwtVerify } from 'jose';
 export interface Identity {
   userId: string;
   name: string;
+  /** Guests are labelled so nobody mistakes one for a colleague (docs/09 §6). */
+  guest: boolean;
 }
 
 export type TokenVerifier = (token: string) => Promise<Identity>;
@@ -22,6 +24,6 @@ export function createTokenVerifier(keys: JWTVerifyGetKey | URL): TokenVerifier 
     if (typeof payload.sub !== 'string' || typeof payload.name !== 'string') {
       throw new Error('token lacks subject or name');
     }
-    return { userId: payload.sub, name: payload.name };
+    return { userId: payload.sub, name: payload.name, guest: payload.guest === true };
   };
 }

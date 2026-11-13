@@ -1,5 +1,10 @@
 import { authIdentities, users, uuidv7 } from '@campus/db';
-import { displayNameSchema, type GuestSignUpResponse, type SessionResponse } from '@campus/shared';
+import {
+  displayNameSchema,
+  type GuestSignUpResponse,
+  PRIVACY_NOTICE_VERSION,
+  type SessionResponse,
+} from '@campus/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
@@ -15,12 +20,29 @@ import {
   startSession,
 } from '../auth/sessions';
 import { ApiError } from '../errors';
-import { toUserDto, type UserRow } from './users';
+import { claimsFor, toUserDto, type UserRow } from './users';
 
 export const REFRESH_COOKIE = 'campus_refresh';
 const COOKIE_PATH = '/api/v1/auth';
 
-const guestBody = z.object({ name: displayNameSchema });
+/** The refresh token lives in an HTTP-only cookie that only the auth routes receive. */
+export function setRefreshCookie(reply: FastifyReply, session: IssuedSession, secure: boolean) {
+  return reply.setCookie(REFRESH_COOKIE, session.refreshToken, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    path: COOKIE_PATH,
+    maxAge: REFRESH_TOKEN_DAYS * 86_400,
+  });
+}
+
+const guestBody = z.object({
+  name: displayNameSchema,
+  /** The privacy notice version shown next to the button; an account needs consent first. */
+  consent: z.literal(PRIVACY_NOTICE_VERSION, {
+    error: 'Cần đồng ý với thông báo quyền riêng tư.',
+  }),
+});
 const recoverBody = z.object({ code: z.string().min(10).max(40) });
 
 function parse<T>(schema: z.ZodType<T>, body: unknown): T {
@@ -40,23 +62,12 @@ export async function authRoutes(app: FastifyInstance, deps: AppDeps): Promise<v
   const limit = (max: number) => Math.round(max * (deps.rateLimitScale ?? 1));
 
   const setCookie = (reply: FastifyReply, session: IssuedSession) =>
-    reply.setCookie(REFRESH_COOKIE, session.refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: deps.secureCookies,
-      path: COOKIE_PATH,
-      maxAge: REFRESH_TOKEN_DAYS * 86_400,
-    });
+    setRefreshCookie(reply, session, deps.secureCookies);
   const clearCookie = (reply: FastifyReply) =>
     reply.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH });
 
   const respond = async (user: UserRow, session: IssuedSession): Promise<SessionResponse> => ({
-    accessToken: await keys.sign({
-      sub: user.id,
-      name: user.displayName,
-      role: user.role,
-      sid: session.sessionId,
-    }),
+    accessToken: await keys.sign(claimsFor(user, session.sessionId)),
     expiresIn: ACCESS_TOKEN_SECONDS,
     user: toUserDto(user),
   });
@@ -74,12 +85,12 @@ export async function authRoutes(app: FastifyInstance, deps: AppDeps): Promise<v
     async (request, reply): Promise<GuestSignUpResponse> => {
       if (deps.guestMode === 'off')
         throw new ApiError(403, 'guests_disabled', 'Cần đăng nhập bằng tài khoản công ty.');
-      const { name } = parse(guestBody, request.body);
+      const { name, consent } = parse(guestBody, request.body);
       const recoveryCode = newRecoveryCode();
       const user = await db.transaction(async (tx) => {
         const [created] = await tx
           .insert(users)
-          .values({ id: uuidv7(), displayName: name, isGuest: true })
+          .values({ id: uuidv7(), displayName: name, isGuest: true, consentVersion: consent })
           .returning();
         if (!created) throw new ApiError(500, 'internal', 'Không tạo được tài khoản.');
         await tx.insert(authIdentities).values({

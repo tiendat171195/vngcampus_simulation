@@ -2,6 +2,7 @@ import type { Browser, BrowserContextOptions, Page } from '@playwright/test';
 
 export interface Remote {
   name: string;
+  tag: string;
   status: number;
   anim: number;
   emote: number;
@@ -13,8 +14,8 @@ export interface Remote {
 }
 
 /**
- * Opens the game in a fresh browser (so a new guest account), skipping the splash button, and
- * waits until it is in a channel.
+ * Opens the game in a fresh browser (so a new guest account), agrees to the privacy notice,
+ * steps in and waits until it is in a channel.
  */
 export async function enterAs(
   browser: Browser,
@@ -26,9 +27,19 @@ export async function enterAs(
   const context = await browser.newContext(options);
   await context.addInitScript((name) => window.localStorage.setItem('campus.name.v1', name), name);
   const page = await context.newPage();
-  await page.goto(`/?enter&debug${query}`);
-  await page.getByTestId('channel-badge').waitFor();
+  await page.goto(`/?debug${query}`);
+  await enterFromSplash(page);
   return { context, page };
+}
+
+/** On the splash screen: agrees to the privacy notice if asked, then steps in. */
+export async function enterFromSplash(page: Page) {
+  await page.locator('.splash[data-phase="ready"]').waitFor();
+  await page.locator('.splash-card:not([data-account="checking"])').waitFor();
+  const consent = page.locator('.splash-consent-box');
+  if (await consent.isVisible()) await consent.check();
+  await page.getByRole('button', { name: 'Vào campus' }).click();
+  await page.getByTestId('channel-badge').waitFor();
 }
 
 export const remotes = (page: Page) =>

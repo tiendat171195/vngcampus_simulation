@@ -4,9 +4,11 @@ import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import type { AccessClaims, KeyRing } from './auth/keys';
+import type { OidcProvider } from './auth/oidc';
 import { ApiError, sendError } from './errors';
 import { authRoutes } from './routes/auth';
 import { meRoutes } from './routes/me';
+import { oidcRoutes } from './routes/oidc';
 import { worldRoutes } from './routes/world';
 
 declare module 'fastify' {
@@ -24,6 +26,15 @@ export interface AppDeps {
   secureCookies: boolean;
   /** Multiplies every per-route rate limit; tests raise it to make many accounts. */
   rateLimitScale?: number;
+  /** Company sign-in (docs/07 §5.2); without it only guests can sign in. */
+  oidc?: {
+    providers: OidcProvider[];
+    /** Origin people use, where providers send them back. */
+    publicUrl: string;
+    /** Allowed email domains; empty allows any. */
+    emailDomains: string[];
+    adminEmails: string[];
+  };
 }
 
 /** Builds the HTTP app without binding a port, so tests can drive it with `app.inject()`. */
@@ -57,6 +68,7 @@ export async function buildApp(
   await app.register(
     async (v1) => {
       await authRoutes(v1, deps);
+      await oidcRoutes(v1, deps);
       await meRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },

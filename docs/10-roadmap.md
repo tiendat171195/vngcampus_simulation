@@ -117,7 +117,7 @@ Ngoài nghiệm thu: emote, ghế, chat gần có lọc từ, danh bạ online v
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
 | P3.1 | DB + API nền + khách | Drizzle schema và migration (users, auth_identities, sessions, settings; `user_stats` chuyển sang P4.1). Khung Fastify: định dạng lỗi, zod, rate limit. Đăng nhập khách, JWT ký bất đối xứng, refresh xoay vòng. `/me`, `/world/bootstrap`. Realtime kiểm tra JWT thật | M | Xong |
-| P3.2 | Đăng nhập OIDC | Google + OIDC tổng quát, danh sách domain cho phép, liên kết khách → tài khoản thật, màn hình đồng ý + thông báo quyền riêng tư | S | Chưa làm |
+| P3.2 | Đăng nhập OIDC | Google + OIDC tổng quát, danh sách domain cho phép, liên kết khách → tài khoản thật, màn hình đồng ý + thông báo quyền riêng tư | S | Xong |
 | P3.3 | Avatar module | Các phần rời từ bộ nhân vật CC0, gộp thành một skinned mesh, bảng màu đỉnh, chuỗi cấu hình. Trình chỉnh avatar có xem trước 3D. Lưu và đồng bộ cho người khác. LOD1 + impostor | L | Chưa làm |
 | P3.4 | Hồ sơ và lần đầu vào game | Thẻ hồ sơ, phòng ban (script nhập CSV), tuỳ chọn ẩn khỏi danh sách online, luồng lần đầu (tên → avatar → hướng dẫn) | S | Chưa làm |
 

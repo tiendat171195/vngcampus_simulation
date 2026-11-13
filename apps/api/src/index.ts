@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { createDb, migrateDatabase } from '@campus/db';
 import { buildApp } from './app';
 import { createKeyRing } from './auth/keys';
+import { createOidcProvider, type OidcProvider } from './auth/oidc';
 import { loadEnv } from './env';
 
 const env = loadEnv();
@@ -15,12 +16,40 @@ if (env.NODE_ENV !== 'production') {
   await migrateDatabase(db, existsSync(bundled) ? bundled : undefined);
 }
 
+const providers: OidcProvider[] = [];
+if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
+  providers.push(
+    createOidcProvider({
+      id: 'google',
+      label: 'Google',
+      issuer: 'https://accounts.google.com',
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
+  );
+if (env.OIDC_ISSUER && env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET)
+  providers.push(
+    createOidcProvider({
+      id: 'oidc',
+      label: env.OIDC_LABEL,
+      issuer: env.OIDC_ISSUER,
+      clientId: env.OIDC_CLIENT_ID,
+      clientSecret: env.OIDC_CLIENT_SECRET,
+    }),
+  );
+
 const app = await buildApp(
   {
     db,
     keys: await createKeyRing(env.JWT_PRIVATE_KEY),
     guestMode: env.GUEST_MODE,
     rateLimitScale: env.RATE_LIMIT_SCALE,
+    oidc: {
+      providers,
+      publicUrl: env.PUBLIC_URL,
+      emailDomains: env.AUTH_EMAIL_DOMAINS,
+      adminEmails: env.ADMIN_EMAILS,
+    },
     secureCookies: env.NODE_ENV === 'production',
   },
   {

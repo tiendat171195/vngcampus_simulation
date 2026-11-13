@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong phase P1, P2 (mốc M2 "gặp nhau") và P3.1: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản khách thật (lưu trong Postgres, nhớ qua cookie, mã khôi phục); đăng nhập Google/OIDC ở P3.2.
+**Trạng thái:** xong phase P1, P2 (mốc M2 "gặp nhau") và P3.1: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản: khách (tên tự đặt) hoặc tài khoản công ty qua Google/OIDC, giới hạn theo domain email; khách liên kết lên tài khoản công ty mà không mất gì; có thông báo quyền riêng tư và ghi nhận đồng ý.
 
 ## Chạy thử
 
@@ -26,9 +26,11 @@ pnpm dev
 
 Trang web chỉ nói chuyện với **chính origin của nó**: `/api` là REST, `/rt` là realtime. Lúc dev, Vite đóng vai reverse proxy; khi triển khai thật, Caddy làm việc đó.
 
+Muốn thử đăng nhập công ty mà không cần Google: chạy IdP giả lập `pnpm --filter @campus/mock-idp start` và bật nó cho `api` bằng các dòng `OIDC_*` trong [`.env.example`](.env.example). Màn hình chào sẽ có nút "Đăng nhập bằng Mock IdP"; nhập email bất kỳ thuộc domain trong `AUTH_EMAIL_DOMAINS`.
+
 Muốn thấy multiplayer: mở thêm một cửa sổ ẩn danh (mỗi cửa sổ là một người khác nhau) và đặt tên khác. Hai tab trong cùng một cửa sổ là cùng một người — tab cũ sẽ bị đóng.
 
-Tham số URL hữu ích: `?enter` (bỏ qua nút "Vào campus"), `?bots=50` (50 avatar giả đi lang thang), `?quality=low|medium|high`, `?spawn=poi.checkpoint.atrium` (xuất hiện ở chỗ khác — danh sách POI xem ở `/debug/map`).
+Tham số URL hữu ích: `?enter` (tự bấm "Vào campus" khi trình duyệt đã có tài khoản và đã đồng ý quyền riêng tư), `?bots=50` (50 avatar giả đi lang thang), `?quality=low|medium|high`, `?spawn=poi.checkpoint.atrium` (xuất hiện ở chỗ khác — danh sách POI xem ở `/debug/map`).
 
 **Thử trên điện thoại cùng Wi-Fi:**
 
@@ -65,7 +67,7 @@ Không có Docker thì dùng một Postgres cài sẵn, tạo user `campus` (m�
 | `pnpm budget` | Kiểm tra dung lượng JS của bản build web theo ngân sách tải (màn hình chào ≤ 120 KB, trước khi đi được ≤ 600 KB, gzip) |
 | `pnpm smoke` | Khởi động bản build của `api` và `realtime`, kiểm tra health |
 | `pnpm check` | Tất cả các bước trên theo thứ tự — chạy trước khi commit; CI chạy đúng chuỗi này |
-| `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước, cần Postgres): đăng nhập khách, hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang, emote, chat, chuyển kênh |
+| `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước, cần Postgres): đăng nhập khách và qua IdP giả lập, hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang, emote, chat, chuyển kênh |
 | `pnpm load -- --url http://127.0.0.1:2567 --bots 500` | Thử tải realtime bằng bot (server cần `DEV_GUEST_AUTH=on`); kết quả mẫu ở `docs/05-multiplayer.md` §11 |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
 
@@ -87,6 +89,8 @@ packages/
 infra/        Docker Compose cho môi trường dev
 tools/
   map-tools/  sinh bản đồ campus từ dữ liệu OpenStreetMap
+  mock-idp/   nhà cung cấp OpenID Connect giả lập cho dev và e2e
+  loadtest/   bot thử tải realtime
 scripts/      script bảo trì repo (smoke test)
 docs/         plan và thiết kế kỹ thuật
 ```

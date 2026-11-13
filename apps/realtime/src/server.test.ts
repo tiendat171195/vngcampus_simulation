@@ -26,7 +26,10 @@ import { createServer } from './server';
 
 let colyseus: ColyseusTestServer;
 /** Signs tokens the way the API does, with a key only this test knows. */
-let signToken: (claims: { sub: string; name: string }, issuer?: string) => Promise<string>;
+let signToken: (
+  claims: { sub: string; name: string; guest?: boolean },
+  issuer?: string,
+) => Promise<string>;
 let nextId = 0;
 const guest = (name = 'Đồng nghiệp') => ({
   id: `test-user-${String(++nextId).padStart(4, '0')}`,
@@ -39,7 +42,7 @@ beforeAll(async () => {
     keys: [{ ...(await exportJWK(publicKey)), kid: 'test', alg: 'ES256' }],
   });
   signToken = (claims, issuer = 'campus-api') =>
-    new SignJWT({ name: claims.name, role: 'player', sid: 's' })
+    new SignJWT({ name: claims.name, role: 'player', guest: claims.guest ?? false, sid: 's' })
       .setProtectedHeader({ alg: 'ES256', kid: 'test' })
       .setSubject(claims.sub)
       .setIssuer(issuer)
@@ -447,7 +450,19 @@ describe('access tokens', () => {
     expect(me(room)).toMatchObject({
       name: 'Từ API',
       userId: '0190f0c2-0000-7000-8000-000000000001',
+      tag: '',
     });
+  });
+
+  it('labels guests as guests', async () => {
+    const token = await signToken({
+      sub: '0190f0c2-0000-7000-8000-000000000002',
+      name: 'Vãng Lai',
+      guest: true,
+    });
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, { open: true, token });
+    await settle(150);
+    expect(me(room)).toMatchObject({ name: 'Vãng Lai', tag: 'Khách' });
   });
 
   it('turns away forged or foreign tokens', async () => {

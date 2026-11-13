@@ -101,10 +101,10 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 |---|---|---|
 | POST | `/auth/guest` | Tạo tài khoản khách từ tên hiển thị; trả mã khôi phục |
 | POST | `/auth/guest/recover` | Lấy lại tài khoản khách bằng mã khôi phục |
-| GET | `/auth/oidc/:provider/start` · `/callback` | Đăng nhập OIDC |
-| POST | `/auth/link/:provider` | Gắn danh tính thật vào tài khoản khách, giữ nguyên tiến độ |
+| GET | `/auth/oidc/:provider/start` · `/callback` | Đăng nhập OIDC (`google`, `oidc`). `start?return=/đường-dẫn&consent=<phiên bản>`; lỗi quay về `?auth_error=cancelled\|failed\|expired\|unverified\|domain\|banned\|unknown`. Trình duyệt đang là khách thì callback biến khách thành tài khoản thật, giữ nguyên tiến độ |
+| POST | `/me/consent` | Ghi nhận đồng ý thông báo quyền riêng tư `{ version }` |
 | POST | `/auth/refresh` · `/auth/logout` | Làm mới token · đăng xuất |
-| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên, avatar, tuỳ chọn riêng tư; yêu cầu xoá dữ liệu |
+| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên (chỉ khách — tài khoản thật lấy tên từ IdP), avatar, tuỳ chọn riêng tư; yêu cầu xoá dữ liệu |
 
 ### Thế giới
 
@@ -164,11 +164,15 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 
 Chính sách khách cấu hình được qua `GUEST_MODE = off | limited | full`. Ở mức `limited`: khách đi lại và emote được, nhưng không chat, không lên BXH, không được tính trong objective `social`.
 
-Liên kết tài khoản: khách đăng nhập OIDC khi đang có phiên → danh tính mới gắn vào tài khoản hiện tại, tiến độ giữ nguyên. Nếu danh tính đó đã thuộc tài khoản khác → chuyển sang tài khoản thật, bỏ tài khoản khách.
+Cấu hình (P3.2): Google bằng `GOOGLE_CLIENT_ID/SECRET`; một nhà cung cấp OIDC bất kỳ (Microsoft Entra ID, Keycloak…) bằng `OIDC_ISSUER/CLIENT_ID/CLIENT_SECRET/LABEL`; domain cho phép `AUTH_EMAIL_DOMAINS` (bắt buộc ở production — chuyển vào bảng `settings` khi có admin ở P5); `PUBLIC_URL` để dựng redirect URI. Nút đăng nhập hiện theo `providers` trong `/world/bootstrap`. Thư viện: `openid-client` (Authorization Code + PKCE, kiểm tra `state`, `nonce`, `iss`). Trong lúc rời sang nhà cung cấp, `state`/`nonce`/PKCE verifier nằm trong cookie `campus_oidc` (HttpOnly, SameSite=Lax, 10 phút, phạm vi `/api/v1/auth/oidc`) được ký bằng khoá của API — không cần lưu phía server. Phát triển và e2e dùng `tools/mock-idp` (đăng nhập bằng email bất kỳ; không bao giờ mở ra internet).
+
+Tìm tài khoản ở callback, theo thứ tự: (1) danh tính `(provider, subject)` đã biết → tài khoản đó; (2) có tài khoản thật cùng email → gắn thêm danh tính; (3) trình duyệt đang đăng nhập bằng khách → khách đó thành tài khoản thật, giữ nguyên tiến độ, **xoá mã khôi phục** (mã yếu hơn đăng nhập công ty); (4) tạo tài khoản mới. Mỗi lần đăng nhập, tên hiển thị và email cập nhật theo IdP. Phiên cũ của trình duyệt bị thu hồi; nếu đó là một khách khác thì khách ấy bị bỏ (job `data-retention` dọn sau 30 ngày).
+
+Đồng ý: tạo khách cần `consent` bằng `PRIVACY_NOTICE_VERSION` (`@campus/shared`); đăng nhập OIDC mang phiên bản đã đồng ý qua `start?consent=`; tăng phiên bản thì màn hình chào hỏi lại và ghi bằng `POST /me/consent`. Nội dung thông báo ở `/privacy` (`apps/web/src/pages/PrivacyPage.tsx`).
 
 ### 5.3 Phân quyền
 
-Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không phải khách và đúng vai trò (ma trận quyền ở [08](08-admin-cms.md)). Quản trị viên đầu tiên khai báo qua biến môi trường `ADMIN_EMAILS`.
+Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không phải khách và đúng vai trò (ma trận quyền ở [08](08-admin-cms.md)). Quản trị viên đầu tiên khai báo qua biến môi trường `ADMIN_EMAILS`: người có email trong danh sách thành `admin` khi đăng nhập qua IdP (chỉ nâng từ `player`, không hạ quyền ai). Access token có thêm claim `guest`; realtime gắn nhãn "Khách" trên tên của khách.
 
 ## 6. Job nền (BullMQ)
 

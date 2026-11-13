@@ -7,7 +7,7 @@ Plan đang đi theo cột **Mặc định**. Có thể bắt đầu P0–P2 ngay
 | # | Câu hỏi | Các lựa chọn | Mặc định | Nếu chọn khác thì ảnh hưởng gì | Cần trước |
 |---|---|---|---|---|---|
 | D1 | **Ai được vào?** | (a) Chỉ nhân viên · (b) Nhân viên + khách mời · (c) Công khai | (a), kiến trúc để ngỏ (b) | (c) đổi hẳn bài toán: kiểm duyệt nặng, cần chịu tải đột biến, bắt buộc có phép về thương hiệu | P3 |
-| D2 | **Đăng nhập bằng gì?** | (a) OIDC Google/Microsoft theo domain email công ty · (b) Khách + **mã mời** · (c) Zalo | Khách ở giai đoạn dựng → (a) khi mở rộng | Nếu công ty không cho dùng IdP cho dự án này thì dùng (b): vẫn giữ được phạm vi nội bộ, nhưng tên hiển thị không gắn danh tính thật | P3.2 |
+| D2 | **Đăng nhập bằng gì?** | (a) OIDC Google/Microsoft theo domain email công ty · (b) Khách + **mã mời** · (c) Zalo | Khách ở giai đoạn dựng → (a) khi mở rộng | Nếu công ty không cho dùng IdP cho dự án này thì dùng (b): vẫn giữ được phạm vi nội bộ, nhưng tên hiển thị không gắn danh tính thật. P3.2 đã làm cả Google lẫn OIDC tổng quát (Microsoft dùng được qua OIDC), chỉ cần cấu hình — vẫn cần chốt IdP nào và domain email nào | Trước khi mở cho nhiều người |
 | D3 | **Phong cách hình ảnh** | (a) Low-poly cách điệu · (b) Tả thực · (c) Voxel/khối vuông | (a) | (b) tốn công art gấp nhiều lần và nặng máy; (c) nhanh hơn nữa nhưng ít giống thật | P6 |
 | D4 | **Phạm vi bản đồ MVP** | (a) Ngoại cảnh + tầng trệt công cộng, tầng văn phòng giản lược · (b) Chỉ ngoại cảnh + Atrium · (c) Đủ 3 tầng chi tiết | (a) | (b) ra nhanh hơn; (c) chậm hơn đáng kể và đụng vấn đề an ninh | P1.1 (chỉnh lại ở P6.2) |
 | D5 | **Hạ tầng và tên miền** | (a) 1 VPS + CDN tự trả · (b) VNG Cloud · (c) Khác | (a) cho pilot | (b) cần tài khoản và quy trình của công ty | P7.1 |

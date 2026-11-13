@@ -63,6 +63,8 @@ test('nearby chat reaches people close by, filtered, and nobody far away', async
 });
 
 test('finding a colleague in another channel and joining them', async ({ browser }) => {
+  // Four browsers rendering WebGL in software take a while to step in.
+  test.slow();
   // The e2e server closes a channel to new arrivals at three people.
   const first = await enterAs(browser, 'Đồng Nghiệp');
   const others = [await enterAs(browser, 'Hai'), await enterAs(browser, 'Ba')];

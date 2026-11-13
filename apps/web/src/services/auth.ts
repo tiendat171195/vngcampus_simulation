@@ -1,5 +1,11 @@
 // No zod and no heavy imports: the splash screen uses this module and must stay small.
-import type { ApiErrorBody, SessionResponse, UserDto } from '@campus/shared';
+import type {
+  ApiErrorBody,
+  BootstrapResponse,
+  SessionResponse,
+  SignInProvider,
+  UserDto,
+} from '@campus/shared';
 
 const BASE = '/api/v1';
 /** Ask for a new access token this long before the current one runs out. */
@@ -21,6 +27,11 @@ export type SignInResult =
 
 let held: Held | null = null;
 let refreshing: Promise<Held | null> | null = null;
+let bootstrap: Promise<BootstrapResponse | null> | null = null;
+/** The privacy notice version the person ticked on the splash screen, for later retries. */
+let agreed: number | null = null;
+/** The last refresh failed because the API did not answer at all. */
+let unreachable = false;
 
 type Reply<T> = { status: number; body: T | ApiErrorBody | null } | null;
 
@@ -58,6 +69,7 @@ function hold(session: SessionResponse): Held {
 
 async function exchange(): Promise<Held | null> {
   const reply = await call<SessionResponse>('POST', '/auth/refresh');
+  unreachable = reply === null;
   if (reply?.status === 200) return hold(reply.body as SessionResponse);
   // Only a definite "no" forgets the session; a network hiccup keeps the old token for a retry.
   if (reply) held = null;
@@ -97,25 +109,74 @@ function guestName(): string {
     .toUpperCase()}`;
 }
 
+/** Sign-in options and the privacy notice version; null when the API cannot be reached. */
+export function loadBootstrap(): Promise<BootstrapResponse | null> {
+  bootstrap ??= call<BootstrapResponse>('GET', '/world/bootstrap').then((reply) => {
+    if (reply?.status === 200) return reply.body as BootstrapResponse;
+    bootstrap = null;
+    return null;
+  });
+  return bootstrap;
+}
+
+/**
+ * Who this browser is signed in as, from its cookie: a user, null when signed out, or
+ * `undefined` when the API did not answer.
+ */
+export async function resume(): Promise<UserDto | null | undefined> {
+  if (held && held.expiresAt - Date.now() > MARGIN_MS) return held.user;
+  const session = await refresh();
+  if (session) return session.user;
+  return unreachable ? undefined : null;
+}
+
 /**
  * Signs this browser in: resumes the session its cookie remembers, or creates a guest account
- * (docs/07-backend-data.md §3). A `name` different from the account's renames it; null keeps
- * whatever the account is called.
+ * (docs/07-backend-data.md §5.2). For a guest, a `name` different from the account's renames it;
+ * null keeps it. `consent` is the privacy notice version the person just agreed to, if any; an
+ * account is only created with it.
  */
-export async function signIn(name: string | null): Promise<SignInResult> {
+export async function signIn(
+  name: string | null,
+  consent: number | null = agreed,
+): Promise<SignInResult> {
+  if (consent !== null) agreed = consent;
   let session = held && held.expiresAt - Date.now() > MARGIN_MS ? held : await refresh();
   if (!session) {
-    const reply = await call<SessionResponse>('POST', '/auth/guest', { name: name ?? guestName() });
+    if (unreachable)
+      return { ok: false, reason: 'unreachable', message: 'Không kết nối được máy chủ.' };
+    if (consent === null)
+      return { ok: false, reason: 'refused', message: 'Cần đồng ý với thông báo quyền riêng tư.' };
+    const reply = await call<SessionResponse>('POST', '/auth/guest', {
+      name: name ?? guestName(),
+      consent,
+    });
     if (!reply) return { ok: false, reason: 'unreachable', message: errorMessage(reply) };
     if (reply.status !== 201) return { ok: false, reason: 'refused', message: errorMessage(reply) };
     // The recovery code in this reply is offered again from the profile (P3.4).
     session = hold(reply.body as SessionResponse);
   }
-  if (name !== null && session.user.displayName !== name) {
+  if (session.user.isGuest && name !== null && session.user.displayName !== name) {
     const reply = await call<SessionResponse>('PATCH', '/me', { displayName: name });
     if (reply?.status === 200) session = hold(reply.body as SessionResponse);
   }
+  if (consent !== null && session.user.consentVersion !== consent) {
+    const reply = await call<UserDto>('POST', '/me/consent', { version: consent });
+    if (reply?.status === 200) session.user = reply.body as UserDto;
+  }
   return { ok: true, user: session.user };
+}
+
+/**
+ * Where to send the browser to sign in with a company account. It comes back to the current
+ * page; a guest signed in on this browser becomes that account (docs/07 §5.2).
+ */
+export function providerUrl(provider: SignInProvider, consent: number | null): string {
+  const here = new URL(window.location.href);
+  here.searchParams.delete('auth_error');
+  const query = new URLSearchParams({ return: `${here.pathname}${here.search}` });
+  if (consent !== null) query.set('consent', String(consent));
+  return `${BASE}/auth/oidc/${provider}/start?${query}`;
 }
 
 /** Ends the session on this device. */

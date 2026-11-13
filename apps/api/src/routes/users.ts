@@ -10,4 +10,15 @@ export const toUserDto = (user: UserRow): UserDto => ({
   role: user.role,
   avatar: user.avatar,
   locale: user.locale,
+  email: user.email,
+  consentVersion: user.consentVersion,
+});
+
+/** Claims of an access token for this user in session `sid`. */
+export const claimsFor = (user: UserRow, sid: string) => ({
+  sub: user.id,
+  name: user.displayName,
+  role: user.role,
+  guest: user.isGuest,
+  sid,
 });

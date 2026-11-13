@@ -72,6 +72,7 @@ export default function GameScreen() {
       remotes: () =>
         [...net.remotes.values()].map((remote) => ({
           name: remote.name,
+          tag: remote.tag,
           status: remote.status,
           anim: remote.anim,
           emote: remote.emote,

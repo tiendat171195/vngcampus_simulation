@@ -1,5 +1,10 @@
 import { authIdentities, users } from '@campus/db';
-import { displayNameSchema, type SessionResponse, type UserDto } from '@campus/shared';
+import {
+  displayNameSchema,
+  PRIVACY_NOTICE_VERSION,
+  type SessionResponse,
+  type UserDto,
+} from '@campus/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -9,9 +14,10 @@ import { newRecoveryCode } from '../auth/recovery';
 import { sha256 } from '../auth/sessions';
 import { ApiError } from '../errors';
 import { claimsOf, requireUser } from './guard';
-import { toUserDto } from './users';
+import { claimsFor, toUserDto } from './users';
 
 const patchBody = z.object({ displayName: displayNameSchema.optional() }).strict();
+const consentBody = z.object({ version: z.literal(PRIVACY_NOTICE_VERSION) }).strict();
 
 export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<void> {
   const { db, keys } = deps;
@@ -41,6 +47,14 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
         z.flattenError(parsed.error),
       );
     if (parsed.data.displayName !== undefined) {
+      // A company account is called what the company calls it, so nobody can pose as a
+      // colleague (docs/09 §6).
+      if (!claims.guest)
+        throw new ApiError(
+          403,
+          'name_from_provider',
+          'Tên của tài khoản công ty lấy từ hệ thống đăng nhập.',
+        );
       await db
         .update(users)
         .set({ displayName: parsed.data.displayName })
@@ -48,15 +62,22 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
     }
     const user = await load(claims.sub);
     return {
-      accessToken: await keys.sign({
-        sub: user.id,
-        name: user.displayName,
-        role: user.role,
-        sid: claims.sid,
-      }),
+      accessToken: await keys.sign(claimsFor(user, claims.sid)),
       expiresIn: ACCESS_TOKEN_SECONDS,
       user: toUserDto(user),
     };
+  });
+
+  /** Records agreement to the current privacy notice. */
+  app.post('/me/consent', guard, async (request): Promise<UserDto> => {
+    const parsed = consentBody.safeParse(request.body ?? {});
+    if (!parsed.success)
+      throw new ApiError(400, 'invalid_request', 'Phiên bản thông báo không đúng.');
+    await db
+      .update(users)
+      .set({ consentVersion: parsed.data.version })
+      .where(eq(users.id, claimsOf(request).sub));
+    return toUserDto(await load(claimsOf(request).sub));
   });
 
   /** A new recovery code for a guest; the previous one stops working. */

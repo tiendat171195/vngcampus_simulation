@@ -188,7 +188,8 @@ export class CampusRoom extends Room<{
         throw new ServerError(401, 'Phiên đăng nhập đã hết hạn.');
       }
     }
-    if (guest && this.config.devGuestAuth) return { userId: `guest:${guest.id}`, name: guest.name };
+    if (guest && this.config.devGuestAuth)
+      return { userId: `guest:${guest.id}`, name: guest.name, guest: true };
     throw new ServerError(401, 'Cần đăng nhập.');
   }
 
@@ -205,6 +206,7 @@ export class CampusRoom extends Room<{
     const player = new PlayerState();
     player.userId = identity.userId;
     player.name = identity.name;
+    player.tag = identity.guest ? 'Khách' : '';
     player.x = encodePosition(spawn.x);
     player.y = encodePosition(y);
     player.z = encodePosition(spawn.z);

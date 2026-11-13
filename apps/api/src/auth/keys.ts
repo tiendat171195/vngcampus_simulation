@@ -21,6 +21,8 @@ export interface AccessClaims {
   sub: string;
   name: string;
   role: string;
+  /** Guests are labelled as such to others (docs/09 §6, impersonation). */
+  guest: boolean;
   /** Session id, to tie a token to the session that issued it. */
   sid: string;
 }
@@ -30,6 +32,12 @@ export interface KeyRing {
   verify(token: string): Promise<AccessClaims>;
   /** Public keys for other services (the realtime server) to verify tokens with. */
   jwks: { keys: JWK[] };
+  /**
+   * Signs short-lived data the browser carries between two requests (the sign-in round trip)
+   * so it comes back unaltered. `purpose` keeps one kind from being replayed as another.
+   */
+  seal(payload: Record<string, unknown>, purpose: string, seconds: number): Promise<string>;
+  unseal(token: string, purpose: string): Promise<Record<string, unknown>>;
 }
 
 /** Builds the signing key from a PEM, or a fresh one for development. */
@@ -54,7 +62,7 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
   return {
     jwks: { keys: [jwk] },
     sign: (claims) =>
-      new SignJWT({ name: claims.name, role: claims.role, sid: claims.sid })
+      new SignJWT({ name: claims.name, role: claims.role, guest: claims.guest, sid: claims.sid })
         .setProtectedHeader({ alg: ALGORITHM, kid })
         .setSubject(claims.sub)
         .setIssuer(ISSUER)
@@ -68,8 +76,23 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
         sub: String(payload.sub),
         name: String(payload.name ?? ''),
         role: String(payload.role ?? 'player'),
+        guest: payload.guest === true,
         sid: String(payload.sid ?? ''),
       };
+    },
+    seal: (payload, purpose, seconds) =>
+      new SignJWT(payload)
+        .setProtectedHeader({ alg: ALGORITHM, kid })
+        .setIssuer(ISSUER)
+        .setAudience(`${AUDIENCE}:${purpose}`)
+        .setExpirationTime(`${seconds}s`)
+        .sign(privateKey),
+    async unseal(token, purpose) {
+      const { payload } = await jwtVerify(token, publicKey, {
+        issuer: ISSUER,
+        audience: `${AUDIENCE}:${purpose}`,
+      });
+      return payload as Record<string, unknown>;
     },
   };
 }

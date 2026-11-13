@@ -1,5 +1,5 @@
 import { devices, expect, type Page, test } from '@playwright/test';
-import { enterAs, ownPosition, remotes } from './helpers';
+import { enterAs, enterFromSplash, ownPosition, remotes } from './helpers';
 
 test('a desktop and a phone player see each other and each other moving', async ({ browser }) => {
   const desktop = await enterAs(browser, 'An', { viewport: { width: 1100, height: 640 } });
@@ -57,7 +57,7 @@ test('a returning visitor is the same account; another browser is someone else',
   expect(before).toBeTruthy();
 
   await visitor.page.reload();
-  await visitor.page.getByTestId('channel-badge').waitFor();
+  await enterFromSplash(visitor.page);
   expect(await userId(visitor.page)).toBe(before);
 
   const other = await enterAs(browser, 'Người Khác');
@@ -98,4 +98,53 @@ test('leaving the page frees the seat at once', async ({ browser }) => {
   await expect(stayer.page.getByTestId('channel-badge')).toContainText('1 người');
   await stayer.context.close();
   await leaver.context.close();
+});
+
+test('a guest who signs in with a company account keeps their place and is no longer a guest', async ({
+  browser,
+}) => {
+  const watcher = await enterAs(browser, 'Người Xem Tên');
+  const visitor = await enterAs(browser, 'Khách Mới');
+  const user = (page: Page) =>
+    page.evaluate(() =>
+      (
+        window as unknown as {
+          campus: { user(): { id: string; isGuest: boolean; displayName: string } | null };
+        }
+      ).campus.user(),
+    );
+  const before = await user(visitor.page);
+  expect(before?.isGuest).toBe(true);
+  await expect.poll(async () => (await remotes(watcher.page)).map((r) => r.tag)).toContain('Khách');
+
+  // Back to the splash screen, then the provider's sign-in form.
+  await visitor.page.goto('/?debug');
+  await visitor.page.getByRole('button', { name: 'Đăng nhập bằng Mock IdP' }).click();
+  await visitor.page.fill('#email', 'khach.moi@vng.com.vn');
+  await visitor.page.fill('#name', 'Lê Khách Mới');
+  await visitor.page.getByRole('button', { name: 'Đăng nhập' }).click();
+  await expect(visitor.page.getByTestId('splash-account')).toContainText('Lê Khách Mới');
+  await enterFromSplash(visitor.page);
+
+  const after = await user(visitor.page);
+  expect(after).toMatchObject({ id: before?.id, isGuest: false, displayName: 'Lê Khách Mới' });
+  await expect
+    .poll(async () => (await remotes(watcher.page)).find((r) => r.name === 'Lê Khách Mới')?.tag)
+    .toBe('');
+  await watcher.context.close();
+  await visitor.context.close();
+});
+
+test('only company addresses can sign in with the provider', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('/?debug');
+  await page.locator('.splash-consent-box').check();
+  await page.getByRole('button', { name: 'Đăng nhập bằng Mock IdP' }).click();
+  await page.fill('#email', 'ai.do@gmail.com');
+  await page.fill('#name', 'Ai Đó');
+  await page.getByRole('button', { name: 'Đăng nhập' }).click();
+  await expect(page.locator('.splash-problem')).toHaveText('Chỉ email công ty mới đăng nhập được.');
+  await expect(page.getByTestId('splash-account')).toHaveCount(0);
+  await context.close();
 });

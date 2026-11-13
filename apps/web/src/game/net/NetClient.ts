@@ -21,6 +21,8 @@ import { ClockSync, Interpolator } from './Interpolator';
 interface WirePlayer {
   userId: string;
   name: string;
+  /** "Khách" for guests, '' otherwise. */
+  tag: string;
   status: number;
   x: number;
   y: number;
@@ -45,6 +47,7 @@ export interface RemotePlayer {
   sessionId: string;
   userId: string;
   name: string;
+  tag: string;
   status: number;
   anim: number;
   emote: number;
@@ -286,6 +289,7 @@ export class NetClient {
           sessionId,
           userId: player.userId,
           name: player.name,
+          tag: player.tag,
           status: 0,
           anim: 0,
           emote: 0,
@@ -295,6 +299,7 @@ export class NetClient {
         this.remotes.set(sessionId, remote);
       }
       remote.name = player.name;
+      remote.tag = player.tag;
       remote.status = player.status;
       remote.anim = player.anim;
       remote.emote = player.emote;

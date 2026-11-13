@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  * End-to-end tests against the production builds (run `pnpm build` first): the API, the realtime
  * server and the web app served by `vite preview`, which proxies /api and /rt like in development.
  */
-const PORTS = { web: 4173, api: 3911, realtime: 3912 };
+const PORTS = { web: 4173, api: 3911, realtime: 3912, idp: 3913 };
 
 export default defineConfig({
   testDir: './specs',
@@ -26,6 +26,12 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
+      command: 'pnpm --filter @campus/mock-idp start',
+      env: { MOCK_IDP_PORT: String(PORTS.idp) },
+      url: `http://127.0.0.1:${PORTS.idp}/.well-known/openid-configuration`,
+      reuseExistingServer: false,
+    },
+    {
       command: 'node ../../apps/api/dist/index.mjs',
       env: {
         NODE_ENV: 'test',
@@ -36,6 +42,13 @@ export default defineConfig({
           process.env.E2E_DATABASE_URL ?? 'postgres://campus:campus@127.0.0.1:5432/campus_e2e',
         // Every test signs up new guests from the same address.
         RATE_LIMIT_SCALE: '10',
+        // Company sign-in through the mock provider started below.
+        PUBLIC_URL: `http://localhost:${PORTS.web}`,
+        OIDC_ISSUER: `http://127.0.0.1:${PORTS.idp}`,
+        OIDC_CLIENT_ID: 'campus-dev',
+        OIDC_CLIENT_SECRET: 'campus-dev-secret',
+        OIDC_LABEL: 'Mock IdP',
+        AUTH_EMAIL_DOMAINS: 'vng.com.vn',
       },
       url: `http://127.0.0.1:${PORTS.api}/api/health`,
       reuseExistingServer: false,

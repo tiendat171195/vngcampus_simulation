@@ -15,6 +15,23 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Đăng nhập công ty qua OIDC, liên kết khách, đồng ý quyền riêng tư
+
+- Gói việc: P3.2
+- Bối cảnh: D2 (Google Workspace hay Microsoft 365, domain nào) chưa chốt.
+- Quyết định:
+  - Làm hai loại nhà cung cấp cắm qua biến môi trường: `google` và `oidc` tổng quát (dùng cho Microsoft Entra ID hay bất kỳ IdP chuẩn nào). Thiếu cấu hình thì nút không hiện.
+  - **Không có `POST /auth/link/:provider` riêng:** liên kết xảy ra ngay ở callback khi trình duyệt đang là khách — vì OIDC là chuyển trang, cookie refresh của khách đi theo tới callback.
+  - Tài khoản thật lấy tên hiển thị từ IdP mỗi lần đăng nhập và không đổi tên được (chống mạo danh, docs/09 §6); khách có nhãn "Khách" trên đầu.
+  - Khi khách thành tài khoản thật, mã khôi phục của khách bị xoá.
+  - Đồng ý là một ô đánh dấu trên màn hình chào (không phải màn hình riêng sau khi đăng nhập), để chưa đồng ý thì chưa tạo tài khoản nào. Server cũng bắt buộc: tạo khách thiếu `consent` thì lỗi 400.
+  - Thêm `tools/mock-idp` để dev và e2e chạy được luồng OIDC thật mà không cần tài khoản Google.
+- Khác plan ở đâu: `07-backend-data.md` §4 (bảng API), §5.2, §5.3; D2 trong `11-risks-open-questions.md`.
+- Hệ quả:
+  - Danh sách domain đang ở biến môi trường; P5 chuyển vào bảng `settings` để admin sửa.
+  - Đổi email ở IdP sang một email đã thuộc tài khoản khác sẽ lỗi (ràng buộc unique) — hiếm, xử lý khi có admin.
+  - Nội dung `/privacy` là bản viết theo nguyên tắc ở docs/09 §8, chưa qua pháp chế.
+
 ## 2026-11-13 — Tài khoản khách thật, realtime nhận JWT
 
 - Gói việc: P3.1

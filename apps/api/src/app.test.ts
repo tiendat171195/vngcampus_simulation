@@ -3,6 +3,7 @@ import {
   type BootstrapResponse,
   type GuestSignUpResponse,
   healthResponseSchema,
+  PRIVACY_NOTICE_VERSION,
   type SessionResponse,
   type UserDto,
 } from '@campus/shared';
@@ -38,7 +39,7 @@ async function signUp(name = 'Minh Anh') {
   const response = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/guest',
-    payload: { name },
+    payload: { name, consent: PRIVACY_NOTICE_VERSION },
   });
   expect(response.statusCode).toBe(201);
   return {
@@ -84,11 +85,24 @@ describe('guest sign-up', () => {
       const response = await app.inject({
         method: 'POST',
         url: '/api/v1/auth/guest',
-        payload: { name },
+        payload: { name, consent: PRIVACY_NOTICE_VERSION },
       });
       expect(response.statusCode, name).toBe(400);
       expect(response.json().error.code).toBe('invalid_request');
     }
+  });
+
+  it('needs agreement to the current privacy notice', async () => {
+    for (const consent of [undefined, 0, PRIVACY_NOTICE_VERSION + 1]) {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/guest',
+        payload: { name: 'Chưa Đồng Ý', consent },
+      });
+      expect(response.statusCode, String(consent)).toBe(400);
+    }
+    const { body } = await signUp('Đã Đồng Ý');
+    expect(body.user.consentVersion).toBe(PRIVACY_NOTICE_VERSION);
   });
 
   it('issues access tokens that the published keys verify', async () => {
@@ -98,7 +112,12 @@ describe('guest sign-up', () => {
       issuer: 'campus-api',
       audience: 'campus',
     });
-    expect(payload).toMatchObject({ sub: body.user.id, name: 'Kiểm Tra', role: 'player' });
+    expect(payload).toMatchObject({
+      sub: body.user.id,
+      name: 'Kiểm Tra',
+      role: 'player',
+      guest: true,
+    });
   });
 
   it('limits how fast one address can create accounts', async () => {
@@ -108,7 +127,7 @@ describe('guest sign-up', () => {
       const response = await strict.app.inject({
         method: 'POST',
         url: '/api/v1/auth/guest',
-        payload: { name: `Người ${i}` },
+        payload: { name: `Người ${i}`, consent: PRIVACY_NOTICE_VERSION },
       });
       codes.push(response.statusCode);
     }
@@ -122,7 +141,7 @@ describe('guest sign-up', () => {
     const response = await closed.app.inject({
       method: 'POST',
       url: '/api/v1/auth/guest',
-      payload: { name: 'A' },
+      payload: { name: 'A', consent: PRIVACY_NOTICE_VERSION },
     });
     expect(response.statusCode).toBe(403);
     await closed.app.close();
