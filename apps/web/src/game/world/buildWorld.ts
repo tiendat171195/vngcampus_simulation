@@ -9,7 +9,14 @@ import {
   MeshLambertMaterial,
 } from 'three';
 import { MeshBVH } from 'three-mesh-bvh';
-import { type BuildContext, LEVEL_ORDER, type LevelBatches, type LevelId } from './context';
+import {
+  type BuildContext,
+  FLAT_LAYERS,
+  type FlatLayer,
+  LEVEL_ORDER,
+  type LevelBatches,
+  type LevelId,
+} from './context';
 import { buildGround } from './ground';
 import { MeshBatch } from './MeshBatch';
 import { PALETTE } from './palette';
@@ -38,10 +45,19 @@ export interface World {
 export function buildWorld(map: CampusMap): World {
   const index = createMapIndex(map);
   const batches = new Map<LevelId, LevelBatches>();
+  const flats = new Map<FlatLayer, MeshBatch>();
   const ctx: BuildContext = {
     map,
     index,
     collider: new MeshBatch(),
+    flat(layer) {
+      let batch = flats.get(layer);
+      if (!batch) {
+        batch = new MeshBatch();
+        flats.set(layer, batch);
+      }
+      return batch;
+    },
     level(id) {
       let level = batches.get(id);
       if (!level) {
@@ -80,6 +96,23 @@ export function buildWorld(map: CampusMap): World {
   for (const id of LEVEL_ORDER) {
     const group = new Group();
     group.name = `level:${id}`;
+    if (id === 'ground') {
+      // Later layers are pulled further towards the camera in depth, so they win where they overlap.
+      for (const [order, layer] of FLAT_LAYERS.entries()) {
+        const batch = flats.get(layer);
+        if (!batch || batch.isEmpty) continue;
+        const material = solidMaterial.clone();
+        material.polygonOffset = true;
+        material.polygonOffsetFactor = -order;
+        material.polygonOffsetUnits = -order * 2;
+        materials.push(material);
+        const mesh = new Mesh(batch.toGeometry(), material);
+        mesh.name = `flat:${layer}`;
+        group.add(mesh);
+        triangles += batch.triangleCount;
+        drawCalls++;
+      }
+    }
     const level = batches.get(id);
     if (level && !level.solid.isEmpty) {
       const mesh = new Mesh(level.solid.toGeometry(), solidMaterial);

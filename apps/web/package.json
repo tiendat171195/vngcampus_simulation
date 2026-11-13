@@ -18,7 +18,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "three": "^0.187.0",
-    "three-mesh-bvh": "^0.9.18"
+    "three-mesh-bvh": "^0.9.18",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@types/react": "catalog:",

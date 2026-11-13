@@ -24,49 +24,88 @@ body {
 .scene {
   position: fixed;
   inset: 0;
+  touch-action: none;
 }
 
 .panel {
   position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  max-width: 360px;
-  padding: 14px 16px;
+  left: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  width: min(340px, calc(100vw - 24px));
+  padding: 12px 14px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 12px;
-  background: rgb(16 20 24 / 78%);
+  background: rgb(16 20 24 / 82%);
   backdrop-filter: blur(8px);
+  font-size: 13px;
 }
 
 .panel h1 {
   margin: 0 0 2px;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .panel p {
-  margin: 0 0 10px;
-  font-size: 13px;
+  margin: 0 0 8px;
   color: #9aa7b4;
 }
 
-.status {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 10px;
-  margin: 0;
-  font-size: 13px;
+.panel a {
+  color: #8ec5ff;
 }
 
-.status dt {
+.panel .group {
+  margin-bottom: 8px;
+}
+
+.panel .group-label {
+  display: block;
+  margin-bottom: 4px;
   color: #9aa7b4;
+  font-size: 12px;
 }
 
-.status dd {
-  margin: 0;
+.panel .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.panel button {
+  padding: 5px 9px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 6%);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.panel button:hover {
+  background: rgb(255 255 255 / 14%);
+}
+
+.panel button[aria-pressed="true"] {
+  background: #e9edf1;
+  border-color: #e9edf1;
+  color: #101418;
+}
+
+.panel .check {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-bottom: 8px;
+}
+
+.panel .stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+  color: #c9d2db;
 }
 
 .dot {

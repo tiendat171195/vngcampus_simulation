@@ -58,7 +58,7 @@ Các "system" giao tiếp qua event bus có kiểu (`player.areaChanged`, `net.d
 
 ## 4. Render và mức chất lượng
 
-`WebGLRenderer` (WebGL2), màu sRGB, tone mapping AgX/ACES. Greybox dùng 1 đèn hướng + 1 hemisphere; sau art pass chuyển sang lightmap bake.
+`WebGLRenderer` (WebGL2), màu sRGB. Greybox dùng 1 đèn hướng + 1 hemisphere + 1 ambient, flat shading, **không tone mapping** (màu ra đúng như bảng màu); sau art pass chuyển sang lightmap bake và đánh giá lại tone mapping.
 
 | Thiết lập | Low | Medium | High |
 |---|---|---|---|

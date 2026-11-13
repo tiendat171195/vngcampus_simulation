@@ -11,6 +11,7 @@ import {
   type CampusMap,
   type Connector,
   campusMapSchema,
+  closestPointOnSegment,
   connectorFootprint,
   createMapIndex,
   distance,
@@ -315,7 +316,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
         [56.7, 14],
       ],
       'outdoor',
-      ['landmark'],
+      [],
     ),
     area('pool', 'Hồ bơi', 'F1', poolOutline, 'water', ['landmark']),
     area(
@@ -494,6 +495,21 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     if (!isWalkable(index, position, floor)) {
       throw new Error(`poi.${id} at ${position.join(', ')} on ${floor} is not on walkable ground`);
     }
+    // Things that stay put (furniture, kiosks, characters) must not stand in a roadway.
+    if (kind === 'seat' || kind === 'kiosk_spot' || kind === 'npc_spot') {
+      const road = paths.find(
+        (p) =>
+          p.kind === 'road' &&
+          p.floor === floor &&
+          p.points.some(
+            (point, i) =>
+              i > 0 &&
+              closestPointOnSegment(position, p.points[i - 1] as Vec2, point).distance <
+                p.width / 2 + 0.4,
+          ),
+      );
+      if (road) throw new Error(`poi.${id} at ${position.join(', ')} stands on ${road.id}`);
+    }
     const poi: Poi = { id: `poi.${id}`, kind, floor, position: roundVec(position), ...extra };
     if (poi.yawDeg !== undefined) poi.yawDeg = Math.round(poi.yawDeg);
     pois.push(poi);
@@ -516,7 +532,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   checkpoint('lobby', 'Sảnh lễ tân', 'F1', [-30, 14]);
   checkpoint('canteen', 'Lối vào canteen', 'F1', [10, -16]);
   checkpoint('koi', 'Bên hồ Koi', 'F1', [-2, 24.5]);
-  checkpoint('pool', 'Hồ bơi', 'F1', [60, 5]);
+  checkpoint('pool', 'Hồ bơi', 'F1', [56.5, 7]);
   checkpoint('forecourt', 'Sân đón khách', 'F1', [-60, 30], 4);
   checkpoint('parking', 'Bãi xe', 'F1', [-146, 0], 4);
   checkpoint('riverside', 'Giữa công viên ven sông', 'F1', promenadeAt(-40), 4);
@@ -552,11 +568,23 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     }
   }
   for (let i = 0; i < 8; i++) seat(`atrium_${pad(i + 1)}`, 'F1', [-16.5, -6 + i * 2], 90, 'step');
-  for (let i = 0; i < 6; i++) seat(`pool_${pad(i + 1)}`, 'F1', [61, -40 + i * 6], -90, 'lounger');
+  // Two rows of loungers on the deck south of the pool, facing the water.
+  for (const [i, at] of (
+    [
+      [51.8, -1],
+      [54.3, -1],
+      [56.8, -1],
+      [53.2, 2.5],
+      [55.7, 2.5],
+      [58.2, 2.5],
+    ] as Vec2[]
+  ).entries()) {
+    seat(`pool_${pad(i + 1)}`, 'F1', at, 180, 'lounger');
+  }
   for (let i = 0; i < 4; i++)
     seat(`cafe_terrace_${pad(i + 1)}`, 'F1', [46 + i * 4, 56.5], 180, 'chair');
   for (let i = 0; i < 4; i++)
-    seat(`cafe_terrace_${pad(i + 5)}`, 'F1', [44, 40 + i * 4], 90, 'chair');
+    seat(`cafe_terrace_${pad(i + 5)}`, 'F1', [44, 44 + i * 3.5], 90, 'chair');
   for (let i = 0; i < 4; i++) seat(`lobby_${pad(i + 1)}`, 'F1', [-24, 12 + i * 3], -90, 'sofa');
 
   const westDoor = structures[0]?.openings[1]?.at as Vec2;
@@ -572,7 +600,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     [66, 54],
     [-165, 40],
     [-160, bankZ(-160) - 6],
-    [62, -42],
+    [50, -42.6],
     [-18, -52],
     [-100, -43],
     [-60, 38],
@@ -590,7 +618,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   kiosk('lobby', 'Kiosk sảnh lễ tân', 'F1', [-27, 24], westDoor);
   kiosk('atrium', 'Kiosk Atrium', 'F1', [15, -9], [0, 2]);
   kiosk('canteen', 'Kiosk canteen', 'F1', [8, -20], [20, -20]);
-  kiosk('pool', 'Kiosk hồ bơi', 'F1', [60, 11], [50, -10]);
+  kiosk('pool', 'Kiosk hồ bơi', 'F1', [58.2, 11.5], [50, -10]);
   kiosk('riverside', 'Kiosk ven sông', 'F1', [-90, bankZ(-90) - 11], [-90, 40]);
   kiosk('parking', 'Kiosk bãi xe', 'F1', [-146, -30], [-146, 0]);
   kiosk('block2', 'Kiosk block 2', 'F1', [-86, 30], [-70, 40]);
@@ -607,7 +635,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   photo('gate', 'Trước cổng chính', [0, -49], [0, -34]);
   photo('atrium', 'Giữa Atrium', [0, 10], [0, -12]);
   photo('riverside', 'Bờ sông', promenadeAt(21), [21, 110]);
-  photo('pool', 'Bên hồ bơi', [60, -2], [45, -20]);
+  photo('pool', 'Bên hồ bơi', [57.6, -3.2], [47, -22]);
 
   // --- Scatter sets for collect-style objectives -------------------------------------------------
 

@@ -22,6 +22,7 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 - `pnpm check` runs lint → typecheck → test → build → smoke, the same chain as CI. Run it before every commit; `pnpm format` fixes formatting.
 - One package: `pnpm --filter @campus/realtime test`.
 - UI changes are verified by running `pnpm dev` and driving the page in a browser, not by tests alone.
+- Cloud sessions render WebGL in software (about 10 FPS at 1400×800), so frame rates measured there mean nothing. Check draw calls and triangle counts instead, and say that real-device FPS is unmeasured.
 
 ## How the workspace is built
 
@@ -32,6 +33,7 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 - Versions used by more than one package live in the `catalog:` of `pnpm-workspace.yaml`.
 - The browser only calls its own origin: `/api` (REST) and `/rt` (realtime). Vite proxies both in development.
 - Biome does not format Markdown; keep doc tables compact.
+- The 3D world is built from map data by `apps/web/src/game/world/buildWorld.ts` (pure three.js, no DOM). Its tests cast rays through the collision mesh; when geometry or the map changes, extend those rather than eyeballing screenshots alone.
 - `packages/map-data/src/campus.json` is generated: edit `tools/map-tools/src/campus-v0.ts` and run `pnpm map:build`. A test fails if the committed file is stale. Library code comes from `@campus/map-data`, the campus itself from `@campus/map-data/campus`. `http://localhost:5173/debug/map` shows each floor with coordinates under the cursor.
 
 ## Rules that are easy to get wrong

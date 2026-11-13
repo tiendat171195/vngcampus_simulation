@@ -136,13 +136,10 @@ function buildSlabs(ctx: BuildContext, structure: Structure): void {
   const storeys = storeysOf(ctx, structure);
   const ground = storeys[0] as Storey;
 
-  // Interior finish of the ground floor, then any named rooms tinted on top of it.
-  const lowest = ctx.level(ground.floor).solid;
-  lowest.polygon(
-    structure.footprint,
-    ground.y0 + LAYER.floor,
-    structure.style === 'kiosk' ? PALETTE.kiosk : PALETTE.floor,
-  );
+  // Interior finish of the ground floor; named rooms are tinted on top of it by buildRooms.
+  const finish = structure.style === 'kiosk' ? PALETTE.kiosk : PALETTE.floor;
+  if (ground.y0 === 0) ctx.flat('floor').polygon(structure.footprint, LAYER.floor, finish);
+  else ctx.level(ground.floor).solid.polygon(structure.footprint, ground.y0 + 0.01, finish);
 
   for (const storey of storeys.slice(1)) {
     const { voids, stairwells } = slabHoles(ctx, structure, storey.floor);
@@ -186,14 +183,10 @@ function buildSlabs(ctx: BuildContext, structure: Structure): void {
 function buildRooms(ctx: BuildContext): void {
   for (const area of ctx.map.areas) {
     if (area.kind !== 'indoor' || area.tags.includes('base')) continue;
-    const y = ctx.floorY(area.floor) + LAYER.room;
-    ctx
-      .level(area.floor)
-      .solid.polygon(
-        area.polygon,
-        y,
-        area.tags.includes('landmark') ? PALETTE.landmark : PALETTE.room,
-      );
+    const colour = area.tags.includes('landmark') ? PALETTE.landmark : PALETTE.room;
+    const y = ctx.floorY(area.floor);
+    if (y === 0) ctx.flat('room').polygon(area.polygon, LAYER.room, colour);
+    else ctx.level(area.floor).solid.polygon(area.polygon, y + 0.02, colour);
   }
 }
 

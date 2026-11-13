@@ -85,24 +85,18 @@ export function buildGround(ctx: BuildContext): void {
   const outdoors = map.areas.filter((area) => area.floor === groundFloor);
 
   for (const area of outdoors.filter((a) => a.kind === 'outdoor')) {
-    if (area.tags.includes('base')) ground.polygon(area.polygon, LAYER.site, PALETTE.grass);
-    else
-      ground.polygon(
-        area.polygon,
-        LAYER.tint,
-        area.tags.includes('green') ? PALETTE.park : PALETTE.paved,
-      );
+    if (area.tags.includes('base'))
+      ctx.flat('site').polygon(area.polygon, LAYER.site, PALETTE.grass);
+    else {
+      const colour = area.tags.includes('green') ? PALETTE.park : PALETTE.paved;
+      ctx.flat('tint').polygon(area.polygon, LAYER.tint, colour);
+    }
   }
 
   for (const path of map.paths.filter((p) => p.floor === groundFloor)) {
+    const layer = path.kind === 'road' ? 'road' : 'walkway';
     const colour = path.kind === 'road' ? PALETTE.road : PALETTE.walkway;
-    ground.ribbon(
-      path.points,
-      path.width,
-      path.kind === 'road' ? LAYER.path : LAYER.path + 0.004,
-      colour,
-      path.closed,
-    );
+    ctx.flat(layer).ribbon(path.points, path.width, LAYER[layer], colour, path.closed);
   }
 
   // Water. The river lies outside the fence; pools and ponds get a curb and an invisible wall.
@@ -117,9 +111,8 @@ export function buildGround(ctx: BuildContext): void {
       ground.polygon(area.polygon, LAYER.river, PALETTE.river);
       continue;
     }
-    const indoor = isInsideBuilding(map, area);
-    const batch = indoor ? ctx.level(groundFloor).solid : ground;
-    batch.polygon(area.polygon, LAYER.water, PALETTE.water);
+    ctx.flat('water').polygon(area.polygon, LAYER.water, PALETTE.water);
+    const batch = isInsideBuilding(map, area) ? ctx.level(groundFloor).solid : ground;
     for (let i = 0; i < area.polygon.length; i++) {
       const a = area.polygon[i] as ReadonlyVec2;
       const b = area.polygon[(i + 1) % area.polygon.length] as ReadonlyVec2;
@@ -153,7 +146,7 @@ export function buildGround(ctx: BuildContext): void {
           along(a, b, from),
           along(a, b, to),
           FENCE_THICKNESS,
-          0,
+          LAYER.outside,
           FENCE_HEIGHT,
           PALETTE.fence,
         );

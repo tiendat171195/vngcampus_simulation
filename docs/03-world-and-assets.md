@@ -183,6 +183,23 @@ Nguyên tắc: **luôn có một campus chơi được**. Art thay dần greybox
 | D. Art theo khu | Dựng trong Blender bằng bộ module (tường, mặt kính, cột, cầu thang, bàn ghế, kệ cây) + các điểm nhấn (giếng trời Atrium, hồ bơi, hồ Koi, quầy lễ tân). Bake ánh sáng. Xuất GLB | Từng zone GLB thay cho greybox tương ứng |
 | E. Hoàn thiện | Biển hiệu, decal, nước, cá Koi, âm thanh môi trường, NPC | Campus "có hồn" |
 
+### 5.0 Bộ dựng greybox (giai đoạn B, đã có)
+
+Nằm ở `apps/web/src/game/world`. `buildWorld(map)` là three.js thuần, không đụng DOM, nên chạy được cả trong test.
+
+| Thành phần | Cách làm |
+|---|---|
+| Gộp lưới | `MeshBatch` gộp mọi hình đơn giản thành một lưới tô màu theo đỉnh cho mỗi **tầng hiển thị**: `ground` (ngoài trời), `F1`, `F2`, `F3`, `ROOF`. Mỗi tầng có một lưới đặc và một lưới kính |
+| Lớp phẳng trên mặt đất | Cỏ, lát nền, đường, lối đi, sàn trong nhà, phòng, mặt nước gần như đồng phẳng nên mỗi lớp là một lưới riêng vẽ với polygon offset. Chỉ chênh cao độ thì nhìn từ xa sẽ nhấp nháy |
+| Nhà | Mỗi tầng: tường có chân tường đặc, băng kính, dầm trên; cửa khoét theo `openings`. Sàn tầng trên khoét `voids` và giếng thang. Mái có giếng trời lợp kính. Tường chung giữa hai block chỉ dựng một lần |
+| Cầu thang | Vẽ thành bậc, nhưng va chạm là một mặt dốc nhẵn. Có lan can hai bên và quanh mọi lỗ sàn, chừa trống đúng chỗ thang đáp |
+| Đạo cụ | `InstancedMesh` cho từng model (cây, đèn, xe, chậu cây, cụm bàn, kệ cây) và cho đồ nội thất của từng ghế |
+| Va chạm | Một lưới riêng, không vẽ: mặt đất, tường, sàn, dốc, lan can, đạo cụ đặc, cộng rào vô hình kín quanh khuôn viên và quanh mặt nước. Có BVH (three-mesh-bvh) |
+| Bảng tên khu | Sprite vẽ bằng canvas 2D (đúng dấu tiếng Việt), chỉ cho khu gắn nhãn `landmark` |
+| Cắt lớp | `world.showUpTo(tầng)` ẩn các tầng phía trên để nhìn vào trong nhà |
+
+Test (`buildWorld.test.ts`) bắn tia vào lưới va chạm: sàn đúng cao độ ở từng tầng, Atrium thông từ đất tới giếng trời, thang dốc đều, đi lọt qua cửa nhưng không lọt qua tường, và **dưới mọi POI đều có sàn**.
+
 ### 5.1 Quy ước Blender
 
 - 1 đơn vị = 1 m; gốc file trùng gốc campus; mỗi zone một file `.blend`.

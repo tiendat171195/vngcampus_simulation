@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Greybox không dùng tone mapping; lớp phẳng vẽ bằng polygon offset
+
+- Gói việc: P1.2
+- Bối cảnh: với tone mapping ACES, màu của bản dựng khối bị xỉn và trần nhà quá tối. Ngoài ra các lớp phẳng trên mặt đất (cỏ, đường, sàn, nước) chỉ cách nhau vài mm nên nhấp nháy khi nhìn từ xa.
+- Quyết định: tắt tone mapping cho greybox, thêm một đèn ambient. Mỗi lớp phẳng là một lưới riêng có polygon offset tăng dần.
+- Khác plan ở đâu: `04-client.md` §4 ghi "tone mapping AgX/ACES" — đã sửa; cách dựng mô tả ở `03-world-and-assets.md` §5.0.
+- Hệ quả: thêm khoảng 7 draw call cho các lớp phẳng (tổng vẫn dưới 50). Đánh giá lại tone mapping khi có lightmap ở P6.
+
 ## 2026-11-13 — Bản đồ v0: định dạng chỉnh lại và bố cục giả định
 
 - Gói việc: P1.1

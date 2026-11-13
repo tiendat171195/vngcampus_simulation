@@ -16,26 +16,33 @@ export interface LevelBatches {
   glass: MeshBatch;
 }
 
+/**
+ * Flat surfaces painted on the ground, lowest first. They are almost coplanar, so each one is
+ * its own mesh drawn with a polygon offset; a height difference alone flickers from far away.
+ */
+export const FLAT_LAYERS = ['site', 'tint', 'road', 'walkway', 'floor', 'room', 'water'] as const;
+export type FlatLayer = (typeof FLAT_LAYERS)[number];
+
+/** Nominal heights. The millimetre steps only keep the order well defined. */
+export const LAYER: Record<FlatLayer | 'outside' | 'river', number> = {
+  outside: -0.3,
+  river: -0.12,
+  site: 0,
+  tint: 0.002,
+  road: 0.004,
+  walkway: 0.006,
+  floor: 0.008,
+  room: 0.01,
+  water: 0.012,
+};
+
 export interface BuildContext {
   map: CampusMap;
   index: MapIndex;
   level(id: LevelId): LevelBatches;
+  /** Ground-level decals: grass, paving, roads, interior floor finish, water surfaces. */
+  flat(layer: FlatLayer): MeshBatch;
   /** Everything a character can bump into or stand on. Never drawn. */
   collider: MeshBatch;
   floorY(id: FloorId): number;
 }
-
-/**
- * Heights of the flat layers painted on the ground. They are a centimetre apart: enough to
- * avoid z-fighting at campus distances, too little to notice underfoot.
- */
-export const LAYER = {
-  outside: -0.02,
-  river: -0.015,
-  site: 0,
-  tint: 0.01,
-  path: 0.02,
-  floor: 0.03,
-  room: 0.04,
-  water: 0.05,
-} as const;
