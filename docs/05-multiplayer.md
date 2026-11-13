@@ -5,6 +5,7 @@
 - **Một kênh = một phòng `CampusRoom`** chứa toàn bộ campus. Mọi người trong cùng kênh thấy nhau, không có màn hình chờ khi đi giữa các khu.
 - **Sức chứa mỗi kênh:** ngưỡng mềm 80, ngưỡng cứng 100.
   - Tự xếp kênh: đưa người mới vào kênh **đông nhất còn dưới ngưỡng mềm** để thế giới luôn có cảm giác đông.
+    Cách làm (P2.1): phòng ghi metadata `{ channel, open }`, `open = số người < ngưỡng mềm`. Client tự xếp kênh gọi `joinOrCreate('campus', { open: true })`; phòng được đăng ký với `filterBy(['open']).sortBy({ clients: -1 })` nên Colyseus chọn phòng mở đông nhất, hết phòng mở thì tạo phòng mới. `maxClients` = ngưỡng cứng. Vào kênh của đồng nghiệp dùng `joinById` (được tới ngưỡng cứng). Danh sách kênh: `GET /rt/channels`.
   - Mọi kênh đều chạm ngưỡng mềm → mở kênh mới ("Campus 2", "Campus 3"…).
   - Chủ động chuyển sang kênh của đồng nghiệp: được phép cho tới ngưỡng cứng.
   - Kênh trống tự đóng.
@@ -58,8 +59,8 @@ const EntityState = schema({ // NPC, kiosk, vật phẩm dùng chung, bảng ti�
 }, 'EntityState');
 
 const RoomState = schema({
-  channel: t.string(),
-  tick: t.uint32(),                 // mốc thời gian cho nội suy
+  channel: t.uint16(),              // số kênh hiển thị: "Campus 2"
+  time: t.uint32(),                 // ms từ lúc tạo phòng, đóng dấu mỗi patch; client nội suy theo nó
   players: t.map(PlayerState),
   entities: t.map(EntityState),
   seats: t.map('string'),           // seatId → sessionId
@@ -119,7 +120,7 @@ Tên message và schema payload định nghĩa một lần trong `packages/share
 | Giữ chỗ khi rớt mạng | 30 giây |
 | Treo máy | 5 phút không thao tác → AFK; 30 phút → mời ra để nhường chỗ |
 
-**Nội suy:** mỗi người chơi khác có một bộ đệm vòng các mốc `(tick server, vị trí, góc)`. Client vẽ họ tại thời điểm `giờ server ước lượng − 200 ms`, nội suy giữa hai mốc kề nhau. Người khác sẽ trễ khoảng 0,2–0,3 giây so với thực tế — không nhận ra được trong bối cảnh đi dạo.
+**Nội suy:** mỗi người chơi khác có một bộ đệm vòng các mốc `(state.time, vị trí, góc)`. Client vẽ họ tại thời điểm `giờ server ước lượng − 200 ms`, nội suy giữa hai mốc kề nhau. Người khác sẽ trễ khoảng 0,2–0,3 giây so với thực tế — không nhận ra được trong bối cảnh đi dạo.
 
 **Server kiểm tra mỗi gói `move`:**
 

@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@campus/map-data": "workspace:*",
     "@campus/shared": "workspace:*",
     "@colyseus/core": "^0.18.28",
     "@colyseus/schema": "^5.0.48",

@@ -15,6 +15,19 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Phòng realtime: danh tính dev, xếp kênh bằng metadata, đồng hồ phòng
+
+- Gói việc: P2.1
+- Quyết định:
+  - **Danh tính tạm cho dev:** client gửi `guest: { id, name }` khi vào phòng (id ngẫu nhiên do trình duyệt giữ). Chỉ được chấp nhận khi `DEV_GUEST_AUTH=on`; mặc định bật ở mọi môi trường trừ production. P3.1 thay bằng JWT.
+  - **Xếp kênh** dựa trên tính năng sẵn có của Colyseus (lọc theo metadata `open`, sắp theo số người) thay vì một endpoint xếp kênh riêng; xem `05-multiplayer.md` §1.
+  - **Đồng hồ phòng:** state có `time` (ms từ lúc tạo phòng) thay cho bộ đếm `tick`; `pong` trả cùng đồng hồ đó để client tính lệch giờ.
+  - **Một người một phiên** dùng pub/sub của Colyseus presence: mỗi lần vào phòng phát `{ userId, sessionId }`, mọi phòng đóng phiên cũ của người đó bằng mã 4101. Chạy được nhiều tiến trình khi bật Redis presence.
+  - Ngắt kết nối do server chủ động (mã 41xx) không giữ chỗ; mọi trường hợp rớt mạng khác giữ chỗ 30 giây, trạng thái người chơi chuyển "đang kết nối lại".
+  - Phòng `hello` của P0.1 đã bỏ; trang kiểm tra trạng thái realtime qua `GET /rt/channels`.
+- Khác plan ở đâu: đã sửa `05-multiplayer.md` §1 và §3.
+- Hệ quả: chừng nào chưa có P3.1, ai biết địa chỉ server dev cũng vào được với tên tự đặt — không mở server dev ra internet.
+
 ## 2026-11-13 — Vỏ ứng dụng: tầm nhìn dài hơn, minimap xoay theo hướng nhìn, cửa chính rộng hơn
 
 - Gói việc: P1.4

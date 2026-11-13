@@ -88,7 +88,7 @@ flowchart LR
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P2.1 | Phòng realtime | `CampusRoom` + schema. Token khách tạm cho dev. Vào/ra. Xử lý `move` có kiểm tra tốc độ và biên. Kênh với ngưỡng mềm/cứng + tự xếp kênh. Kết nối lại, một người một phiên. Test phòng bằng `@colyseus/testing` | M | Chưa làm |
+| P2.1 | Phòng realtime | `CampusRoom` + schema. Token khách tạm cho dev. Vào/ra. Xử lý `move` có kiểm tra tốc độ và biên. Kênh với ngưỡng mềm/cứng + tự xếp kênh. Kết nối lại, một người một phiên. Test phòng bằng `@colyseus/testing` | M | Xong |
 | P2.2 | Lớp mạng phía client | `NetClient`, đồng bộ đồng hồ, avatar người khác có nội suy, pool đối tượng, trần LOD, thẻ tên. Lớp phủ kết nối lại. Test e2e hai trình duyệt | M | Chưa làm |
 | P2.3 | Giao lưu | Emote + bánh xe emote, ghế, chat gần + bong bóng + rate limit + lọc từ, presence trong Redis, danh sách online, chọn kênh, trạng thái AFK | M | Chưa làm |
 | P2.4 | Loadtest | Bot giả lập, endpoint metric, chạy 100 bot/kênh và 500 bot tổng, ghi kết quả vào tài liệu, tinh chỉnh | S | Chưa làm |
