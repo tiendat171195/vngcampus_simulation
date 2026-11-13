@@ -255,8 +255,8 @@ assets-src/*.blend
 | Áo, quần/váy, giày | Kiểu + màu từ bảng màu |
 | Phụ kiện | Kính, mũ, **dây đeo + thẻ nhân viên** (dấu ấn riêng của game) |
 
-- Khi một avatar xuất hiện, các phần được **gộp thành một skinned mesh duy nhất**, tô bằng màu đỉnh → 1 draw call mỗi người.
-- Cấu hình avatar là một chuỗi ngắn (≤ 32 byte), ví dụ `v1.b0.s2.h3-5.t1-12.p0-4.f0-1.a2`, lưu DB và gửi qua mạng.
+- Khi một avatar xuất hiện, các phần được **gộp thành một skinned mesh duy nhất**, tô bằng màu đỉnh → 1 draw call mỗi người. Những người trông giống hệt nhau dùng chung một geometry.
+- Cấu hình avatar là một chuỗi ngắn (≤ 32 byte), mỗi lựa chọn một chữ số hệ 36, ví dụ `v1.b1.s2.h3-5.t1-c.p0-4.f0-1.a2` (dáng, da, tóc-màu, áo-màu, quần/váy-màu, giày-màu, phụ kiện); lưu ở `users.avatar`, đi trong access token và state của phòng. Mã hoá/giải mã ở `packages/shared/src/avatar.ts`. Người chưa chọn (chuỗi rỗng) có avatar sinh ổn định từ user id — ai nhìn cũng thấy giống nhau.
 - **Animation dùng chung:** đứng, đi, chạy, nhảy, ngồi (xuống/giữ/đứng dậy), vẫy tay, vỗ tay, cúi chào, 2 điệu nhảy, reo mừng. V1 thêm bơi, bê đồ, và pha trộn nửa thân trên (vẫy tay khi đang đi).
 
 **Mức chi tiết theo khoảng cách và trần số lượng:**
@@ -269,9 +269,9 @@ assets-src/*.blend
 
 **Thẻ tên:** vẽ bằng Canvas 2D (hiển thị tiếng Việt có dấu chuẩn theo font trình duyệt) vào một atlas texture, render dạng sprite; mờ dần theo khoảng cách.
 
-**Hiện tại (P1.3):** một nhân vật khối dựng bằng code (`apps/web/src/game/avatars/Avatar.ts`) — 12 xương, skin cứng, animation thủ tục (đứng, đi/chạy liền mạch theo tốc độ, nhảy, rơi, ngồi, nhún khi tiếp đất), có dây đeo và thẻ nhân viên, màu chỉnh được theo 5 vùng (da, tóc, áo, quần, giày). Mọi avatar dùng chung buffer hình học, mỗi người chỉ giữ mảng màu riêng; 1 draw call/người. Đây là bản tạm để có thứ đi lại được; bản thật làm ở P3.3.
+**Hiện tại (P3.3):** nhân vật khối low-poly dựng bằng code (`apps/web/src/game/avatars/Avatar.ts`), lắp từ các phần theo cấu hình: 3 dáng người, 8 tông da, 9 kiểu tóc × 10 màu, 4 kiểu áo (áo thun, sơ mi, hoodie, áo khoác), quần dài/short/váy, 3 kiểu giày, 16 màu vải, 5 phụ kiện (kính, kính râm, mũ lưỡi trai, mũ len, tai nghe); luôn có dây đeo + thẻ nhân viên. 12 xương, skin cứng, animation thủ tục (đứng, đi/chạy liền mạch theo tốc độ, nhảy, rơi, ngồi, nhún khi tiếp đất, 6 emote). Tổ hợp nặng nhất là 504 tam giác (test kiểm tra ngân sách cho từng lựa chọn), nên LOD1 dùng chính mesh đó, chỉ hạ animation xuống 15 Hz; LOD2 là hình nộm instanced, màu áo theo cấu hình. Không cần tải asset nào. Trình chỉnh avatar (nút "Avatar") có xem trước 3D xoay tròn, nút ngẫu nhiên; lưu là mọi người trong kênh thấy ngay.
 
-**Nguồn khởi đầu:** bộ CC0 của Quaternius — *Universal Base Characters* (6 nhân vật đã rig, có glTF) và *Universal Animation Library* (hơn 120 animation, cùng bộ xương) — để có nhân vật chạy được ngay, sau đó chỉnh phong cách. Không dùng dịch vụ avatar bên thứ ba (Ready Player Me đã đóng dịch vụ công khai từ 31/01/2026).
+**Bộ CC0 của Quaternius** (*Universal Base Characters*, *Universal Animation Library*) vẫn là lựa chọn khi làm phần mỹ thuật ở P6: thay hàm dựng hình bằng các phần glTF cùng bộ xương, giữ nguyên chuỗi cấu hình và cách đồng bộ. Không dùng dịch vụ avatar bên thứ ba (Ready Player Me đã đóng dịch vụ công khai từ 31/01/2026).
 
 ## 8. Tư liệu cần bạn cung cấp
 

@@ -48,6 +48,12 @@ interface SessionState {
   addChat(line: Omit<ChatLine, 'id'>): void;
   /** Name the player typed on the splash screen. */
   displayName: string;
+  /** Own avatar string (a seeded one until the person makes their own); '' before sign-in. */
+  avatar: string;
+  setAvatar(avatar: string): void;
+  /** A full-screen dialog over the game; the game ignores keys and touches meanwhile. */
+  modal: 'avatar' | null;
+  setModal(modal: 'avatar' | null): void;
   net: NetSummary;
   setPhase(phase: Phase): void;
   setDisplayName(name: string): void;
@@ -73,6 +79,10 @@ export const useSession = create<SessionState>((set, get) => ({
   setPrompt: (prompt) => set({ prompt }),
   showNotice: (text) => set((state) => ({ notice: { text, id: (state.notice?.id ?? 0) + 1 } })),
   displayName: '',
+  avatar: '',
+  setAvatar: (avatar) => set({ avatar }),
+  modal: null,
+  setModal: (modal) => set({ modal }),
   net: { status: 'idle', channel: null, players: 0 },
   setPhase: (phase) => set({ phase }),
   setDisplayName: (displayName) => set({ displayName }),

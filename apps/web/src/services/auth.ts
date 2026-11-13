@@ -179,6 +179,20 @@ export function providerUrl(provider: SignInProvider, consent: number | null): s
   return `${BASE}/auth/oidc/${provider}/start?${query}`;
 }
 
+/**
+ * Saves profile changes. Returns the updated account, whose new access token already carries
+ * them, or an error message.
+ */
+export async function saveProfile(changes: {
+  displayName?: string;
+  avatar?: string;
+}): Promise<UserDto | string> {
+  if (!(await accessToken())) return 'Phiên đăng nhập đã hết, hãy tải lại trang.';
+  const reply = await call<SessionResponse>('PATCH', '/me', changes);
+  if (reply?.status === 200) return hold(reply.body as SessionResponse).user;
+  return errorMessage(reply);
+}
+
 /** Ends the session on this device. */
 export async function signOut(): Promise<void> {
   await call('POST', '/auth/logout');

@@ -1,6 +1,6 @@
 import { areasAt, distance, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
-import { ANIM, type AnimId, EMOTE_BY_ID, EMOTES, MOVEMENT } from '@campus/shared';
+import { ANIM, type AnimId, EMOTE_BY_ID, EMOTES, MOVEMENT, parseAvatar } from '@campus/shared';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import { DoubleSide, type PerspectiveCamera, Ray, Vector3 } from 'three';
@@ -56,6 +56,12 @@ export function Player() {
   });
 
   useEffect(() => () => avatar.dispose(), [avatar]);
+  // Dressed as the session says; the editor changes it.
+  const look = useSession((state) => state.avatar);
+  useEffect(() => {
+    const config = parseAvatar(look);
+    if (config) avatar.setAvatar(config);
+  }, [avatar, look]);
   useEffect(() => () => bubble.clear(), [bubble]);
 
   useEffect(() => {

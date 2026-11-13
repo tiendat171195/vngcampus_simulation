@@ -199,6 +199,12 @@ export class NetClient {
     if (this.status === 'online') this.room?.send(MSG.emote, { id });
   }
 
+  /** Tells the room about a new name or avatar, proven by a fresh access token. */
+  async sendProfile(): Promise<void> {
+    const token = await this.getToken();
+    if (token && this.status === 'online') this.room?.send(MSG.profile, { token });
+  }
+
   sendChat(text: string): void {
     if (this.status === 'online') this.room?.send(MSG.chat, { text });
   }

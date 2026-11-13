@@ -163,7 +163,9 @@ export function RemotePlayers() {
       const remote = net.remotes.get(id);
       if (!remote) return;
       const { sample } = view;
-      const detailed = rank < DETAIL_CAP[level];
+      // LOD0/LOD1 (full or 15 Hz animation) up close; LOD2, a flat stand-in, beyond the
+      // reduced-animation distance or past the cap (docs/03 §7).
+      const detailed = rank < DETAIL_CAP[level] && view.distance <= preset.reducedAnimationDistance;
 
       if (detailed) {
         if (!view.avatar) {
@@ -180,12 +182,7 @@ export function RemotePlayers() {
         avatar.object.visible = true;
         avatar.object.position.set(sample.x, sample.y, sample.z);
         avatar.object.rotation.y = sample.yaw;
-        const interval =
-          view.distance < preset.fullAnimationDistance
-            ? 0
-            : view.distance < preset.reducedAnimationDistance
-              ? 1 / 15
-              : 1 / 5;
+        const interval = view.distance < preset.fullAnimationDistance ? 0 : 1 / 15;
         view.animAccumulator += dt;
         if (view.animAccumulator >= interval) {
           const away = remote.status === PLAYER_STATUS.reconnecting;

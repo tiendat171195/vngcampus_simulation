@@ -3,6 +3,7 @@ import type { Browser, BrowserContextOptions, Page } from '@playwright/test';
 export interface Remote {
   name: string;
   tag: string;
+  avatar: string;
   status: number;
   anim: number;
   emote: number;

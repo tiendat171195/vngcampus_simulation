@@ -120,7 +120,8 @@ test('a guest who signs in with a company account keeps their place and is no lo
   // Back to the splash screen, then the provider's sign-in form.
   await visitor.page.goto('/?debug');
   await visitor.page.getByRole('button', { name: 'Đăng nhập bằng Mock IdP' }).click();
-  await visitor.page.fill('#email', 'khach.moi@vng.com.vn');
+  // The e2e database outlives a run; a fresh address keeps this a first sign-in.
+  await visitor.page.fill('#email', `khach.moi.${Date.now()}@vng.com.vn`);
   await visitor.page.fill('#name', 'Lê Khách Mới');
   await visitor.page.getByRole('button', { name: 'Đăng nhập' }).click();
   await expect(visitor.page.getByTestId('splash-account')).toContainText('Lê Khách Mới');

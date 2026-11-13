@@ -104,7 +104,7 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 | GET | `/auth/oidc/:provider/start` · `/callback` | Đăng nhập OIDC (`google`, `oidc`). `start?return=/đường-dẫn&consent=<phiên bản>`; lỗi quay về `?auth_error=cancelled\|failed\|expired\|unverified\|domain\|banned\|unknown`. Trình duyệt đang là khách thì callback biến khách thành tài khoản thật, giữ nguyên tiến độ |
 | POST | `/me/consent` | Ghi nhận đồng ý thông báo quyền riêng tư `{ version }` |
 | POST | `/auth/refresh` · `/auth/logout` | Làm mới token · đăng xuất |
-| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên (chỉ khách — tài khoản thật lấy tên từ IdP), avatar, tuỳ chọn riêng tư; yêu cầu xoá dữ liệu |
+| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên (chỉ khách — tài khoản thật lấy tên từ IdP), avatar (chuỗi `v1…` hợp lệ theo `@campus/shared/avatar`), tuỳ chọn riêng tư; yêu cầu xoá dữ liệu. PATCH trả access token mới vì tên và avatar nằm trong token |
 
 ### Thế giới
 
@@ -144,7 +144,7 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 
 | Token | Dạng | Thời hạn | Lưu ở đâu |
 |---|---|---|---|
-| Access | JWT ký bất đối xứng (ES256/EdDSA); claim: `sub`, `role`, `name`, `sid` | 15 phút | Bộ nhớ của trang |
+| Access | JWT ký bất đối xứng (ES256/EdDSA); claim: `sub`, `role`, `name`, `guest`, `avatar`, `sid` | 15 phút | Bộ nhớ của trang |
 | Refresh | Chuỗi ngẫu nhiên, DB chỉ lưu hash | 30 ngày, **xoay vòng mỗi lần dùng**; phát hiện dùng lại → thu hồi cả chuỗi phiên | Cookie `HttpOnly; Secure; SameSite=Lax`, phạm vi `/api/v1/auth` |
 
 - API giữ khoá riêng để ký. Realtime chỉ có **khoá công khai** — kiểm tra được token nhưng không phát hành được.

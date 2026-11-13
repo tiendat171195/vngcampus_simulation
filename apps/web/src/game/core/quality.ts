@@ -12,7 +12,7 @@ export interface QualityPreset {
   viewDistance: number;
   /** Bots and remote avatars closer than this animate every frame. */
   fullAnimationDistance: number;
-  /** Between fullAnimationDistance and this, avatars animate at 15 Hz; beyond, at 5 Hz. */
+  /** Between fullAnimationDistance and this, avatars animate at 15 Hz; beyond, impostors. */
   reducedAnimationDistance: number;
 }
 

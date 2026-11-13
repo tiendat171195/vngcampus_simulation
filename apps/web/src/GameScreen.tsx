@@ -1,3 +1,4 @@
+import { avatarFromSeed, formatAvatar } from '@campus/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from './game/core/session';
 import { useSettings } from './game/core/settings';
@@ -7,6 +8,7 @@ import { net } from './game/net/net';
 import { currentUser, signIn } from './services/auth';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
 import { AreaToast } from './ui/AreaToast';
+import { AvatarEditor } from './ui/AvatarEditor';
 import { ChatBox } from './ui/ChatBox';
 import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
@@ -18,6 +20,8 @@ export default function GameScreen() {
   const playing = useSession((state) => state.phase === 'playing');
   const following = useDebugStore((state) => state.cameraMode === 'follow');
   const showHints = useSettings((state) => state.showHints);
+  const modal = useSession((state) => state.modal);
+  const steering = playing && following && modal === null;
   const [mountCanvas, setMountCanvas] = useState(false);
 
   useEffect(() => {
@@ -42,6 +46,9 @@ export default function GameScreen() {
       const result = await signIn(session.displayName);
       if (result.ok) session.setDisplayName(result.user.displayName);
     }
+    // Dressed in the account's avatar, or the one everybody else derives from the user id.
+    const user = currentUser();
+    if (user) session.setAvatar(user.avatar || formatAvatar(avatarFromSeed(user.id)));
     const spawn = new URLSearchParams(window.location.search).get('spawn') ?? undefined;
     await net.leave();
     await net.connect({ spawn });
@@ -73,6 +80,7 @@ export default function GameScreen() {
         [...net.remotes.values()].map((remote) => ({
           name: remote.name,
           tag: remote.tag,
+          avatar: remote.avatar,
           status: remote.status,
           anim: remote.anim,
           emote: remote.emote,
@@ -86,11 +94,11 @@ export default function GameScreen() {
   return (
     <>
       {mountCanvas && <GameCanvas />}
-      {playing && following && <InputLayer />}
+      {steering && <InputLayer />}
       {playing && <MiniMap />}
       {playing && <AreaToast />}
       {playing && <NoticeToast />}
-      {playing && following && <ActionBar />}
+      {steering && <ActionBar />}
       {playing && <ChatBox />}
       {playing && following && showHints && (
         <p className="hint">
@@ -99,6 +107,7 @@ export default function GameScreen() {
       )}
       {playing && <ConnectionBanner onRetry={() => void connect()} />}
       {playing && <Toolbar />}
+      {playing && modal === 'avatar' && <AvatarEditor />}
     </>
   );
 }

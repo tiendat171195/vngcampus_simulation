@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { enterAs, remotes } from './helpers';
+import { enterAs, enterFromSplash, remotes } from './helpers';
 
 const ANIM_SIT = 5;
 const ANIM_EMOTE = 6;
@@ -81,4 +81,32 @@ test('finding a colleague in another channel and joining them', async ({ browser
   await expect(first.page.getByTestId('channel-badge')).toContainText('4 người');
 
   for (const player of [first, ...others, late]) await player.context.close();
+});
+
+test('a new avatar is saved and seen by others straight away', async ({ browser }) => {
+  const dresser = await enterAs(browser, 'Thay Áo', {}, '&spawn=poi.checkpoint.atrium');
+  const watcher = await enterAs(browser, 'Ngắm Áo', {}, '&spawn=poi.checkpoint.atrium');
+  const avatarOf = async (name: string) =>
+    (await remotes(watcher.page)).find((remote) => remote.name === name)?.avatar;
+  await expect.poll(() => avatarOf('Thay Áo')).toBe('');
+
+  await dresser.page.getByRole('button', { name: 'Avatar' }).click();
+  const editor = dresser.page.getByTestId('avatar-editor');
+  const row = (label: string) => editor.locator('.avatar-row', { hasText: label });
+  await row('Tóc').getByRole('button', { name: 'Đuôi ngựa', exact: true }).click();
+  await row('Áo').getByRole('button', { name: 'Áo khoác', exact: true }).click();
+  await row('Phụ kiện').getByRole('button', { name: 'Tai nghe', exact: true }).click();
+  await editor.getByRole('button', { name: 'Lưu' }).click();
+  await expect(editor).toHaveCount(0);
+
+  await expect
+    .poll(() => avatarOf('Thay Áo'))
+    .toMatch(/^v1\.b\d\.s\d\.h6-\w\.t3-\w\.p\w-\w\.f\w-\w\.a5$/);
+  // Saved to the account: it is still there after a reload.
+  const saved = await avatarOf('Thay Áo');
+  await dresser.page.reload();
+  await enterFromSplash(dresser.page);
+  await expect.poll(() => avatarOf('Thay Áo')).toBe(saved);
+  await dresser.context.close();
+  await watcher.context.close();
 });

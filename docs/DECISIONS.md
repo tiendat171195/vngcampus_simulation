@@ -15,6 +15,18 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Avatar module dựng bằng code thay cho bộ asset Quaternius
+
+- Gói việc: P3.3
+- Bối cảnh: plan chọn bộ nhân vật CC0 của Quaternius, tách thành phần rời rồi chỉnh phong cách. Việc đó cần Blender và một quy trình asset (tách mesh, gắn lại xương, nén) chưa có trong repo; tải về rồi mới biết các phần có ghép được với nhau không.
+- Quyết định:
+  - Mở rộng nhân vật khối của P1.3 thành hệ module thật: mỗi phần (tóc, áo, quần/váy, giày, phụ kiện, dáng) là một hàm dựng hình trên cùng bộ xương, gộp thành một skinned mesh màu đỉnh. Không tải asset, không tốn ngân sách 1,5 MB cho avatar.
+  - Chuỗi cấu hình dùng một chữ số hệ 36 cho mỗi lựa chọn để luôn ≤ 32 byte (ví dụ trong plan có số hai chữ số).
+  - Avatar đi trong access token; đổi avatar giữa chừng bằng message `profile` mang token mới, nên server realtime vẫn không cần đọc DB và client không tự khai avatar của mình.
+  - LOD1 không cần mesh riêng (mesh gốc đã dưới mức ~1.200 tam giác của LOD1); LOD2 (hình nộm) giờ dùng cho cả người ở xa hơn tầm LOD1, đúng bảng thiết kế — trước đó người ở xa vẫn là avatar đầy đủ chạy 5 Hz.
+- Khác plan ở đâu: `03-world-and-assets.md` §7 (Hiện tại, nguồn asset, chuỗi cấu hình), `05-multiplayer.md` §4, `07-backend-data.md` §4–5.
+- Hệ quả: hình dáng còn khối vuông; nâng cấp mỹ thuật (glTF, bo tròn, khuôn mặt) để P6, giữ nguyên chuỗi cấu hình và đồng bộ.
+
 ## 2026-11-13 — Đăng nhập công ty qua OIDC, liên kết khách, đồng ý quyền riêng tư
 
 - Gói việc: P3.2

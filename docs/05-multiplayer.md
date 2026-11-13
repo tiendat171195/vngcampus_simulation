@@ -32,7 +32,7 @@ import { schema, t, type SchemaType } from '@colyseus/schema';
 const PlayerState = schema({
   userId: t.string(),
   name: t.string(),
-  avatar: t.string(),      // chuỗi cấu hình avatar
+  avatar: t.string(),      // chuỗi cấu hình avatar, lấy từ access token ('' = avatar sinh từ userId)
   tag: t.string(),         // nhãn phòng ban (tuỳ chọn)
   level: t.uint8(),
   status: t.uint8(),       // 0 bình thường · 1 AFK · 2 tạm mất kết nối
@@ -88,6 +88,7 @@ Tên message và schema payload định nghĩa một lần trong `packages/share
 | `seat:take` / `seat:leave` | `{ seatId }` | |
 | `afk` | `{ on }` | Khi tab ẩn/hiện |
 | `ping` | `{ t }` | Mỗi 5 giây, để đo trễ và lệch đồng hồ |
+| `profile` | `{ token }` | Sau khi đổi tên/avatar qua `PATCH /me`: access token mới của chính người đó; server đọc tên, nhãn khách và avatar từ token (không tin dữ liệu do client tự khai). Tối đa ~1 lần/5 giây |
 | `report` | `{ target, reason, note? }` | Báo cáo vi phạm |
 
 **Server → Client**
