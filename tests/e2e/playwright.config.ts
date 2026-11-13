@@ -33,7 +33,13 @@ export default defineConfig({
     },
     {
       command: 'node ../../apps/realtime/dist/index.mjs',
-      env: { NODE_ENV: 'test', REALTIME_PORT: String(PORTS.realtime), DEV_GUEST_AUTH: 'on' },
+      env: {
+        NODE_ENV: 'test',
+        REALTIME_PORT: String(PORTS.realtime),
+        DEV_GUEST_AUTH: 'on',
+        // Small channels, so a test can fill one and see a second open.
+        CHANNEL_SOFT_CAP: '3',
+      },
       url: `http://127.0.0.1:${PORTS.realtime}/health`,
       reuseExistingServer: false,
     },

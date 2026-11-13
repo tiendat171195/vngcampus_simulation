@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong P1 và P2.1–P2.2: nhiều người cùng vào một kênh, thấy nhau đi lại (desktop và điện thoại), tự vào lại khi rớt mạng. Đăng nhập tạm bằng tên tự đặt. Chưa có emote/chat (P2.3).
+**Trạng thái:** xong P1 và P2.1–P2.3: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng. Đăng nhập tạm bằng tên tự đặt (thật ở P3).
 
 ## Chạy thử
 

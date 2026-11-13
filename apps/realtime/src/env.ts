@@ -6,6 +6,9 @@ const envSchema = z.object({
   REALTIME_PORT: z.coerce.number().int().min(1).max(65535).default(2567),
   /** `on` lets clients join with a self-chosen guest identity. Only for development, until P3. */
   DEV_GUEST_AUTH: z.enum(['on', 'off']).optional(),
+  /** Channel sizes; defaults come from CHANNEL in @campus/shared. Lowered in tests. */
+  CHANNEL_SOFT_CAP: z.coerce.number().int().min(1).optional(),
+  CHANNEL_HARD_CAP: z.coerce.number().int().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -1,7 +1,8 @@
 import { maskProfanity, normaliseChat } from '@campus/core';
-import { distance, floorAt, type Poi, poisOfSet } from '@campus/map-data';
+import { areasAt, distance, floorAt, isWalkable, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import {
+  afkSchema,
   CHANNEL,
   CHAT,
   type ChatMessage,
@@ -17,6 +18,7 @@ import {
   moveSchema,
   NET,
   type NoticeMessage,
+  type OnlineEntry,
   PLAYER_STATUS,
   type PongMessage,
   pingSchema,
@@ -45,6 +47,10 @@ export interface CampusRoomOptions {
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
+  /** Without input for this long a player shows as away. */
+  idleAfkSeconds?: number;
+  /** Without input for this long a player is asked to leave, freeing the place. */
+  idleKickSeconds?: number;
 }
 
 export interface CampusMetadata {
@@ -65,10 +71,18 @@ interface Tracking {
   violations: WindowCounter;
   emotes: RateLimiter;
   chat: RateLimiter;
+  /** Room clock of the last deliberate input. */
+  lastActivity: number;
+  /** The tab is hidden, as reported by the client. */
+  hidden: boolean;
+  /** What the online directory last showed for this player, to write only on change. */
+  listed: string;
 }
 
 /** Channel-wide pub/sub topic announcing that a user has just joined somewhere. */
 const SESSION_TOPIC = 'campus:session-start';
+/** Presence hash: user id → OnlineEntry JSON, for the online directory. */
+export const ONLINE_KEY = 'campus:online';
 const MOVE_RATE = 15;
 const VIOLATION_WINDOW_MS = 10_000;
 const VIOLATION_FLAG = 5;
@@ -101,6 +115,7 @@ export class CampusRoom extends Room<{
   private config!: Required<CampusRoomOptions>;
   private readonly createdAt = Date.now();
   private readonly tracking = new Map<string, Tracking>();
+  private housekeeping: ReturnType<typeof setInterval> | undefined;
   private readonly onSessionStart = (message: { userId: string; sessionId: string }) => {
     for (const client of this.clients) {
       if (client.auth?.userId === message.userId && client.sessionId !== message.sessionId) {
@@ -119,6 +134,8 @@ export class CampusRoom extends Room<{
       softCap: options.softCap ?? CHANNEL.softCap,
       hardCap: options.hardCap ?? CHANNEL.hardCap,
       reconnectGraceSeconds: options.reconnectGraceSeconds ?? NET.reconnectGraceSeconds,
+      idleAfkSeconds: options.idleAfkSeconds ?? 5 * 60,
+      idleKickSeconds: options.idleKickSeconds ?? 30 * 60,
     };
     this.maxClients = this.config.hardCap;
     this.state.channel = await this.freeChannelNumber();
@@ -130,6 +147,15 @@ export class CampusRoom extends Room<{
     this.onMessage(MSG.seatTake, (client, payload) => this.handleSeatTake(client, payload));
     this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
     this.onMessage(MSG.chat, (client, payload) => this.handleChat(client, payload));
+    this.onMessage(MSG.afk, (client, payload) => {
+      const tracking = this.tracking.get(client.sessionId);
+      const parsed = afkSchema.safeParse(payload);
+      if (!tracking || !parsed.success) return;
+      tracking.hidden = parsed.data.on;
+      if (!parsed.data.on) tracking.lastActivity = this.now();
+      this.refreshStatus(client.sessionId);
+    });
+    this.housekeeping = setInterval(() => void this.tidy(), 1000);
     const pings = new Map<string, RateLimiter>();
     this.onMessage(MSG.ping, (client, payload) => {
       const limiter = pings.get(client.sessionId) ?? new RateLimiter(PING_RATE, this.now());
@@ -154,29 +180,34 @@ export class CampusRoom extends Room<{
   ): Promise<void> {
     const identity = client.auth;
     if (!identity) throw new ServerError(401, 'Cần đăng nhập.');
-    const spawn = this.chooseSpawn(joinOptionsSchema.safeParse(options ?? {}).data?.spawn);
-    const y = campusIndex.floors.get(spawn.floor)?.y ?? 0;
+    const joinOptions = joinOptionsSchema.safeParse(options ?? {}).data;
+    const spawn = this.chooseSpawn(joinOptions?.spawn, joinOptions?.resume);
+    const y = spawn.y;
 
     const player = new PlayerState();
     player.userId = identity.userId;
     player.name = identity.name;
-    player.x = encodePosition(spawn.position[0]);
+    player.x = encodePosition(spawn.x);
     player.y = encodePosition(y);
-    player.z = encodePosition(spawn.position[1]);
-    player.yaw = encodeYaw(((spawn.yawDeg ?? 0) * Math.PI) / 180);
+    player.z = encodePosition(spawn.z);
+    player.yaw = encodeYaw(spawn.yaw);
     this.state.players.set(client.sessionId, player);
 
     const now = this.now();
     this.tracking.set(client.sessionId, {
-      accepted: { x: spawn.position[0], y, z: spawn.position[1], at: now },
+      accepted: { x: spawn.x, y, z: spawn.z, at: now },
       lastSeq: -1,
       rate: new RateLimiter(MOVE_RATE, now),
       violations: new WindowCounter(VIOLATION_WINDOW_MS),
       emotes: new RateLimiter(EMOTE_RATE, now),
       chat: new RateLimiter(CHAT.burst / (CHAT.windowMs / 1000), now, CHAT.burst),
+      lastActivity: now,
+      hidden: false,
+      listed: '',
     });
 
     await this.updateListing();
+    await this.updateDirectory(client.sessionId);
     // One person, one session: any older session of this user, in any channel, is closed.
     this.presence.publish(SESSION_TOPIC, { userId: identity.userId, sessionId: client.sessionId });
   }
@@ -201,12 +232,15 @@ export class CampusRoom extends Room<{
 
   override async onLeave(client: Client): Promise<void> {
     this.releaseSeat(client.sessionId);
+    const player = this.state.players.get(client.sessionId);
+    if (player) await this.unlist(player.userId, client.sessionId);
     this.state.players.delete(client.sessionId);
     this.tracking.delete(client.sessionId);
     await this.updateListing();
   }
 
   override async onDispose(): Promise<void> {
+    clearInterval(this.housekeeping);
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
@@ -240,7 +274,9 @@ export class CampusRoom extends Room<{
       return;
     }
 
+    const moved = Math.hypot(next.x - tracking.accepted.x, next.z - tracking.accepted.z) > 0.05;
     tracking.accepted = { ...next, at: now };
+    if (moved) this.markActive(client.sessionId);
     if (player.seatId) {
       const seat = campusIndex.pois.get(player.seatId);
       if (!seat || distance(seat.position, [next.x, next.z]) > SEAT_LEASH)
@@ -259,6 +295,7 @@ export class CampusRoom extends Room<{
     const player = this.state.players.get(client.sessionId);
     const parsed = emoteSchema.safeParse(payload);
     if (!tracking || !player || !parsed.success || !tracking.emotes.take(this.now())) return;
+    this.markActive(client.sessionId);
     player.emote = parsed.data.id;
     // The sequence number lets clients replay the same emote twice in a row.
     player.emoteSeq = (player.emoteSeq + 1) % 65536;
@@ -281,6 +318,7 @@ export class CampusRoom extends Room<{
       } satisfies NoticeMessage);
       return;
     }
+    this.markActive(client.sessionId);
     const message: ChatMessage = {
       from: client.sessionId,
       name: player.name,
@@ -328,12 +366,95 @@ export class CampusRoom extends Room<{
     player.seatId = '';
   }
 
-  private chooseSpawn(requested: string | undefined): Poi {
+  private markActive(sessionId: string): void {
+    const tracking = this.tracking.get(sessionId);
+    if (!tracking) return;
+    tracking.lastActivity = this.now();
+    this.refreshStatus(sessionId);
+  }
+
+  /** Active, away (hidden tab or idle) or reconnecting, from what is known about the session. */
+  private refreshStatus(sessionId: string): void {
+    const tracking = this.tracking.get(sessionId);
+    const player = this.state.players.get(sessionId);
+    if (!tracking || !player || player.status === PLAYER_STATUS.reconnecting) return;
+    const idle = this.now() - tracking.lastActivity > this.config.idleAfkSeconds * 1000;
+    player.status = tracking.hidden || idle ? PLAYER_STATUS.afk : PLAYER_STATUS.active;
+  }
+
+  /** Once a second: idle players become away, then are asked to leave; the directory follows. */
+  private async tidy(): Promise<void> {
+    const now = this.now();
+    for (const client of this.clients) {
+      const tracking = this.tracking.get(client.sessionId);
+      if (!tracking) continue;
+      if (now - tracking.lastActivity > this.config.idleKickSeconds * 1000) {
+        client.leave(CLOSE.idle, 'Bạn đã rời bàn phím khá lâu.');
+        continue;
+      }
+      this.refreshStatus(client.sessionId);
+      await this.updateDirectory(client.sessionId);
+    }
+  }
+
+  /** Writes this player's line of the online directory if it changed. */
+  private async updateDirectory(sessionId: string): Promise<void> {
+    const tracking = this.tracking.get(sessionId);
+    const player = this.state.players.get(sessionId);
+    if (!tracking || !player) return;
+    const { x, y, z } = tracking.accepted;
+    const floor = floorAt(campusIndex, y);
+    const place = areasAt(campusIndex, [x, z], floor).find((area) => !area.tags.includes('base'));
+    const entry: OnlineEntry & { sessionId: string } = {
+      userId: player.userId,
+      name: player.name,
+      channel: this.state.channel,
+      roomId: this.roomId,
+      area: place?.name.vi ?? '',
+      status: player.status,
+      sessionId,
+    };
+    const value = JSON.stringify(entry);
+    if (value === tracking.listed) return;
+    tracking.listed = value;
+    await this.presence.hset(ONLINE_KEY, player.userId, value);
+  }
+
+  /** Removes a player from the directory, unless a newer session of theirs has taken the line. */
+  private async unlist(userId: string, sessionId: string): Promise<void> {
+    const current = await this.presence.hget(ONLINE_KEY, userId);
+    if (!current) return;
+    try {
+      if ((JSON.parse(current) as { sessionId?: string }).sessionId !== sessionId) return;
+    } catch {
+      // Unreadable line: remove it.
+    }
+    await this.presence.hdel(ONLINE_KEY, userId);
+  }
+
+  private chooseSpawn(
+    requested: string | undefined,
+    resume: { x: number; y: number; z: number } | undefined,
+  ): { x: number; y: number; z: number; yaw: number } {
+    const fromPoi = (poi: Poi) => ({
+      x: poi.position[0],
+      y: campusIndex.floors.get(poi.floor)?.y ?? 0,
+      z: poi.position[1],
+      yaw: ((poi.yawDeg ?? 0) * Math.PI) / 180,
+    });
+    // Keeping one's place when switching channel; anywhere one could have walked to is fine.
+    if (resume && isWalkable(campusIndex, [resume.x, resume.z], floorAt(campusIndex, resume.y))) {
+      return { ...resume, yaw: 0 };
+    }
     // Picking a spawn point is a development convenience until P3; it is only honoured when
     // development identities are.
     const wanted =
       requested && this.config.devGuestAuth ? campusIndex.pois.get(requested) : undefined;
-    if (wanted) return wanted;
+    if (wanted) return fromPoi(wanted);
+    return fromPoi(this.gateSpawn());
+  }
+
+  private gateSpawn(): Poi {
     // The free spot furthest from everyone already standing at the gate, so people do not appear
     // inside each other.
     const gate = poisOfSet(campusIndex, 'players_gate');

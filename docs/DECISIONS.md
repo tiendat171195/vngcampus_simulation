@@ -15,6 +15,21 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Giao lưu: emote, ghế, chat gần, vắng mặt, danh bạ
+
+- Gói việc: P2.3
+- Quyết định:
+  - **Emote** là tư thế thủ tục của avatar tạm (6 loại). Server giữ `emote` + `emoteSeq`, tối đa 1 emote/2 giây.
+  - **Ghế:** server cấp ghế khi người chơi đứng trong 2,5 m, cùng tầng, ghế trống; tự trả ghế khi đi xa quá 1,5 m hoặc rời phòng.
+  - **Bộ lọc từ chat** nằm ở `packages/core`. Từ tục tiếng Việt chỉ bắt khi viết **có dấu**, vì bỏ dấu sẽ trùng từ thường ("lồn"/"lớn", "cặc"/"các"); viết tắt ASCII (đm, vcl…) và tiếng Anh bắt theo nguyên từ. Ưu tiên không che nhầm câu bình thường; phần lọt lưới để báo cáo/kiểm duyệt (P5.4) xử lý.
+  - **Chưa có bộ đệm chat 24 giờ** cho báo cáo vi phạm (plan §8): làm cùng nút báo cáo ở P5.4, khi có Redis. Hiện chat chỉ đi qua bộ nhớ, không lưu ở đâu.
+  - **Vắng mặt / treo máy:** tab ẩn hoặc 5 phút không thao tác → "vắng mặt"; 30 phút → mời ra (mã 4103).
+  - **Danh bạ online** dùng hash của Colyseus presence thay cho các khoá Redis tự đặt (`presence:user:*`), để chạy được cả một tiến trình lẫn nhiều tiến trình mà không đổi mã.
+  - **Chuyển kênh giữ vị trí** qua tuỳ chọn `resume` khi vào phòng; server chỉ chấp nhận chỗ đi được.
+  - **Kích thước kênh** chỉnh được bằng `CHANNEL_SOFT_CAP` / `CHANNEL_HARD_CAP` (test e2e dùng ngưỡng mềm 3).
+- Khác plan ở đâu: đã sửa `05-multiplayer.md` §7.
+- Hệ quả: tuỳ chọn "ẩn khỏi danh sách online" làm ở P3.4 cùng hồ sơ.
+
 ## 2026-11-13 — Lớp mạng phía client và test e2e
 
 - Gói việc: P2.2

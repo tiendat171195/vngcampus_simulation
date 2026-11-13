@@ -198,7 +198,11 @@ export function RemotePlayers() {
       // Name tags for the nearest few.
       const tagged = rank < TAG_CAP && view.distance < TAG_DISTANCE;
       const text =
-        remote.status === PLAYER_STATUS.reconnecting ? `${remote.name} · mất kết nối` : remote.name;
+        remote.status === PLAYER_STATUS.reconnecting
+          ? `${remote.name} · mất kết nối`
+          : remote.status === PLAYER_STATUS.afk
+            ? `${remote.name} · vắng mặt`
+            : remote.name;
       if (tagged && (!view.tag || view.tagText !== text)) {
         if (view.tag) {
           view.tag.removeFromParent();

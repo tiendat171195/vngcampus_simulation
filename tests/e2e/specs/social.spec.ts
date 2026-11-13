@@ -73,3 +73,22 @@ test('nearby chat reaches people close by, filtered, and nobody far away', async
 
   for (const player of [speaker, neighbour, stranger]) await player.context.close();
 });
+
+test('finding a colleague in another channel and joining them', async ({ browser }) => {
+  // The e2e server closes a channel to new arrivals at three people.
+  const first = await enterAs(browser, 'Đồng Nghiệp');
+  const others = [await enterAs(browser, 'Hai'), await enterAs(browser, 'Ba')];
+  const late = await enterAs(browser, 'Đến Muộn');
+  await expect(late.page.getByTestId('channel-badge')).toContainText('Campus 2');
+
+  await late.page.getByRole('button', { name: 'Mọi người' }).click();
+  await late.page.getByLabel('Tìm theo tên').fill('dong nghiep');
+  const row = late.page.getByTestId('people-list').locator('li', { hasText: 'Đồng Nghiệp' });
+  await expect(row).toContainText('Campus 1');
+  await row.getByRole('button', { name: 'Tới kênh này' }).click();
+
+  await expect(late.page.getByTestId('channel-badge')).toContainText('Campus 1 · 4 người');
+  await expect(first.page.getByTestId('channel-badge')).toContainText('4 người');
+
+  for (const player of [first, ...others, late]) await player.context.close();
+});

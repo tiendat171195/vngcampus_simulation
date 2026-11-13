@@ -89,6 +89,8 @@ export class NetClient {
   onCorrect: ((x: number, y: number, z: number) => void) | null = null;
 
   private client: Client | null = null;
+  private guest: DevGuest | null = null;
+  private lastTransform: { x: number; y: number; z: number } | null = null;
   private room: Room<unknown, WireState> | null = null;
   private sessionId = '';
   private spawned = false;
@@ -102,12 +104,16 @@ export class NetClient {
     return useSession.getState().net.status;
   }
 
-  async connect(guest: DevGuest, options: { spawn?: string; roomId?: string } = {}): Promise<void> {
+  async connect(
+    guest: DevGuest,
+    options: { spawn?: string; roomId?: string; resume?: { x: number; y: number; z: number } } = {},
+  ): Promise<void> {
     if (this.room) return;
     this.setStatus('connecting');
     try {
       this.client ??= new Client(`${window.location.origin}/rt`);
-      const joinOptions = { guest, spawn: options.spawn };
+      this.guest = guest;
+      const joinOptions = { guest, spawn: options.spawn, resume: options.resume };
       const room = options.roomId
         ? await this.client.joinById<WireState>(options.roomId, joinOptions)
         : await this.client.joinOrCreate<WireState>(CAMPUS_ROOM, { ...joinOptions, open: true });
@@ -116,6 +122,28 @@ export class NetClient {
       console.warn('[campus] could not join a channel', error);
       this.setStatus('offline');
     }
+  }
+
+  /** Moves to another channel, keeping the player's place in the campus. */
+  async switchChannel(roomId: string): Promise<void> {
+    if (!this.guest || roomId === this.room?.roomId) return;
+    const resume = this.lastTransform ? { ...this.lastTransform } : undefined;
+    await this.leave();
+    await this.connect(this.guest, { roomId, resume });
+    if (useSession.getState().net.status === 'offline') {
+      useSession.getState().showNotice('Kênh đó đã đầy hoặc vừa đóng.');
+      await this.connect(this.guest, { resume });
+    }
+  }
+
+  /** Tells the others whether this tab is in the background. */
+  setAway(away: boolean): void {
+    if (this.status === 'online') this.room?.send(MSG.afk, { on: away });
+  }
+
+  /** Id of the room (channel) we are in, '' when not connected. */
+  get roomId(): string {
+    return this.room?.roomId ?? '';
   }
 
   /** Leaves on purpose (closing the tab, switching channel). */
@@ -128,6 +156,7 @@ export class NetClient {
 
   /** Called every frame with the local player's state; sends at most 10 times a second. */
   update(localNow: number, transform: Transform): void {
+    this.lastTransform = { x: transform.x, y: transform.y, z: transform.z };
     const room = this.room;
     if (!room || this.status !== 'online') return;
 

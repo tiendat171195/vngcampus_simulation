@@ -46,6 +46,13 @@ export default function GameScreen() {
     if (playing) connect();
   }, [playing, connect]);
 
+  // A hidden tab shows as away to the others.
+  useEffect(() => {
+    const report = () => net.setAway(document.visibilityState === 'hidden');
+    document.addEventListener('visibilitychange', report);
+    return () => document.removeEventListener('visibilitychange', report);
+  }, []);
+
   useEffect(() => {
     const leave = () => void net.leave();
     window.addEventListener('pagehide', leave);

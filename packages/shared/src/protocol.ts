@@ -128,6 +128,11 @@ export const joinOptionsSchema = z.object({
   spawn: z.string().max(80).optional(),
   /** Set by automatic channel assignment; see the room's matchmaking filter. */
   open: z.boolean().optional(),
+  /**
+   * Where to appear instead of the gate, in metres: used when switching channel so the player
+   * keeps their place. Honoured only on walkable ground.
+   */
+  resume: z.object({ x: z.number(), y: z.number(), z: z.number() }).optional(),
 });
 export type JoinOptions = z.infer<typeof joinOptionsSchema>;
 
@@ -147,6 +152,17 @@ export const PLAYER_STATUS = {
   /** Connection dropped; the seat is held while the client tries to come back. */
   reconnecting: 2,
 } as const;
+
+/** One person in the online directory (`GET /rt/online`). */
+export interface OnlineEntry {
+  userId: string;
+  name: string;
+  channel: number;
+  roomId: string;
+  /** Name of the place they are in, if any. */
+  area: string;
+  status: number;
+}
 
 export interface ChannelInfo {
   roomId: string;

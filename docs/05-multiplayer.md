@@ -173,9 +173,9 @@ sequenceDiagram
 
 ## 7. Presence toàn cục và tìm đồng nghiệp
 
-- Realtime ghi vào Redis: `presence:user:{id}` = `{ channel, areaId, status, since }` (tự hết hạn, làm mới định kỳ) và tập `presence:online`.
+- Realtime ghi danh bạ vào **presence của Colyseus** (hash `campus:online`: userId → `{ name, channel, roomId, area, status }`), cập nhật khi thay đổi. Một tiến trình dùng bộ nhớ trong; khi bật Redis presence (bậc 2) thì dữ liệu nằm ở Redis mà không phải sửa mã. `GET /rt/online?q=` trả danh sách, tìm theo tên không dấu, bỏ các dòng của phòng không còn tồn tại.
 - API cung cấp danh sách online có tìm kiếm và tổng số theo kênh/khu.
-- "Tìm đồng nghiệp": gõ tên → thấy kênh và khu → nút **Tới kênh này** → vào kênh, có mũi tên chỉ đường tới vị trí người đó.
+- "Tìm đồng nghiệp": bảng **Mọi người** → gõ tên → thấy kênh và khu → nút **Tới kênh này** → vào kênh đó, **giữ nguyên vị trí** (client gửi `resume`, server chấp nhận nếu chỗ đó đi được). Mũi tên chỉ đường tới người đó: V1.
 - Quyền riêng tư: mỗi người có tuỳ chọn **ẩn khỏi danh sách online** (vẫn hiện trong thế giới với người đứng gần).
 
 ## 8. Chat

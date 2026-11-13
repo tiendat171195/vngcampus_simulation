@@ -11,6 +11,7 @@ import {
   encodePosition,
   healthResponseSchema,
   MSG,
+  type OnlineEntry,
   PLAYER_STATUS,
   type PongMessage,
 } from '@campus/shared';
@@ -30,7 +31,14 @@ const guest = (name = 'Đồng nghiệp') => ({
 
 beforeAll(async () => {
   colyseus = await boot(
-    createServer({ devGuestAuth: true, softCap: 2, hardCap: 3, reconnectGraceSeconds: 1 }),
+    createServer({
+      devGuestAuth: true,
+      softCap: 2,
+      hardCap: 3,
+      reconnectGraceSeconds: 1,
+      idleAfkSeconds: 2,
+      idleKickSeconds: 6,
+    }),
   );
 });
 afterEach(async () => {
@@ -362,5 +370,54 @@ describe('chat', () => {
     expect((await warned).text).toContain('hơi nhanh');
     await settle(250);
     expect(received).toEqual(['tin 1', 'tin 2', 'tin 3', 'tin 4', 'tin 5']);
+  });
+});
+
+describe('presence', () => {
+  it('shows a hidden tab as away and back', async () => {
+    const a = await join();
+    const b = await join();
+    a.send(MSG.afk, { on: true });
+    await settle(250);
+    expect(b.state.players.get(a.sessionId)?.status).toBe(PLAYER_STATUS.afk);
+    a.send(MSG.afk, { on: false });
+    await settle(250);
+    expect(b.state.players.get(a.sessionId)?.status).toBe(PLAYER_STATUS.active);
+  });
+
+  it('marks an idle player away, then asks them to leave', { timeout: 12_000 }, async () => {
+    const idle = await join();
+    const watcher = await join();
+    const closed = new Promise<number>((resolve) => idle.onLeave((code) => resolve(code)));
+    // Away after 2 s, checked once a second, plus a patch on the way.
+    await settle(3400);
+    expect(watcher.state.players.get(idle.sessionId)?.status).toBe(PLAYER_STATUS.afk);
+    expect(await closed).toBe(CLOSE.idle);
+  });
+
+  it('lists who is online, where, and finds names without diacritics', async () => {
+    await join(guest('Bình'), { spawn: 'poi.checkpoint.atrium' });
+    const an = await join(guest('An'));
+    await settle(1200);
+    const everyone = (await colyseus.http.get('/online')).data as OnlineEntry[];
+    expect(everyone.map((entry) => [entry.name, entry.channel, entry.area])).toEqual([
+      ['An', 1, 'Cổng chính'],
+      ['Bình', 1, 'Atrium'],
+    ]);
+    const found = (await colyseus.http.get('/online?q=binh')).data as OnlineEntry[];
+    expect(found.map((entry) => entry.name)).toEqual(['Bình']);
+
+    await an.leave();
+    await settle(300);
+    const after = (await colyseus.http.get('/online')).data as OnlineEntry[];
+    expect(after.map((entry) => entry.name)).toEqual(['Bình']);
+  });
+
+  it("keeps one's place when switching channel, but only on walkable ground", async () => {
+    const mover = await join(guest(), { resume: { x: 10, y: 0, z: -20 } });
+    expect(decodePosition(me(mover)?.x ?? 0)).toBeCloseTo(10, 1);
+    expect(decodePosition(me(mover)?.z ?? 0)).toBeCloseTo(-20, 1);
+    const swimmer = await join(guest(), { resume: { x: -2, y: 0, z: 30 } });
+    expect(decodePosition(me(swimmer)?.z ?? 0)).toBeLessThan(-45);
   });
 });
