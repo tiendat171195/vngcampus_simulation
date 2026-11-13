@@ -59,7 +59,7 @@ export async function applySanction(
   db: Db,
   input: {
     userId: string;
-    type: 'mute' | 'ban';
+    type: 'mute' | 'ban' | 'warn';
     reason: string;
     hours: number | null;
     actorId: string;

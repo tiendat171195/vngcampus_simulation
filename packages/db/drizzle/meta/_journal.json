@@ -43,6 +43,13 @@
       "when": 1794610145742,
       "tag": "0005_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794611567296,
+      "tag": "0006_reports_analytics",
+      "breakpoints": true
     }
   ]
 }

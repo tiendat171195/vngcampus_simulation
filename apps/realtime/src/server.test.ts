@@ -27,7 +27,7 @@ import { MissionRuntime } from './missions/runtime';
 import { memorySource } from './missions/source';
 import { type ActiveSanction, SanctionWatcher } from './moderation';
 import { NO_OPS, OpsWatcher } from './operations';
-import type { CampusRoom } from './rooms/CampusRoom';
+import type { CampusRoom, ReportToFile } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
 import { createServer } from './server';
 
@@ -38,6 +38,11 @@ const watcher = new SanctionWatcher(async () => inForce);
 /** Switches and announcements, as the database would report them. */
 let opsView: OpsMessage = NO_OPS;
 const ops = new OpsWatcher(async () => opsView);
+/** Reports as the database would receive them. */
+const filed: ReportToFile[] = [];
+/** Counters and people seen, as the analytics tables would receive them. */
+const counted: string[] = [];
+const seen: string[] = [];
 /** A running mission with one objective: check in at the main gate, where players appear. */
 const gateMission = {
   id: '0190f0c2-0000-7000-8000-0000000000ff',
@@ -108,6 +113,15 @@ beforeAll(async () => {
       missions,
       sanctions: watcher,
       ops,
+      reports: async (report) => {
+        filed.push(report);
+        return true;
+      },
+      analytics: {
+        count: (metric, dimension = '') =>
+          counted.push(dimension ? `${metric}:${dimension}` : metric),
+        active: (userId) => seen.push(userId),
+      },
       devGuestAuth: true,
       verifyToken: createTokenVerifier(jwks),
       softCap: 2,
@@ -731,5 +745,98 @@ describe('operations', () => {
       }),
     });
     expect(staff.sessionId).toBeTruthy();
+  });
+});
+
+describe('reports and counters', () => {
+  const ids = {
+    rude: '0190f0c2-0000-7000-8000-0000000000b1',
+    witness: '0190f0c2-0000-7000-8000-0000000000b2',
+  };
+  const at = (sub: string, name: string, device?: 'mobile') =>
+    signToken({ sub, name }).then((token) =>
+      colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+        open: true,
+        token,
+        spawn: 'poi.checkpoint.atrium',
+        ...(device ? { device } : {}),
+      }),
+    );
+
+  it('file what the reporter saw in chat, and nothing else', async () => {
+    counted.length = 0;
+    seen.length = 0;
+    const rude = await at(ids.rude, 'Nói Bậy');
+    const witness = await at(ids.witness, 'Người Thấy', 'mobile');
+    const notices: string[] = [];
+    witness.onMessage(MSG.notice, (message: { text: string }) => notices.push(message.text));
+    const heard = witness.waitForMessage(MSG.chat);
+    rude.send(MSG.chat, { text: 'đm mấy người' });
+    await heard;
+    witness.send(MSG.chat, { text: 'nói chuyện đàng hoàng đi' });
+    await settle(150);
+
+    witness.send(MSG.report, { targetUserId: ids.witness, reason: 'spam' });
+    witness.send(MSG.report, { targetUserId: 'not-a-user', reason: 'spam' });
+    witness.send(MSG.report, { targetUserId: ids.rude, reason: 'harassment', note: 'chửi thề' });
+    await settle(250);
+    expect(filed).toHaveLength(1);
+    expect(filed[0]).toMatchObject({
+      reporterId: ids.witness,
+      targetUserId: ids.rude,
+      reason: 'harassment',
+      note: 'chửi thề',
+    });
+    expect(
+      filed[0]?.context.map((line) => [line.name, line.text, line.byTarget, line.byReporter]),
+    ).toEqual([
+      ['Nói Bậy', '** mấy người', true, false],
+      ['Người Thấy', 'nói chuyện đàng hoàng đi', false, true],
+    ]);
+    expect(notices).toEqual(['Đã gửi báo cáo. Kiểm duyệt viên sẽ xem sớm — cảm ơn bạn.']);
+
+    // Five in a row, then slowed down.
+    for (let i = 0; i < 5; i++)
+      witness.send(MSG.report, { targetUserId: ids.rude, reason: 'spam' });
+    await settle(300);
+    expect(filed).toHaveLength(5);
+    expect(notices).toContainEqual(expect.stringMatching(/khá nhiều báo cáo/));
+
+    // Counted without who: a mobile visit, two chats, the two people.
+    expect(counted).toEqual(
+      expect.arrayContaining(['session_start:desktop', 'session_start:mobile', 'report_sent']),
+    );
+    expect(counted.filter((c) => c === 'chat_sent')).toHaveLength(2);
+    expect(seen).toEqual(expect.arrayContaining([ids.rude, ids.witness]));
+    filed.length = 0;
+  });
+
+  it('show a warning to the person once, and count a visit by its length when they leave', async () => {
+    const room = await at(ids.rude, 'Nói Bậy');
+    const notices: string[] = [];
+    room.onMessage(MSG.notice, (message: { text: string }) => notices.push(message.text));
+    inForce.push({
+      id: 'w1',
+      userId: ids.rude,
+      type: 'warn',
+      endsAt: new Date(Date.now() + 3_600_000),
+      reason: 'Lời lẽ thiếu tôn trọng',
+    });
+    await watcher.refresh();
+    await watcher.refresh();
+    await settle(200);
+    expect(notices).toEqual([
+      'Kiểm duyệt viên nhắc bạn: Lời lẽ thiếu tôn trọng. Hãy giữ campus thân thiện nhé.',
+    ]);
+    // A warning is not a mute.
+    const heard = room.waitForMessage(MSG.chat);
+    room.send(MSG.chat, { text: 'xin lỗi mọi người' });
+    expect(await heard).toMatchObject({ text: 'xin lỗi mọi người' });
+    inForce.length = 0;
+    await watcher.refresh();
+    counted.length = 0;
+    await room.leave();
+    await settle(200);
+    expect(counted).toEqual(['session_length:<5m']);
   });
 });

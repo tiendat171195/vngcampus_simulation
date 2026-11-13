@@ -1,6 +1,14 @@
-import { activeAnnouncements, activeSanctions, readSettings } from '@campus/core';
+import {
+  activeAnnouncements,
+  activeSanctions,
+  addActivity,
+  addCounts,
+  createReport,
+  readSettings,
+} from '@campus/core';
 import { createDb } from '@campus/db';
 import type { LocalizedText } from '@campus/shared';
+import { AnalyticsBuffer } from './analytics';
 import { createTokenVerifier } from './auth';
 import { devGuestAuthEnabled, devSpawnEnabled, loadEnv } from './env';
 import { MissionRuntime } from './missions/runtime';
@@ -33,10 +41,17 @@ const ops = new OpsWatcher(async () => {
   };
 });
 ops.start();
+const analytics = new AnalyticsBuffer(async ({ day, counts, hashes }) => {
+  await addCounts(db, day, counts);
+  await addActivity(db, day, hashes);
+}, env.ANALYTICS_SALT ?? 'development-only-analytics-salt');
+analytics.start();
 const server = createServer({
   missions,
   sanctions,
   ops,
+  analytics,
+  reports: async (report) => (await createReport(db, report)) !== null,
   devGuestAuth: devGuestAuthEnabled(env),
   devSpawn: devSpawnEnabled(env),
   verifyToken: createTokenVerifier(new URL(env.AUTH_JWKS_URL)),

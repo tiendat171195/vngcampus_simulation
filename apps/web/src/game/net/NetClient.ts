@@ -21,8 +21,10 @@ import {
   type PongMessage,
   type QuizQuestionMessage,
   type QuizResultMessage,
+  type ReportInput,
 } from '@campus/shared';
 import { Client, CloseCode, type Room } from '@colyseus/sdk';
+import { deviceKind } from '../../services/analytics';
 import { type NetStatus, useSession } from '../core/session';
 import { setMissionEntities, useMissions } from '../missions/missionStore';
 import { ClockSync, Interpolator } from './Interpolator';
@@ -147,6 +149,7 @@ export class NetClient {
       this.preview = options.preview ?? this.preview;
       const joinOptions = {
         token,
+        device: deviceKind(),
         spawn: options.spawn,
         resume: options.resume,
         ...(this.preview ? { preview: this.preview } : {}),
@@ -255,6 +258,12 @@ export class NetClient {
     choice: number;
   }): void {
     if (this.status === 'online') this.room?.send(MSG.quizAnswer, answer);
+  }
+
+  /** Reports someone; the server attaches what we saw in chat and answers with a notice. */
+  report(input: ReportInput): void {
+    if (this.status === 'online') this.room?.send(MSG.report, input);
+    else useSession.getState().showNotice('Chưa kết nối, chưa gửi được báo cáo.');
   }
 
   leaveSeat(): void {

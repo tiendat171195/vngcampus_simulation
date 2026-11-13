@@ -17,7 +17,8 @@ const DURATIONS: Array<{ hours: number | null; label: string }> = [
 ];
 
 function sanctionText(sanction: SanctionDto) {
-  const kind = sanction.type === 'ban' ? 'Khoá tài khoản' : 'Cấm chat';
+  const kind =
+    sanction.type === 'ban' ? 'Khoá tài khoản' : sanction.type === 'warn' ? 'Nhắc nhở' : 'Cấm chat';
   return `${kind} · ${sanction.endsAt ? `đến ${when(sanction.endsAt)}` : 'không thời hạn'}`;
 }
 

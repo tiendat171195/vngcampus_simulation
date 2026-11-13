@@ -18,6 +18,11 @@ const envSchema = z.object({
   /** Channel sizes; defaults come from CHANNEL in @campus/shared. Lowered in tests. */
   CHANNEL_SOFT_CAP: z.coerce.number().int().min(1).optional(),
   CHANNEL_HARD_CAP: z.coerce.number().int().min(1).optional(),
+  /**
+   * Salt for the hash that stands for a person in the analytics tables (docs/07 §8). A long
+   * random secret in production; changing it makes everyone look new.
+   */
+  ANALYTICS_SALT: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -27,6 +32,10 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   if (!parsed.success) {
     throw new Error(`Invalid environment:\n${z.prettifyError(parsed.error)}`);
   }
+  if (parsed.data.NODE_ENV === 'production' && (parsed.data.ANALYTICS_SALT?.length ?? 0) < 32)
+    throw new Error(
+      'ANALYTICS_SALT must be a random secret of at least 32 characters in production.',
+    );
   return parsed.data;
 }
 

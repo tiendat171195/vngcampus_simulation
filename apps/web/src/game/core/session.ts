@@ -62,8 +62,11 @@ interface SessionState {
   avatar: string;
   setAvatar(avatar: string): void;
   /** A full-screen dialog over the game; the game ignores keys and touches meanwhile. */
-  modal: 'avatar' | 'quiz' | null;
-  setModal(modal: 'avatar' | 'quiz' | null): void;
+  modal: 'avatar' | 'quiz' | 'report' | null;
+  setModal(modal: 'avatar' | 'quiz' | 'report' | null): void;
+  /** Who is being reported, while the report form is open. */
+  reportTarget: { userId: string; name: string } | null;
+  openReport(target: { userId: string; name: string } | null): void;
   /** The colleague whose profile card is open. */
   profileCard: { userId: string; name: string; guest: boolean } | null;
   setProfileCard(card: { userId: string; name: string; guest: boolean } | null): void;
@@ -99,6 +102,13 @@ export const useSession = create<SessionState>((set, get) => ({
   setAvatar: (avatar) => set({ avatar }),
   modal: null,
   setModal: (modal) => set({ modal }),
+  reportTarget: null,
+  openReport: (reportTarget) =>
+    set((state) => ({
+      reportTarget,
+      profileCard: reportTarget ? null : state.profileCard,
+      modal: reportTarget ? 'report' : state.modal === 'report' ? null : state.modal,
+    })),
   profileCard: null,
   setProfileCard: (profileCard) => set({ profileCard }),
   net: { status: 'idle', channel: null, players: 0 },

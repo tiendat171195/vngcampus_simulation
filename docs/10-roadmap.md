@@ -173,7 +173,18 @@ Ngoài nghiệm thu: streak theo ngày làm việc, giờ vàng, BXH tuần/thá
 | P5.1 | Vỏ admin + phân quyền | SPA admin, đăng nhập, kiểm tra vai trò ở server (có test), quản lý người dùng, vai trò, án phạt, nhật ký thao tác | M | Xong |
 | P5.2 | Trình soạn nhiệm vụ | Danh sách + lịch, form sinh từ schema, bản đồ chọn vị trí, kiểm tra tự động, xuất bản/gỡ/kết thúc/nhân bản, ngân hàng quiz + nhập CSV, xem thử trong game | L | Xong |
 | P5.3 | Mẫu, tự điền, vận hành | Kho mẫu, job tự điền ngày trống, thông báo (phát ngay và hẹn giờ), cấu hình + cờ tính năng + công tắc khẩn | M | Xong |
-| P5.4 | Kiểm duyệt và số liệu | Nút báo cáo trong game, hàng đợi kiểm duyệt, mute/ban có hiệu lực ngay, đường ống sự kiện analytics, dashboard, trang kết quả nhiệm vụ | M | Chưa làm |
+| P5.4 | Kiểm duyệt và số liệu | Nút báo cáo trong game, hàng đợi kiểm duyệt, mute/ban có hiệu lực ngay, đường ống sự kiện analytics, dashboard, trang kết quả nhiệm vụ | M | Xong |
+
+**Kết quả nghiệm thu P5 (14/11/2026):**
+
+| Tiêu chí | Kết quả |
+|---|---|
+| Một người không biết code tạo trọn nhiệm vụ cho ngày mai trên giao diện, kể cả đặt vị trí trên bản đồ; nhiệm vụ tự bắt đầu đúng giờ | Đạt — e2e `y-admin.spec.ts`: soạn trên giao diện, chọn Atrium trên bản đồ, kiểm tra tự động, xuất bản, lưu làm mẫu rồi dùng lại mẫu. Nhiệm vụ đã xuất bản được realtime nhận trong ≤ 15 giây và bắt đầu đúng `startsAt` (test runtime; e2e `z-missions.spec.ts` chơi một nhiệm vụ vừa xuất bản) |
+| Bỏ trống một ngày: hệ thống tự điền từ kho mẫu | Đạt — test Postgres: từ 23:00 lấy mẫu lâu chưa dùng nhất, bỏ mẫu không qua kiểm tra, giữ khung giờ, không lặp trong N ngày, tôn trọng công tắc tắt |
+| Cấm chat một tài khoản từ admin: có hiệu lực trong game sau vài giây | Đạt — hai e2e: cấm từ trang người dùng, và từ hàng đợi báo cáo sau khi người chơi bấm báo cáo trên dòng chat; trong ≤ 6 giây chat bị từ chối kèm lý do |
+| Dashboard hiện số người online và phễu nhiệm vụ hôm nay | Đạt — e2e đọc số online trên dashboard và trang kết quả nhiệm vụ (2 tham gia → từng mục tiêu → 2 hoàn thành); test Postgres cho số liệu hôm nay, 7 ngày, người quay lại, nhiệm vụ hôm nay và cảnh báo |
+
+Ngoài nghiệm thu: thông báo ba mức (phát ngay/hẹn giờ), công tắc tắt chat và chế độ bảo trì (có e2e), cấu hình hạn mức thưởng/ngày nghỉ/tự điền. Chưa làm: cờ tính năng, online theo khu, D7, sinh form objective tự động từ schema (V1).
 
 **Nghiệm thu:**
 - Một người không biết code tạo trọn nhiệm vụ cho ngày mai trên giao diện, kể cả đặt vị trí trên bản đồ; nhiệm vụ tự bắt đầu đúng giờ.

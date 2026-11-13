@@ -511,3 +511,119 @@ h2 {
   gap: 8px;
   margin: 8px 0;
 }
+
+/* ---------- dashboard, results, reports (P5.4) ---------- */
+
+h3 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.tile {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line, #e3e7ec);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.tile b {
+  font-size: 26px;
+}
+
+.alerts {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alerts li {
+  padding: 8px 12px;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  background: #eef4ff;
+}
+
+.alerts li[data-level="warn"] {
+  border-color: #f59e0b;
+  background: #fff6e5;
+}
+
+.alerts li[data-level="error"] {
+  border-color: #dc2626;
+  background: #fdecec;
+}
+
+.alerts a {
+  color: inherit;
+}
+
+.bars {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bars li {
+  display: grid;
+  grid-template-columns: minmax(80px, 260px) 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bars .bar {
+  height: 12px;
+  min-width: 2px;
+  border-radius: 6px;
+  background: #f28c28;
+}
+
+.bars li > span:last-child {
+  text-align: right;
+}
+
+.reports {
+  display: grid;
+  gap: 12px;
+}
+
+.report header {
+  gap: 8px;
+}
+
+.transcript {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f6f7f9;
+  list-style: none;
+  font-size: 13px;
+}
+
+.transcript li[data-target="true"] {
+  color: #b42318;
+}
+
+.report-note {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 6px 0;
+}
+
+.top {
+  margin: 8px 0;
+  padding-left: 24px;
+}

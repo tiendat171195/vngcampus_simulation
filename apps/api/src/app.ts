@@ -11,6 +11,7 @@ import { adminMissionRoutes } from './routes/adminMissions';
 import { adminOpsRoutes } from './routes/adminOps';
 import { authRoutes } from './routes/auth';
 import { directoryRoutes } from './routes/directory';
+import { insightRoutes } from './routes/insights';
 import { meRoutes } from './routes/me';
 import { oidcRoutes } from './routes/oidc';
 import { progressRoutes } from './routes/progress';
@@ -80,6 +81,7 @@ export async function buildApp(
       await adminRoutes(v1, deps);
       await adminMissionRoutes(v1, deps);
       await adminOpsRoutes(v1, deps);
+      await insightRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },
     { prefix: '/api/v1' },

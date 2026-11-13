@@ -23,7 +23,7 @@ const services = [
   {
     name: 'realtime',
     entry: 'apps/realtime/dist/index.mjs',
-    env: { REALTIME_PORT: '3902' },
+    env: { REALTIME_PORT: '3902', ANALYTICS_SALT: 'smoke-only-salt-0123456789abcdef0123' },
     url: 'http://127.0.0.1:3902/health',
   },
 ];

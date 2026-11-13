@@ -68,11 +68,13 @@ erDiagram
 | Bảng | Cột chính | Ghi chú |
 |---|---|---|
 | `announcements` | `id`, `level`, `text` (jsonb), `starts_at`, `ends_at`, `created_by` | |
-| `reports` | `id`, `reporter_id`, `target_user_id`, `reason`, `note?`, `context` (jsonb: đoạn chat xung quanh), `status`, `handled_by?`, `handled_at?` | |
-| `sanctions` | `id`, `user_id`, `type` (mute/ban), `reason`, `starts_at`, `ends_at?`, `created_by` | |
+| `reports` | `id`, `reporter_id`, `target_user_id`, `reason`, `note?`, `context` (jsonb: đoạn chat xung quanh), `status`, `handled_by?`, `handled_at?` | **Đã làm (P5.4)**, thêm `resolution`. `context` chỉ gồm các dòng người báo cáo đã nghe/nói trong 30 phút (tối đa 20), xoá sau 180 ngày kể từ khi xử lý |
+| `sanctions` | `id`, `user_id`, `type` (mute/ban/warn), `reason`, `starts_at`, `ends_at?`, `created_by` | `warn` (P5.4): không hạn chế gì, hiện cho người đó một lần, ghi trong hồ sơ 24 giờ |
 | `audit_logs` | `id`, `actor_id`, `action`, `entity_type`, `entity_id`, `diff` (jsonb), `created_at` | Mọi thao tác admin |
 | `settings` | PK `key`, `value` (jsonb), `updated_by`, `updated_at` | Cấu hình và cờ tính năng |
-| `analytics_events` | `ts`, `user_id?`, `name`, `props` (jsonb) | Phân vùng theo tháng; có thời hạn lưu |
+| `analytics_events` | `ts`, `user_id?`, `name`, `props` (jsonb) | Phân vùng theo tháng; có thời hạn lưu. **Không làm (P5.4):** thay bằng hai bảng dưới, không lưu sự kiện thô |
+| `analytics_daily` | PK (`day`, `metric`, `dimension`), `value` | Bộ đếm theo ngày giờ VN; `dimension` là loại thiết bị hoặc khoảng của histogram (thời gian tải, FPS, độ dài phiên) |
+| `activity_days` | PK (`day`, `user_hash`) | Ai có mặt ngày nào dưới dạng mã băm có muối (`ANALYTICS_SALT`) — đủ để đếm DAU và người quay lại hôm sau; xoá sau 90 ngày |
 
 ## 3. Redis
 
@@ -85,7 +87,7 @@ erDiagram
 | `lastpos:{userId}` | string, hết hạn 24 giờ | Vị trí cuối |
 | `lb:*` | sorted set | Bảng xếp hạng |
 | `community:{missionId}` | counter | Mục tiêu cộng đồng |
-| `chatbuf:{roomId}` | list tối đa 200, hết hạn 24 giờ | Ngữ cảnh cho báo cáo vi phạm |
+| `chatbuf:{roomId}` | list tối đa 200, hết hạn 24 giờ | Ngữ cảnh cho báo cáo vi phạm. **Đã làm (P5.4) trong bộ nhớ của phòng**, không qua Redis |
 | `rl:{phạm vi}:{id}` | counter có hạn | Rate limit |
 | `cache:missions:active` | JSON, hết hạn 15 giây | Cache nhiệm vụ đang chạy |
 | Pub/sub: `missions:changed`, `announce`, `moderation`, `settings:changed` | — | Tín hiệu giữa API và realtime |
@@ -126,7 +128,8 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 | GET | `/leaderboards/points?period=week\|month\|all` · `/leaderboards/departments` · `/leaderboards/mission/:id` | Bảng xếp hạng; kèm dòng của chính mình khi ở dưới top 50 |
 | GET | `/me/stats` · `/me/items` · `/items` | Chỉ số (đã làm), tủ đồ và danh mục (V1) |
 | POST | `/shop/purchase` | Đổi điểm lấy cosmetic (V1) |
-| POST | `/reports` | Báo cáo vi phạm |
+| POST | `/reports` | Báo cáo vi phạm. **Đã làm (P5.4) qua realtime** (message `report`): chỉ server phòng biết người báo cáo đã thấy những dòng chat nào |
+| POST | `/analytics` | `{ events }` (đã làm, P5.4): `world_loaded`, `perf_sample`, `client_error`; cần đăng nhập, 30 lần/phút; server đếm vào `analytics_daily` rồi bỏ sự kiện |
 
 Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi được, dựa trên sự kiện trong thế giới.
 
@@ -138,8 +141,8 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 | Mẫu, quiz | `/templates` (đã làm, P5.3): `GET`, `GET /:id`, `POST` `{ name, tags?, active?, definition \| missionId }`, `PATCH /:id`, `DELETE /:id`; `POST /missions/autofill` (tự điền ngày mai ngay); `/quiz` (đã làm): `GET ?q=&tag=`, `PUT /quiz/:id`, `DELETE /quiz/:id` (tắt), `POST /quiz/import` `{ csv }` |
 | Thông báo (đã làm, P5.3) | `GET /announcements` (tuần qua và sắp phát); `POST /announcements` `{ level, text, startsAt?, minutes }` — không có `startsAt` là phát ngay; `POST /announcements/:id/cancel`. Mức `fullscreen` chỉ quản trị viên |
 | Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id` |
-| Kiểm duyệt | `GET /reports`; `POST /reports/:id/resolve` |
-| Số liệu | `GET /stats/overview` · `/stats/missions` |
+| Kiểm duyệt (đã làm, P5.4) | `GET /reports?status=open\|handled`; `POST /reports/:id/resolve` `{ action: dismiss\|warn\|mute\|ban, hours?, note? }` — một quyết định đóng mọi báo cáo đang mở về cùng người |
+| Số liệu (đã làm, P5.4) | `GET /stats/overview` (quyền dashboard); `GET /missions/:id/stats` (trang kết quả). Số online trực tiếp đọc từ `/rt/channels` |
 | Hệ thống | `GET` / `PUT /settings` (đã làm, P5.3: chỉ quản trị viên; `PUT` nhận một phần, kiểm bằng zod, ghi nhật ký những gì đổi); `GET /audit?all=1` (đã làm: của mình, hoặc của mọi người với quyền admin) |
 
 Mọi route admin đọc vai trò **từ DB ở mỗi request** (không tin claim `role` trong token), nên hạ quyền có hiệu lực ngay; khách và tài khoản bị khoá không bao giờ là nhân viên. Án phạt: khoá tài khoản thu hồi mọi phiên; realtime đọc án phạt đang có hiệu lực mỗi 5 giây — người bị cấm chat được báo đến lúc nào, người bị khoá bị đẩy ra và không vào lại được; job mỗi phút trả trạng thái khi án phạt hết hạn.
@@ -190,8 +193,8 @@ Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không
 | `dept-leaderboard` | Mỗi 10 phút | Tính lại BXH phòng ban |
 | `leaderboard-snapshot` | Cuối tuần, cuối tháng | Chụp BXH về Postgres |
 | `presence-sweep` | Mỗi phút | Dọn presence quá hạn |
-| `analytics-rollup` | Hằng giờ | Tổng hợp số liệu cho dashboard |
-| `data-retention` | Hằng ngày | Xoá khách không hoạt động quá 30 ngày, sự kiện analytics quá hạn, phiên hết hạn |
+| `analytics-rollup` | Hằng giờ | Tổng hợp số liệu cho dashboard. **Không cần (P5.4):** số liệu được đếm sẵn khi xảy ra |
+| `data-retention` | Hằng ngày | Xoá khách không hoạt động quá 30 ngày, sự kiện analytics quá hạn, phiên hết hạn. **Đã làm một phần (P5.4)**, mỗi giờ trong vòng job của API: `activity_days` quá 90 ngày, chat trong báo cáo đã xử lý quá 180 ngày; khách và phiên cũ chưa làm (P7) |
 
 ## 7. Cấu hình và cờ tính năng
 
@@ -216,3 +219,5 @@ Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không
 | `client_error` | mã lỗi | Chất lượng |
 
 Dashboard chỉ hiển thị **số liệu tổng hợp**. Không có màn hình nào cho xem lịch sử online của một cá nhân cụ thể.
+
+**Đã làm (P5.4):** không có bảng sự kiện thô. Realtime đếm `session_start` (theo thiết bị; đổi kênh không tính lượt mới), `session_length` (theo khoảng, mỗi lần rời phòng), `chat_sent`, `emote_used`, `seat_taken`, `report_sent` trong bộ nhớ và ghi mỗi phút; client gửi `world_loaded` (lần đầu/lần sau), `perf_sample` (FPS đo 5 giây, mỗi 5 phút), `client_error` (chỉ mã lỗi, tối đa 5 mỗi trang). Phễu nhiệm vụ đọc thẳng từ `mission_progress`. Chưa làm: `mission_viewed`, `channel_switched`, `colleague_found`, tỉ lệ quay lại D7.

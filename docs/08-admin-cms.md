@@ -105,6 +105,8 @@ Nút **Xem thử** mở game với `?preview=<missionId>`. Chỉ người đó t
 
 Trong chế độ nội bộ, tên hiển thị gắn với danh tính thật nên lượng vi phạm kỳ vọng thấp. Công cụ này quan trọng hơn nhiều nếu mở chế độ khách.
 
+**Đã làm (P5.4):** nút "Báo cáo" trên thẻ hồ sơ và nút ⚑ cạnh mỗi dòng chat của người khác; chọn lý do + ghi chú. Báo cáo đi qua realtime, server đính các dòng chat **người báo cáo đã thấy** trong 30 phút gần nhất (bộ đệm trong bộ nhớ phòng, không qua Redis); tối đa 5 báo cáo liền, sau đó 1 báo cáo/2 phút; báo cáo lặp về cùng người khi còn mở chỉ cập nhật bản cũ. Trang "Báo cáo vi phạm": hàng đợi cũ trước, đoạn chat với dòng của người bị báo cáo tô đỏ, số báo cáo khác về người đó, nút bỏ qua · nhắc nhở · cấm chat 1 giờ/1 ngày/7 ngày · khoá; ô "lý do" là điều người bị phạt thấy. Một quyết định đóng mọi báo cáo đang mở về người đó. Nhắc nhở hiện một lần trong game.
+
 ## 7. Dashboard số liệu
 
 | Nhóm | Chỉ số |
@@ -116,6 +118,8 @@ Trong chế độ nội bộ, tên hiển thị gắn với danh tính thật n�
 | Kỹ thuật | Thời gian tải, FPS theo nhóm thiết bị, tỉ lệ lỗi |
 
 Mọi số liệu đều ở dạng **tổng hợp**; không có báo cáo theo từng cá nhân.
+
+**Đã làm (P5.4):** trang Tổng quan: số online theo kênh (đọc `/rt/channels` mỗi 5 giây), người chơi và người mới hôm nay, lượt vào theo thiết bị và độ dài phiên phổ biến, số chat/biểu cảm/lượt ngồi, bảng nhiệm vụ hôm nay (tham gia, hoàn thành, thời gian trung vị), 7 ngày qua với số người quay lại hôm sau, thời gian tải và FPS theo khoảng, số lỗi trình duyệt; cảnh báo: hôm nay/ngày mai chưa có nhiệm vụ ngày, ngày mai được tự điền, báo cáo chờ xử lý (chỉ với kiểm duyệt), bảo trì, chat tắt. Trang Kết quả nhiệm vụ (`/missions/:id/results`): tham gia → từng mục tiêu → hoàn thành, hoàn thành theo giờ, 10 người nhanh nhất, mục tiêu chung. Chưa làm: online theo khu, D7, thời lượng trung vị chính xác (chỉ biết khoảng).
 
 ## 8. Ghi chú kỹ thuật
 

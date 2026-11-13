@@ -55,6 +55,8 @@ export const MSG = {
    * and whenever they change.
    */
   ops: 'ops',
+  /** Client → server: `{ targetUserId, reason, note }` (reportSchema); answered with a notice. */
+  report: 'report',
 } as const;
 
 /** Emotes, by wire id. Never renumber; add new ones at the end. */
@@ -170,6 +172,8 @@ export const joinOptionsSchema = z.object({
   resume: z.object({ x: z.number(), y: z.number(), z: z.number() }).optional(),
   /** Editors only: play this mission (even a draft) alone, without saving or rewards (docs/08 §4.4). */
   preview: z.uuid().optional(),
+  /** For counting sessions by device kind; nothing else is derived from it. */
+  device: z.enum(['desktop', 'mobile']).optional(),
 });
 export type JoinOptions = z.infer<typeof joinOptionsSchema>;
 

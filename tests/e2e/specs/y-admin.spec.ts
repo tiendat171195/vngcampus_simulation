@@ -1,17 +1,6 @@
-import { expect, type Page, test } from '@playwright/test';
-import { enterAs } from './helpers';
+import { expect, test } from '@playwright/test';
+import { ADMIN, enterAs, signInAsAdmin } from './helpers';
 import { resetE2eOperations } from './mission-data';
-
-const ADMIN = 'http://localhost:4174';
-
-/** Signs in on the game with the e2e administrator's company account; the admin shares the session. */
-async function signInAsAdmin(page: Page) {
-  await page.goto('/api/v1/auth/oidc/oidc/start?return=%2F&consent=1');
-  await page.fill('#email', 'e2e.admin@vng.com.vn');
-  await page.fill('#name', 'Quản Trị E2E');
-  await page.getByRole('button', { name: 'Đăng nhập' }).click();
-  await page.waitForURL(/localhost:4173\/$/);
-}
 
 test('an editor builds a mission on screen, places it on the map and publishes it', async ({
   browser,
@@ -166,4 +155,57 @@ test('announcements, the chat switch and maintenance reach the game within secon
     await context.close();
     await player.context.close();
   }
+});
+
+test('a report from the game reaches the queue with the chat, and a decision mutes in seconds', async ({
+  browser,
+}) => {
+  const suffix = Date.now() % 100_000;
+  const rude = await enterAs(browser, `Nói Bậy ${suffix}`, {}, '&spawn=poi.checkpoint.atrium');
+  const witness = await enterAs(
+    browser,
+    `Người Thấy ${suffix}`,
+    {},
+    '&spawn=poi.checkpoint.atrium',
+  );
+  await rude.page.keyboard.press('Enter');
+  await rude.page.getByLabel('Tin nhắn').fill(`ê mấy người kia ${suffix}`);
+  await rude.page.getByLabel('Tin nhắn').press('Enter');
+  await expect(witness.page.locator('.chat-lines')).toContainText(`ê mấy người kia ${suffix}`);
+
+  // Reported from the chat line, with a reason and a note.
+  await witness.page.keyboard.press('Enter');
+  await witness.page.getByRole('button', { name: `Báo cáo Nói Bậy ${suffix}` }).click();
+  const dialog = witness.page.getByTestId('report-dialog');
+  await dialog.getByLabel('Quấy rối, xúc phạm').check();
+  await dialog.getByLabel('Ghi chú cho kiểm duyệt viên (không bắt buộc)').fill('Nói tục ở sảnh');
+  await dialog.getByRole('button', { name: 'Gửi báo cáo' }).click();
+  await expect(witness.page.locator('.notice-toast, .notice')).toContainText('Đã gửi báo cáo');
+
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const admin = await context.newPage();
+  await signInAsAdmin(admin);
+  // The dashboard sees people in the campus and the waiting report.
+  await admin.goto(`${ADMIN}/`);
+  await expect(admin.getByTestId('online-now').locator('b')).toHaveText(/^[1-9]\d*$/);
+  await expect(admin.getByTestId('alerts')).toContainText('báo cáo vi phạm chờ xử lý');
+
+  await admin.goto(`${ADMIN}/reports`);
+  const report = admin.getByTestId('report').filter({ hasText: `Nói Bậy ${suffix}` });
+  await expect(report).toContainText('Nói tục ở sảnh');
+  await expect(report.locator('.transcript')).toContainText(`ê mấy người kia ${suffix}`);
+  await report.getByLabel('Lý do quyết định').fill('Lời lẽ khiếm nhã');
+  await report.getByRole('button', { name: 'Cấm chat 1 giờ' }).click();
+  await expect(admin.getByRole('status')).toContainText(`đã đóng 1 báo cáo về Nói Bậy ${suffix}`);
+
+  // Within a refresh of the realtime server (5 s), the person cannot chat any more.
+  await rude.page.waitForTimeout(6000);
+  await rude.page.keyboard.press('Enter');
+  await rude.page.getByLabel('Tin nhắn').fill('alo');
+  await rude.page.getByLabel('Tin nhắn').press('Enter');
+  await expect(rude.page.locator('.notice-toast, .notice')).toContainText('tạm khoá chat', {
+    timeout: 10_000,
+  });
+  await context.close();
+  for (const player of [rude, witness]) await player.context.close();
 });

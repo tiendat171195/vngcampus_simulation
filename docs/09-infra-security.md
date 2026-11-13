@@ -145,9 +145,10 @@ Khung pháp lý hiện hành: **Luật Bảo vệ dữ liệu cá nhân số 91/
 |---|---|
 | Hồ sơ người dùng và tiến độ | Tới khi người dùng yêu cầu xoá hoặc tài khoản bị vô hiệu |
 | Tài khoản khách không hoạt động | 30 ngày |
-| Bộ đệm chat trong Redis | 24 giờ |
-| Báo cáo vi phạm kèm ngữ cảnh | 180 ngày |
-| Sự kiện analytics thô | 90 ngày (số tổng hợp giữ lâu hơn) |
+| Bộ đệm chat (trong bộ nhớ phòng realtime, P5.4) | 24 giờ, hoặc tới khi phòng đóng |
+| Báo cáo vi phạm kèm ngữ cảnh | Đoạn chat đính kèm xoá 180 ngày sau khi xử lý; quyết định giữ lại |
+| Sự kiện analytics thô | Không lưu (P5.4): đếm thẳng vào `analytics_daily`, giữ lâu |
+| Mã băm "ai có mặt ngày nào" (`activity_days`) | 90 ngày |
 | Log ứng dụng | 30 ngày |
 | Nhật ký thao tác admin | 1 năm |
 

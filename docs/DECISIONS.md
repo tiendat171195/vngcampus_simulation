@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-14 — Báo cáo vi phạm đi qua realtime; số liệu đếm sẵn, không lưu sự kiện thô
+
+- Gói việc: P5.4
+- Bối cảnh: thiết kế có `POST /reports` ở API với ngữ cảnh chat lấy từ bộ đệm Redis của phòng, bảng `analytics_events` thô phân vùng theo tháng cộng job `analytics-rollup` hằng giờ, và `/presence/summary` cho số online. Chưa có Redis; API không biết ai đã nghe dòng chat nào.
+- Quyết định: (1) Báo cáo là message `report` gửi tới phòng realtime. Phòng giữ 200 dòng chat gần nhất **trong bộ nhớ**, mỗi dòng nhớ ai đã nhận; báo cáo chỉ kèm các dòng **người báo cáo đã thấy** trong 30 phút (tối đa 20) — không bịa được ngữ cảnh, không lộ chat của người khác. Rate limit 5 liền rồi 1 mỗi 2 phút; báo cáo lặp khi bản cũ còn mở chỉ cập nhật. (2) Xử lý: một quyết định đóng mọi báo cáo đang mở về cùng người; "nhắc nhở" là án `warn` 24 giờ không hạn chế gì, realtime hiện một lần. (3) Không lưu sự kiện thô: `analytics_daily` (ngày, chỉ số, chiều, giá trị) được cộng dồn khi sự kiện tới — realtime gom trong bộ nhớ và ghi mỗi phút, API đếm sự kiện client vào khoảng (thời gian tải, FPS) rồi bỏ đi. Để đếm DAU và người quay lại, `activity_days` lưu mã băm SHA-256 có muối bí mật (`ANALYTICS_SALT`, bắt buộc ở production) của id, giữ 90 ngày. Không còn job rollup. (4) Số online trên dashboard đọc `/rt/channels` (đã có, chỉ số đếm) mỗi 5 giây. (5) Chat đính trong báo cáo xoá 180 ngày sau khi xử lý (đúng bảng lưu trữ ở 09 và trang quyền riêng tư). Trang quyền riêng tư nói thêm về mã băm, không đổi phiên bản đồng ý vì không thêm loại dữ liệu cá nhân nào mới về nội dung.
+- Khác plan ở đâu: đã sửa `05-multiplayer.md` §8, `07-backend-data.md` §2.4, §3, §4, §5, §6, §8, `08-admin-cms.md` §6–7, `09-infra-security.md` (bảng lưu trữ).
+- Hệ quả: báo cáo về người ở kênh khác không có ngữ cảnh; phòng đóng là mất bộ đệm chat (chấp nhận được). Độ dài phiên và "thời gian trung vị" phiên chỉ biết theo khoảng; đổi kênh làm một phiên thành hai đoạn độ dài. Mất tối đa một phút bộ đếm nếu realtime sập. Muốn D7 hay số online theo khu thì thêm sau trên cùng hai bảng.
+
 ## 2026-11-13 — Mẫu, tự điền, thông báo và công tắc khẩn
 
 - Gói việc: P5.3

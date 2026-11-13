@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
-import { enterAs, enterFromSplash } from './helpers';
+import { ADMIN, enterAs, enterFromSplash, signInAsAdmin } from './helpers';
 import { archiveE2eMission, E2E_TITLE, publishE2eMission } from './mission-data';
 
 // Runs last (file name): the mission it publishes would otherwise greet the other tests.
@@ -96,4 +96,18 @@ test('two colleagues play a mission from start to end, leaving and coming back o
   await expect(board).toContainText('Nhiệm Vụ Bình');
   await an.context.close();
   await binh.context.close();
+
+  // The admin's results page: two started, two finished, every objective done by both.
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const admin = await context.newPage();
+  await signInAsAdmin(admin);
+  await admin.goto(`${ADMIN}/missions/${missionId}/results`);
+  const results = admin.getByTestId('mission-results');
+  await expect(results.locator('.tile b').nth(0)).toHaveText('2');
+  await expect(results.locator('.tile b').nth(1)).toHaveText('2');
+  const funnel = admin.getByTestId('objective-funnel').locator('li');
+  await expect(funnel).toHaveCount(5);
+  for (let i = 0; i < 5; i++) await expect(funnel.nth(i).locator('span').last()).toHaveText('2');
+  await expect(results.locator('.top li')).toHaveCount(2);
+  await context.close();
 });

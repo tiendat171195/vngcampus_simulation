@@ -9,6 +9,8 @@ const ACTIONS: Record<string, string> = {
   'sanction.ban': 'Khoá tài khoản',
   'sanction.lift': 'Gỡ án phạt',
   'settings.update': 'Đổi cấu hình',
+  'sanction.warn': 'Nhắc nhở',
+  'report.resolve': 'Xử lý báo cáo',
   'announcement.create': 'Tạo thông báo',
   'announcement.cancel': 'Huỷ thông báo',
   'template.create': 'Tạo mẫu',

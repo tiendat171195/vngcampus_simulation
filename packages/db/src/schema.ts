@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
+  bigint,
   boolean,
   date,
   index,
@@ -250,7 +251,8 @@ export const leaderboardSnapshots = pgTable(
 
 // ---------- operations (docs/07 §2.4) ----------
 
-export const SANCTION_TYPES = ['mute', 'ban'] as const;
+/** `warn` restricts nothing: the person is told once, and it shows on their record. */
+export const SANCTION_TYPES = ['mute', 'ban', 'warn'] as const;
 
 /** Mutes and bans; in force from `startsAt` until `endsAt` (null: until lifted). */
 export const sanctions = pgTable(
@@ -320,4 +322,70 @@ export const announcements = pgTable(
     ...timestamps,
   },
   (table) => [index('announcements_window').on(table.startsAt, table.endsAt)],
+);
+
+// ---------- moderation and analytics (P5.4, docs/08 §6–7) ----------
+
+export const REPORT_REASONS = [
+  'harassment',
+  'spam',
+  'offensive_name',
+  'cheating',
+  'other',
+] as const;
+export const REPORT_STATUSES = ['open', 'dismissed', 'warned', 'muted', 'banned'] as const;
+
+/**
+ * A player's report about another. `context` holds the few chat lines around it that the
+ * reporter saw (docs/05 §8): the only chat ever written to the database, kept for moderation.
+ */
+export const reports = pgTable(
+  'reports',
+  {
+    id: uuid('id').primaryKey(),
+    reporterId: uuid('reporter_id').references(() => users.id, { onDelete: 'set null' }),
+    targetUserId: uuid('target_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    reason: text('reason', { enum: REPORT_REASONS }).notNull(),
+    note: text('note').notNull().default(''),
+    context: jsonb('context').notNull().default(sql`'[]'::jsonb`),
+    status: text('status', { enum: REPORT_STATUSES }).notNull().default('open'),
+    resolution: text('resolution'),
+    handledBy: uuid('handled_by').references(() => users.id, { onDelete: 'set null' }),
+    handledAt: timestamp('handled_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index('reports_status').on(table.status, table.createdAt),
+    index('reports_target').on(table.targetUserId),
+  ],
+);
+
+/**
+ * Analytics, counted as they happen and never stored per person (docs/07 §8): one row per day,
+ * metric and dimension (a device kind, a histogram bucket…).
+ */
+export const analyticsDaily = pgTable(
+  'analytics_daily',
+  {
+    day: date('day').notNull(),
+    metric: text('metric').notNull(),
+    dimension: text('dimension').notNull().default(''),
+    value: bigint('value', { mode: 'number' }).notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.metric, table.dimension] })],
+);
+
+/**
+ * Who was around on which day, as a salted hash: enough to count daily users and how many come
+ * back, not to tell who. Kept 90 days.
+ */
+export const activityDays = pgTable(
+  'activity_days',
+  {
+    day: date('day').notNull(),
+    userHash: text('user_hash').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.userHash] })],
 );

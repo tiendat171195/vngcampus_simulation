@@ -35,7 +35,7 @@ export interface AdminMeDto {
 
 export interface SanctionDto {
   id: string;
-  type: 'mute' | 'ban';
+  type: 'mute' | 'ban' | 'warn';
   reason: string;
   startsAt: string;
   endsAt: string | null;

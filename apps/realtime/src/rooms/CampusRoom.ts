@@ -27,8 +27,12 @@ import {
   pingSchema,
   profileSchema,
   quizAnswerSchema,
+  type ReportContextLine,
+  type ReportInput,
+  reportSchema,
   STAFF_ROLES,
   seatTakeSchema,
+  sessionBucket,
 } from '@campus/shared';
 import {
   type AuthContext,
@@ -38,7 +42,9 @@ import {
   Room,
   ServerError,
 } from '@colyseus/core';
+import type { AnalyticsSink } from '../analytics';
 import type { Identity, TokenVerifier } from '../auth';
+import { ChatLog } from '../chatLog';
 import { countMessage, recordPatch } from '../metrics';
 import { RoomMissionBinding } from '../missions/binding';
 import type { MissionRuntime } from '../missions/runtime';
@@ -69,6 +75,10 @@ export interface CampusRoomOptions {
   sanctions?: SanctionWatcher;
   /** Kill switches, maintenance and announcements; without it chat is on and nothing is shown. */
   ops?: OpsWatcher;
+  /** Files a player's report; resolves false when it could not be saved. */
+  reports?: (report: ReportToFile) => Promise<boolean>;
+  /** Counters for the dashboard; without it nothing is counted. */
+  analytics?: AnalyticsSink;
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
@@ -92,6 +102,9 @@ interface Tracking {
   emotes: RateLimiter;
   chat: RateLimiter;
   profile: RateLimiter;
+  reports: RateLimiter;
+  /** Wall clock when the player came in, for the session length. */
+  joinedAt: number;
   /** Room clock of the last deliberate input. */
   lastActivity: number;
   /** The tab is hidden, as reported by the client. */
@@ -114,6 +127,13 @@ const PING_RATE = 2;
 const EMOTE_RATE = 0.5;
 /** Profile changes per second, per player (saving an avatar a few times in a row is fine). */
 const PROFILE_RATE = 0.2;
+/** Reports: five, then one every two minutes. */
+const REPORT_RATE = 1 / 120;
+
+export interface ReportToFile extends ReportInput {
+  reporterId: string;
+  context: ReportContextLine[];
+}
 /** How close one must stand to sit down, and how far a seated player may drift before standing. */
 const SEAT_REACH = 2.5;
 const SEAT_LEASH = 1.5;
@@ -138,11 +158,19 @@ export class CampusRoom extends Room<{
   override patchRate = 1000 / NET.serverPatchHz;
 
   private config!: Required<
-    Omit<CampusRoomOptions, 'verifyToken' | 'missions' | 'sanctions' | 'ops'>
+    Omit<
+      CampusRoomOptions,
+      'verifyToken' | 'missions' | 'sanctions' | 'ops' | 'reports' | 'analytics'
+    >
   >;
   private sanctions: SanctionWatcher | null = null;
   private ops: OpsWatcher | null = null;
   private stopWatchingOps: (() => void) | null = null;
+  private stopWatchingWarnings: (() => void) | null = null;
+  private reports: CampusRoomOptions['reports'] | null = null;
+  private analytics: AnalyticsSink | null = null;
+  /** Recent chat in memory, only for reports (docs/05 §8). */
+  private readonly chatLog = new ChatLog();
   private stopWatchingBans: (() => void) | null = null;
   private missions: RoomMissionBinding | null = null;
   private verifyToken: TokenVerifier | undefined;
@@ -182,6 +210,13 @@ export class CampusRoom extends Room<{
             client.leave(CLOSE.kicked, 'Tài khoản đã bị khoá.');
         }
       }) ?? null;
+    this.reports = options.reports ?? null;
+    this.analytics = options.analytics ?? null;
+    // A warning from a moderator is shown once, wherever the person is.
+    this.stopWatchingWarnings =
+      this.sanctions?.onWarnings(() => {
+        for (const client of this.clients) this.deliverWarnings(client);
+      }) ?? null;
     this.ops = options.ops ?? null;
     // Switches and announcements reach everyone inside within seconds (docs/08 §5).
     this.stopWatchingOps =
@@ -212,6 +247,7 @@ export class CampusRoom extends Room<{
     this.onMessage(MSG.seatTake, (client, payload) => this.handleSeatTake(client, payload));
     this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
     this.onMessage(MSG.chat, (client, payload) => this.handleChat(client, payload));
+    this.onMessage(MSG.report, (client, payload) => void this.handleReport(client, payload));
     this.onMessage(MSG.profile, (client, payload) => void this.handleProfile(client, payload));
     this.onMessage(MSG.interact, (client, payload) => void this.handleInteract(client, payload));
     this.onMessage(MSG.quizAnswer, (client, payload) => {
@@ -308,6 +344,8 @@ export class CampusRoom extends Room<{
       emotes: new RateLimiter(EMOTE_RATE, now),
       chat: new RateLimiter(CHAT.burst / (CHAT.windowMs / 1000), now, CHAT.burst),
       profile: new RateLimiter(PROFILE_RATE, now, 3),
+      reports: new RateLimiter(REPORT_RATE, now, 5),
+      joinedAt: Date.now(),
       lastActivity: now,
       hidden: false,
       listed: '',
@@ -323,6 +361,13 @@ export class CampusRoom extends Room<{
         : undefined;
     void this.missions?.join(client.sessionId, identity.userId, identity.name, preview);
     if (this.ops) client.send(MSG.ops, this.ops.current satisfies OpsMessage);
+    this.deliverWarnings(client);
+    if (!preview) {
+      this.analytics?.active(identity.userId);
+      // Moving to another channel is the same visit.
+      if (!joinOptions?.resume)
+        this.analytics?.count('session_start', joinOptions?.device ?? 'desktop');
+    }
     // One person, one session: any older session of this user, in any channel, is closed.
     this.presence.publish(SESSION_TOPIC, { userId: identity.userId, sessionId: client.sessionId });
   }
@@ -346,6 +391,8 @@ export class CampusRoom extends Room<{
   }
 
   override async onLeave(client: Client): Promise<void> {
+    const joinedAt = this.tracking.get(client.sessionId)?.joinedAt;
+    if (joinedAt) this.analytics?.count('session_length', sessionBucket(Date.now() - joinedAt));
     this.releaseSeat(client.sessionId);
     const player = this.state.players.get(client.sessionId);
     if (player) await this.unlist(player.userId, client.sessionId);
@@ -360,6 +407,7 @@ export class CampusRoom extends Room<{
     this.missions?.dispose();
     this.stopWatchingBans?.();
     this.stopWatchingOps?.();
+    this.stopWatchingWarnings?.();
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
@@ -453,6 +501,7 @@ export class CampusRoom extends Room<{
     player.emoteSeq = (player.emoteSeq + 1) % 65536;
     const name = EMOTE_BY_ID.get(parsed.data.id);
     if (name) this.missions?.emote(client.sessionId, name);
+    this.analytics?.count('emote_used');
   }
 
   /** Using a mission entity; the binding checks distance and what it is. */
@@ -500,14 +549,64 @@ export class CampusRoom extends Room<{
       ts: this.now(),
     };
     const origin = tracking.accepted;
+    const heard = new Set<string>();
     for (const other of this.clients) {
       const there = this.tracking.get(other.sessionId)?.accepted;
       if (!there) continue;
       const near =
         Math.hypot(there.x - origin.x, there.z - origin.z) <= CHAT.radius &&
         Math.abs(there.y - origin.y) < 3;
-      if (near) other.send(MSG.chat, message);
+      if (!near) continue;
+      other.send(MSG.chat, message);
+      const listener = this.state.players.get(other.sessionId);
+      if (listener) heard.add(listener.userId);
     }
+    this.chatLog.add({
+      at: Date.now(),
+      userId: player.userId,
+      name: player.name,
+      text: message.text,
+      heard,
+    });
+    this.analytics?.count('chat_sent');
+  }
+
+  /**
+   * A report about someone (docs/08 §6). The server attaches what the reporter saw in chat, so
+   * nobody can make up context, and nobody gets lines they were not there for.
+   */
+  private async handleReport(client: Client, payload: unknown): Promise<void> {
+    const tracking = this.tracking.get(client.sessionId);
+    const player = this.state.players.get(client.sessionId);
+    const parsed = reportSchema.safeParse(payload);
+    if (!tracking || !player || !parsed.success) return;
+    const notice = (text: string) => client.send(MSG.notice, { text } satisfies NoticeMessage);
+    if (parsed.data.targetUserId === player.userId) return;
+    if (!this.reports) {
+      notice('Chưa nhận báo cáo được lúc này.');
+      return;
+    }
+    if (!tracking.reports.take(this.now())) {
+      notice('Bạn vừa gửi khá nhiều báo cáo, thử lại sau ít phút nhé.');
+      return;
+    }
+    const context = this.chatLog.contextFor(player.userId, parsed.data.targetUserId, Date.now());
+    const saved = await this.reports({ ...parsed.data, reporterId: player.userId, context }).catch(
+      () => false,
+    );
+    notice(
+      saved
+        ? 'Đã gửi báo cáo. Kiểm duyệt viên sẽ xem sớm — cảm ơn bạn.'
+        : 'Chưa gửi được báo cáo, thử lại sau nhé.',
+    );
+    if (saved) this.analytics?.count('report_sent');
+  }
+
+  private deliverWarnings(client: Client): void {
+    const player = this.state.players.get(client.sessionId);
+    if (!player || !this.sanctions) return;
+    for (const text of this.sanctions.takeWarnings(player.userId))
+      client.send(MSG.notice, { text } satisfies NoticeMessage);
   }
 
   private handleSeatTake(client: Client, payload: unknown): void {
@@ -531,6 +630,7 @@ export class CampusRoom extends Room<{
     this.releaseSeat(client.sessionId);
     this.state.seats.set(seat.id, client.sessionId);
     player.seatId = seat.id;
+    this.analytics?.count('seat_taken');
   }
 
   private releaseSeat(sessionId: string): void {

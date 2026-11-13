@@ -5,8 +5,10 @@ import { usePath } from './hooks';
 import { AnnouncementsPage } from './pages/Announcements';
 import { AuditPage } from './pages/Audit';
 import { MissionEditorPage } from './pages/MissionEditor';
+import { MissionResultsPage } from './pages/MissionResults';
 import { MissionsPage } from './pages/Missions';
 import { OverviewPage } from './pages/Overview';
+import { ReportsPage } from './pages/Reports';
 import { SettingsPage } from './pages/Settings';
 import { TemplatesPage } from './pages/Templates';
 import { UserDetailPage, UsersPage } from './pages/Users';
@@ -22,6 +24,7 @@ const NAV: Array<{ path: string; label: string; needs: Permission }> = [
   { path: '/missions', label: 'Nhiệm vụ', needs: 'missions' },
   { path: '/templates', label: 'Mẫu nhiệm vụ', needs: 'missions' },
   { path: '/announcements', label: 'Thông báo', needs: 'announcements' },
+  { path: '/reports', label: 'Báo cáo vi phạm', needs: 'moderation' },
   { path: '/users', label: 'Người dùng', needs: 'moderation' },
   { path: '/settings', label: 'Cấu hình', needs: 'config' },
   { path: '/audit', label: 'Nhật ký thao tác', needs: 'dashboard' },
@@ -67,10 +70,12 @@ export function App() {
   const userId = /^\/users\/([0-9a-f-]{36})$/.exec(path)?.[1];
   const missionId = /^\/missions\/([0-9a-f-]{36})$/.exec(path)?.[1];
   const missions = me.permissions.includes('missions');
-  let page = <OverviewPage me={me} />;
+  const resultsId = /^\/missions\/([0-9a-f-]{36})\/results$/.exec(path)?.[1];
+  let page = <OverviewPage me={me} go={go} />;
   if (missions && path === '/missions') page = <MissionsPage go={go} />;
   else if (missions && path === '/missions/new')
     page = <MissionEditorPage key="new" id={null} go={go} />;
+  else if (resultsId) page = <MissionResultsPage key={resultsId} id={resultsId} go={go} />;
   else if (missions && missionId)
     page = <MissionEditorPage key={missionId} id={missionId} go={go} />;
   else if (userId && me.permissions.includes('moderation'))
@@ -81,6 +86,8 @@ export function App() {
     page = <AnnouncementsPage me={me} />;
   else if (path === '/settings' && me.permissions.includes('config'))
     page = <SettingsPage go={go} />;
+  else if (path === '/reports' && me.permissions.includes('moderation'))
+    page = <ReportsPage go={go} />;
   else if (path === '/audit') page = <AuditPage me={me} />;
 
   return (

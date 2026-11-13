@@ -49,7 +49,14 @@ export default function PrivacyPage() {
       <ul>
         <li>Hồ sơ và tiến độ: tới khi bạn yêu cầu xoá hoặc tài khoản bị vô hiệu.</li>
         <li>Tài khoản khách không hoạt động: 30 ngày.</li>
-        <li>Báo cáo vi phạm kèm đoạn trò chuyện liên quan: 180 ngày.</li>
+        <li>
+          Báo cáo vi phạm: đoạn trò chuyện đính kèm (chỉ những dòng người báo cáo đã thấy) được xoá
+          180 ngày sau khi xử lý xong.
+        </li>
+        <li>
+          Để đếm số người chơi mỗi ngày và số người quay lại, máy chủ ghi một mã băm một chiều thay
+          cho tài khoản, không kèm việc bạn làm gì: 90 ngày. Không ai xem được mã đó là của ai.
+        </li>
         <li>Nhật ký hệ thống: 30 ngày.</li>
       </ul>
 

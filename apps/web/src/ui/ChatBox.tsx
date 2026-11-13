@@ -15,6 +15,7 @@ export function ChatBox() {
   const lines = useSession((state) => state.chat);
   const online = useSession((state) => state.net.status === 'online');
   const chatOff = useSession((state) => !state.ops.chatEnabled);
+  const openReport = useSession((state) => state.openReport);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [, setTick] = useState(0);
@@ -62,6 +63,21 @@ export function ChatBox() {
           {shown.map((line) => (
             <li key={line.id} data-mine={line.mine}>
               <b>{line.name}:</b> {line.text}
+              {open && !line.mine && net.remotes.get(line.from) && (
+                <button
+                  type="button"
+                  className="chat-report"
+                  aria-label={`Báo cáo ${line.name}`}
+                  title="Báo cáo"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    const userId = net.remotes.get(line.from)?.userId;
+                    if (userId) openReport({ userId, name: line.name });
+                  }}
+                >
+                  ⚑
+                </button>
+              )}
             </li>
           ))}
         </ol>

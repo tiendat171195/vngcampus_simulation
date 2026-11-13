@@ -66,3 +66,15 @@ export const ownPosition = async (page: Page) => {
     z: Number(await info.getAttribute('data-z')),
   };
 };
+
+/** The admin app of the suite. */
+export const ADMIN = 'http://localhost:4174';
+
+/** Signs in on the game with the e2e administrator's company account; the admin shares the session. */
+export async function signInAsAdmin(page: Page) {
+  await page.goto('/api/v1/auth/oidc/oidc/start?return=%2F&consent=1');
+  await page.fill('#email', 'e2e.admin@vng.com.vn');
+  await page.fill('#name', 'Quản Trị E2E');
+  await page.getByRole('button', { name: 'Đăng nhập' }).click();
+  await page.waitForURL(/localhost:4173\/$/);
+}

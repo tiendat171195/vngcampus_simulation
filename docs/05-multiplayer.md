@@ -195,7 +195,7 @@ sequenceDiagram
 
 **Đường đi của một tin nhắn trên server:** kiểm tra độ dài → rate limit (5 tin/10 giây) → kiểm tra án mute → chuẩn hoá (bỏ dấu, gộp ký tự lặp, chống viết lách) → lọc từ cấm (che bằng dấu sao) → tìm người nhận theo vị trí → gửi.
 
-**Lưu trữ:** không lưu chat vào DB. Mỗi phòng giữ một bộ đệm vòng 200 tin gần nhất trong Redis (hết hạn 24 giờ). Khi có báo cáo vi phạm, đoạn hội thoại xung quanh được chụp lại và đính vào báo cáo. Đây là lựa chọn có chủ đích: đủ để kiểm duyệt, không thành kho lưu trò chuyện của nhân viên.
+**Lưu trữ:** không lưu chat vào DB. Mỗi phòng giữ một bộ đệm vòng 200 tin gần nhất trong Redis (hết hạn 24 giờ). **Đã làm (P5.4):** bộ đệm nằm trong bộ nhớ của phòng (mất khi phòng đóng), mỗi dòng nhớ ai đã nhận; báo cáo (message `report` `{ targetUserId, reason, note }`) chỉ kèm các dòng người báo cáo đã thấy. Khi có báo cáo vi phạm, đoạn hội thoại xung quanh được chụp lại và đính vào báo cáo. Đây là lựa chọn có chủ đích: đủ để kiểm duyệt, không thành kho lưu trò chuyện của nhân viên.
 
 ## 9. Emote, ghế, tương tác hai người
 

@@ -10,6 +10,7 @@ const WAVE = 1;
 export function ProfileCard() {
   const card = useSession((state) => state.profileCard);
   const setCard = useSession((state) => state.setProfileCard);
+  const openReport = useSession((state) => state.openReport);
   const [profile, setProfile] = useState<PublicProfileDto | string | null>(null);
 
   useEffect(() => {
@@ -66,6 +67,15 @@ export function ProfileCard() {
           }}
         >
           👋 Vẫy chào
+        </button>
+        <button
+          type="button"
+          className="profile-action subtle"
+          onClick={() =>
+            openReport({ userId: card.userId, name: loaded?.displayName ?? card.name })
+          }
+        >
+          Báo cáo
         </button>
         <button type="button" className="profile-action" onClick={() => setCard(null)}>
           Đóng

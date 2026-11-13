@@ -7,6 +7,7 @@ import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
 import { missionWorld, useMissions } from './game/missions/missionStore';
 import { net } from './game/net/net';
+import { startAnalytics } from './services/analytics';
 import { currentUser, signIn } from './services/auth';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
 import { Announcements } from './ui/Announcements';
@@ -24,6 +25,7 @@ import {
   WaypointCompass,
 } from './ui/MissionHud';
 import { ProfileCard } from './ui/ProfileCard';
+import { ReportDialog } from './ui/ReportDialog';
 import { Toolbar } from './ui/Toolbar';
 import { Tutorial } from './ui/Tutorial';
 
@@ -37,6 +39,10 @@ export default function GameScreen() {
   const [tutorial, setTutorial] = useState(false);
   const endTutorial = useCallback(() => setTutorial(false), []);
   const steering = playing && following && modal === null;
+  const worldReadyMs = useSession((state) => state.worldReadyMs);
+  useEffect(() => {
+    if (worldReadyMs !== null) startAnalytics(worldReadyMs);
+  }, [worldReadyMs]);
   const [mountCanvas, setMountCanvas] = useState(false);
 
   useEffect(() => {
@@ -150,6 +156,7 @@ export default function GameScreen() {
       {playing && <QuizDialog />}
       {playing && <MissionComplete />}
       {playing && <Announcements />}
+      {playing && modal === 'report' && <ReportDialog />}
       {steering && tutorial && <Tutorial onFinish={endTutorial} />}
     </>
   );

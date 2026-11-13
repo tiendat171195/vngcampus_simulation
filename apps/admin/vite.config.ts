@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => {
       port: 5174,
       proxy: {
         '/api': { target: `http://localhost:${env.API_PORT ?? 3001}`, changeOrigin: true },
+        // Live head counts for the dashboard (`/rt/channels`), as in the game.
+        '/rt': {
+          target: `http://localhost:${env.REALTIME_PORT ?? 2567}`,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/rt/, ''),
+        },
       },
     },
   };

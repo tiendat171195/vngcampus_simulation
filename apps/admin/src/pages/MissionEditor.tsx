@@ -919,6 +919,18 @@ export function MissionEditorPage({ id, go }: { id: string | null; go: (path: st
             Lưu làm mẫu
           </button>
         )}
+        {id && (state === 'running' || state === 'ended') && (
+          <a
+            className="button secondary"
+            href={`/missions/${id}/results`}
+            onClick={(event) => {
+              event.preventDefault();
+              go(`/missions/${id}/results`);
+            }}
+          >
+            Xem kết quả
+          </a>
+        )}
         {id && (
           <a
             className="button secondary"

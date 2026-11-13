@@ -1,8 +1,10 @@
 /** A sanction in force, as the realtime server needs it. */
 export interface ActiveSanction {
+  id?: string;
   userId: string;
-  type: 'mute' | 'ban';
+  type: 'mute' | 'ban' | 'warn';
   endsAt: Date | null;
+  reason?: string;
 }
 
 const clock = new Intl.DateTimeFormat('vi-VN', {
@@ -21,7 +23,11 @@ const clock = new Intl.DateTimeFormat('vi-VN', {
 export class SanctionWatcher {
   private mutes = new Map<string, Date | null>();
   private bans = new Set<string>();
+  private warnings = new Map<string, Array<{ id: string; reason: string }>>();
+  /** Warnings already shown, so each is shown once per process. */
+  private readonly delivered = new Set<string>();
   private readonly listeners = new Set<(banned: ReadonlySet<string>) => void>();
+  private readonly warningListeners = new Set<() => void>();
   private readonly load: () => Promise<ActiveSanction[]>;
 
   constructor(load: () => Promise<ActiveSanction[]>) {
@@ -33,9 +39,17 @@ export class SanctionWatcher {
       const active = await this.load();
       const mutes = new Map<string, Date | null>();
       const bans = new Set<string>();
+      const warnings = new Map<string, Array<{ id: string; reason: string }>>();
       for (const sanction of active) {
         if (sanction.type === 'ban') bans.add(sanction.userId);
-        else {
+        else if (sanction.type === 'warn') {
+          const id = sanction.id ?? `${sanction.userId}:${sanction.reason ?? ''}`;
+          if (this.delivered.has(id)) continue;
+          warnings.set(sanction.userId, [
+            ...(warnings.get(sanction.userId) ?? []),
+            { id, reason: sanction.reason ?? '' },
+          ]);
+        } else {
           const previous = mutes.get(sanction.userId);
           // The longest mute wins; null means until lifted.
           if (
@@ -47,7 +61,9 @@ export class SanctionWatcher {
       }
       this.mutes = mutes;
       this.bans = bans;
+      this.warnings = warnings;
       if (bans.size > 0) for (const listener of this.listeners) listener(bans);
+      if (warnings.size > 0) for (const listener of this.warningListeners) listener();
     } catch (error) {
       console.warn(`[moderation] sanctions not refreshed: ${String(error)}`);
     }
@@ -72,6 +88,25 @@ export class SanctionWatcher {
     return until
       ? `Bạn đang bị tạm khoá chat đến ${clock.format(until)}.`
       : 'Bạn đang bị khoá chat.';
+  }
+
+  /** Warnings for this person not shown yet; they count as shown from now on. */
+  takeWarnings(userId: string): string[] {
+    const pending = this.warnings.get(userId);
+    if (!pending) return [];
+    this.warnings.delete(userId);
+    for (const warning of pending) this.delivered.add(warning.id);
+    return pending.map((warning) =>
+      warning.reason
+        ? `Kiểm duyệt viên nhắc bạn: ${warning.reason}. Hãy giữ campus thân thiện nhé.`
+        : 'Kiểm duyệt viên nhắc bạn giữ campus thân thiện nhé.',
+    );
+  }
+
+  /** Called after each refresh that found warnings not shown yet. */
+  onWarnings(listener: () => void): () => void {
+    this.warningListeners.add(listener);
+    return () => this.warningListeners.delete(listener);
   }
 
   /** Called with everyone banned, after each refresh that found any. */
