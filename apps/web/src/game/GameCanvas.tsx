@@ -1,5 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useRef } from 'react';
+import { BotCrowd } from './bots/BotCrowd';
+import { QualityController, WorldReadySignal } from './core/QualityController';
 import { statsSink, useDebugStore } from './debug/debugStore';
 import { OrbitCamera } from './debug/OrbitCamera';
 import { Player } from './player/Player';
@@ -42,21 +44,23 @@ export function GameCanvas() {
     <div className="scene">
       <Canvas
         camera={{ fov: 60, near: 0.3, far: 2000, position: [0, 4, -62] }}
-        dpr={[1, 2]}
+        dpr={1}
         flat
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
         <color attach="background" args={[PALETTE.skyHorizon]} />
-        <fog attach="fog" args={[PALETTE.skyHorizon, 220, 900]} />
         <ambientLight intensity={0.7} />
         <hemisphereLight args={[PALETTE.skylight, PALETTE.groundBounce, 0.9]} />
         <directionalLight position={SUN_POSITION} intensity={2} color={PALETTE.sunlight} />
         <Sky />
         <CampusWorld>
           <Player />
+          <BotCrowd />
         </CampusWorld>
         {!following && <OrbitCamera />}
         <StatsSampler />
+        <QualityController />
+        <WorldReadySignal />
       </Canvas>
     </div>
   );

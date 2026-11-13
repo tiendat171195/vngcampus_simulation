@@ -3,6 +3,8 @@ import { useMemo, useRef } from 'react';
 import { BackSide, Color, type Mesh, ShaderMaterial } from 'three';
 import { PALETTE } from './palette';
 
+const RADIUS = 900;
+
 const vertexShader = /* glsl */ `
   varying float vHeight;
   void main() {
@@ -42,12 +44,15 @@ export function Sky() {
   );
 
   useFrame(({ camera }) => {
-    mesh.current?.position.copy(camera.position);
+    if (!mesh.current) return;
+    mesh.current.position.copy(camera.position);
+    // Stay inside the far plane, which follows the quality setting.
+    mesh.current.scale.setScalar((((camera as { far?: number }).far ?? 1000) * 0.9) / RADIUS);
   });
 
   return (
     <mesh ref={mesh} material={material} frustumCulled={false} renderOrder={-1}>
-      <sphereGeometry args={[900, 24, 12]} />
+      <sphereGeometry args={[RADIUS, 24, 12]} />
     </mesh>
   );
 }

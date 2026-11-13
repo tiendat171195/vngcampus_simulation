@@ -46,5 +46,8 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Check the web download budget
+        run: pnpm budget
+
       - name: Smoke-test the built servers
         run: pnpm smoke

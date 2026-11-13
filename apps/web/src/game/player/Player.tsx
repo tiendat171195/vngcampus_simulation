@@ -1,4 +1,4 @@
-import { findArea, floorAt, poisOfSet } from '@campus/map-data';
+import { areasAt, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
 import { ANIM, type AnimId, MOVEMENT } from '@campus/shared';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { DoubleSide, type PerspectiveCamera, Ray, Vector3 } from 'three';
 import { Avatar } from '../avatars/Avatar';
 import { input, readMove } from '../core/input';
+import { hudSink, useSession } from '../core/session';
+import { useSettings } from '../core/settings';
 import { playerSink, useDebugStore } from '../debug/debugStore';
 import { useWorld } from '../world/CampusWorld';
 import { CameraRig } from './CameraRig';
@@ -36,12 +38,18 @@ export function Player() {
     rendered: new Vector3(),
     ray: new Ray(),
     reportIn: 0,
+    /** Area seen on the last report; it becomes the location once seen twice in a row. */
+    pendingArea: '',
+    shownArea: '',
   });
 
   useEffect(() => () => avatar.dispose(), [avatar]);
 
   useEffect(() => {
-    const spawn = poisOfSet(campusIndex, 'players_gate')[0];
+    // `?spawn=poi.some_id` starts somewhere else, for testing one part of the campus.
+    const requested = new URLSearchParams(window.location.search).get('spawn');
+    const spawn: Poi | undefined =
+      (requested && campusIndex.pois.get(requested)) || poisOfSet(campusIndex, 'players_gate')[0];
     const s = state.current;
     if (spawn) {
       motor.teleport(
@@ -115,7 +123,11 @@ export function Player() {
       avatar.setHeightAboveGround(ground ? ground.distance : 30);
     }
 
+    const floorNow = floorAt(campusIndex, s.rendered.y);
+    hudSink.player?.(s.rendered.x, s.rendered.z, s.yaw, floorNow);
+
     if (following) {
+      rig.sensitivity = useSettings.getState().lookSensitivity;
       rig.look(input.lookX, input.lookY, input.zoom);
       rig.update(dt, camera, s.rendered, world.bvh);
       // Up close the body would fill the screen.
@@ -128,11 +140,27 @@ export function Player() {
     input.zoom = 0;
 
     s.reportIn -= dt;
-    if (s.reportIn <= 0 && playerSink.element) {
+    if (s.reportIn <= 0) {
       s.reportIn = 0.25;
       const { x, y, z } = motor.position;
       const floor = floorAt(campusIndex, y);
       const area = findArea(campusIndex, [x, z], floor);
+
+      // The named place the player is in: the most specific area that is not just "a floor".
+      const containing = areasAt(campusIndex, [x, z], floor);
+      const place = containing.find((a) => !a.tags.includes('base')) ?? containing[0];
+      const placeId = place ? `${place.id}@${floor}` : '';
+      if (placeId === s.pendingArea && placeId !== s.shownArea && place) {
+        s.shownArea = placeId;
+        useSession.getState().setLocation({
+          areaId: place.id,
+          name: place.name.vi,
+          floorLabel: campusIndex.floors.get(floor)?.label.vi ?? floor,
+        });
+      }
+      s.pendingArea = placeId;
+
+      if (!playerSink.element) return;
       playerSink.element.textContent = `${x.toFixed(1)}, ${y.toFixed(1)}, ${z.toFixed(1)} · ${floor} · ${area?.name.vi ?? '—'}`;
       playerSink.element.dataset.x = x.toFixed(2);
       playerSink.element.dataset.y = y.toFixed(2);

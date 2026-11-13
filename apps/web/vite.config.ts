@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     envDir: '../..',
+    // Sizes are enforced by scripts/check-budget.mjs against the documented budget instead.
+    build: { chunkSizeWarningLimit: 1600 },
     server: {
       port: 5173,
       proxy: {

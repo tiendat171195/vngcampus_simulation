@@ -22,6 +22,8 @@ export class CameraRig {
   pitch = 0.32;
   /** Distance the player asked for. */
   distance = 5;
+  /** Multiplier on how far a drag turns the camera. */
+  sensitivity = 1;
   /** Distance currently used, after any wall has pulled the camera in. */
   armLength = 5;
 
@@ -32,8 +34,9 @@ export class CameraRig {
 
   /** Applies a drag (in pixels) and a zoom request. */
   look(dx: number, dy: number, zoom: number): void {
-    this.heading -= dx * LOOK_SENSITIVITY;
-    this.pitch = Math.min(MAX_PITCH, Math.max(MIN_PITCH, this.pitch + dy * LOOK_SENSITIVITY));
+    const turn = LOOK_SENSITIVITY * this.sensitivity;
+    this.heading -= dx * turn;
+    this.pitch = Math.min(MAX_PITCH, Math.max(MIN_PITCH, this.pitch + dy * turn));
     this.distance = Math.min(
       MAX_DISTANCE,
       Math.max(MIN_DISTANCE, this.distance * (1 + zoom * 0.001)),
