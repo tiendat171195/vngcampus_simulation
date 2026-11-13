@@ -517,3 +517,80 @@ body {
     animation: none;
   }
 }
+
+.splash-name {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #b8c3ce;
+}
+
+.splash-name-input {
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 6%);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.splash-name input[aria-invalid="true"] {
+  border-color: #f2555a;
+}
+
+.splash-problem {
+  margin: -6px 0 10px;
+  color: #ff8a8e;
+  font-size: 13px;
+}
+
+/* ---------- connection ---------- */
+
+.connection-banner {
+  position: fixed;
+  top: calc(56px + env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgb(16 20 24 / 85%);
+  color: #e9edf1;
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+
+.connection-banner[data-status="offline"],
+.connection-banner[data-status="replaced"] {
+  border: 1px solid rgb(242 85 90 / 60%);
+}
+
+.connection-banner button {
+  flex: none;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #f28c28;
+  color: #1a1206;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.channel-badge {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top));
+  left: 50%;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgb(16 20 24 / 65%);
+  color: #e9edf1;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

@@ -3,6 +3,16 @@ import type { QualityLevel } from './quality';
 
 export type Phase = 'loading' | 'building' | 'ready' | 'playing';
 
+export type NetStatus = 'idle' | 'connecting' | 'online' | 'reconnecting' | 'offline' | 'replaced';
+
+export interface NetSummary {
+  status: NetStatus;
+  /** Channel number shown to the player, once joined. */
+  channel: number | null;
+  /** People in this channel, including the player. */
+  players: number;
+}
+
 export interface PlayerLocation {
   areaId: string;
   name: string;
@@ -17,7 +27,12 @@ interface SessionState {
   location: PlayerLocation | null;
   /** Effective quality, after auto adjustment. */
   quality: { level: QualityLevel; dpr: number };
+  /** Name the player typed on the splash screen. */
+  displayName: string;
+  net: NetSummary;
   setPhase(phase: Phase): void;
+  setDisplayName(name: string): void;
+  setNet(patch: Partial<NetSummary>): void;
   markWorldReady(): void;
   setLocation(location: PlayerLocation): void;
   setQuality(level: QualityLevel, dpr: number): void;
@@ -29,13 +44,16 @@ export const useSession = create<SessionState>((set, get) => ({
   worldReadyMs: null,
   location: null,
   quality: { level: 'medium', dpr: 1 },
+  displayName: '',
+  net: { status: 'idle', channel: null, players: 0 },
   setPhase: (phase) => set({ phase }),
+  setDisplayName: (displayName) => set({ displayName }),
+  setNet: (patch) => set((state) => ({ net: { ...state.net, ...patch } })),
   markWorldReady() {
     if (get().worldReadyMs !== null) return;
     const ms = Math.round(performance.now());
     console.info(`[campus] world ready after ${ms} ms`);
-    const autoEnter = new URLSearchParams(window.location.search).has('enter');
-    set({ worldReadyMs: ms, phase: autoEnter ? 'playing' : 'ready' });
+    set({ worldReadyMs: ms, phase: 'ready' });
   },
   setLocation: (location) => set({ location }),
   setQuality: (level, dpr) => set({ quality: { level, dpr } }),

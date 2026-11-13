@@ -5,27 +5,13 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { DoubleSide, Group, Ray, Vector3 } from 'three';
 import type { MeshBVH } from 'three-mesh-bvh';
-import { Avatar, type AvatarLook } from '../avatars/Avatar';
+import { Avatar } from '../avatars/Avatar';
+import { randomLook } from '../avatars/looks';
 import { QUALITY_PRESETS } from '../core/quality';
 import { useSession } from '../core/session';
 import { useDebugStore } from '../debug/debugStore';
 import { CharacterMotor } from '../player/CharacterMotor';
 import { useWorld } from '../world/CampusWorld';
-
-const SKINS = ['#f6d5b8', '#f1c7a0', '#d9a57c', '#b97f57', '#8d5a3b'];
-const HAIR = ['#1f1a17', '#3a2a22', '#5b3a24', '#a0602c', '#c9c2b8', '#20325a'];
-const TOPS = [
-  '#3d7fd9',
-  '#f28c28',
-  '#3fa66b',
-  '#e5484d',
-  '#7a5cd6',
-  '#f2f2f2',
-  '#2f3338',
-  '#ffd23f',
-];
-const BOTTOMS = ['#2f3a4a', '#1f2228', '#5c6b7a', '#c8b48f', '#3b4f3a'];
-const SHOES = ['#f4f4f4', '#1f2228', '#c94f3d', '#3d6fd9'];
 
 /** Where bots may go: spots meant for people to walk to. */
 const DESTINATION_KINDS = new Set<Poi['kind']>([
@@ -38,16 +24,6 @@ const SIGHT_HEIGHT = 0.9;
 const STEP = 1 / 30;
 
 const pick = <T,>(items: readonly T[]) => items[Math.floor(Math.random() * items.length)] as T;
-
-function randomLook(): AvatarLook {
-  return {
-    skin: pick(SKINS),
-    hair: pick(HAIR),
-    top: pick(TOPS),
-    bottom: pick(BOTTOMS),
-    shoes: pick(SHOES),
-  };
-}
 
 interface Bot {
   avatar: Avatar;

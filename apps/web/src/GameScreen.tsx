@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from './game/core/session';
 import { useSettings } from './game/core/settings';
 import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
+import { loadGuest } from './game/net/identity';
+import { net } from './game/net/net';
 import { AreaToast } from './ui/AreaToast';
+import { ChannelBadge, ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
 import { MiniMap } from './ui/MiniMap';
 import { Toolbar } from './ui/Toolbar';
@@ -29,6 +32,37 @@ export default function GameScreen() {
     };
   }, []);
 
+  // Join a channel once the player has stepped in from the splash screen.
+  const connect = useCallback(() => {
+    const { id } = loadGuest();
+    const name = useSession.getState().displayName;
+    const spawn = new URLSearchParams(window.location.search).get('spawn') ?? undefined;
+    void net.leave().then(() => net.connect({ id, name }, { spawn }));
+  }, []);
+
+  useEffect(() => {
+    if (playing) connect();
+  }, [playing, connect]);
+
+  useEffect(() => {
+    const leave = () => void net.leave();
+    window.addEventListener('pagehide', leave);
+    return () => window.removeEventListener('pagehide', leave);
+  }, []);
+
+  // `?debug` exposes a read-only view of the network state for end-to-end tests.
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('debug')) return;
+    (window as unknown as { campus: unknown }).campus = {
+      remotes: () =>
+        [...net.remotes.values()].map((remote) => ({
+          name: remote.name,
+          status: remote.status,
+          ...remote.motion.latest,
+        })),
+    };
+  }, []);
+
   return (
     <>
       {mountCanvas && <GameCanvas />}
@@ -40,6 +74,8 @@ export default function GameScreen() {
           WASD để đi · Shift để chạy · Space để nhảy · kéo chuột để xoay · lăn để zoom
         </p>
       )}
+      {playing && <ChannelBadge />}
+      {playing && <ConnectionBanner onRetry={connect} />}
       {playing && <Toolbar />}
     </>
   );

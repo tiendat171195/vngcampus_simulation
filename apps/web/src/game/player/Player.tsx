@@ -9,6 +9,7 @@ import { input, readMove } from '../core/input';
 import { hudSink, useSession } from '../core/session';
 import { useSettings } from '../core/settings';
 import { playerSink, useDebugStore } from '../debug/debugStore';
+import { net } from '../net/net';
 import { useWorld } from '../world/CampusWorld';
 import { CameraRig } from './CameraRig';
 import { CharacterMotor, type MoveIntent } from './CharacterMotor';
@@ -64,6 +65,26 @@ export function Player() {
     rig.snap();
   }, [motor, rig]);
 
+  // The server decides where we start and can send us back after a rejected move.
+  useEffect(() => {
+    const s = state.current;
+    net.onSpawn = ({ x, y, z, yaw }) => {
+      motor.teleport(x, y, z);
+      s.previous.copy(motor.position);
+      s.yaw = yaw;
+      rig.heading = yaw;
+      rig.snap();
+    };
+    net.onCorrect = (x, y, z) => {
+      motor.teleport(x, y, z);
+      s.previous.copy(motor.position);
+    };
+    return () => {
+      net.onSpawn = null;
+      net.onCorrect = null;
+    };
+  }, [motor, rig]);
+
   // Coming back from the free camera: do not ease from wherever it was left.
   useEffect(() => {
     if (following) rig.snap();
@@ -109,6 +130,14 @@ export function Player() {
     if (!motor.grounded) anim = motor.velocity.y > 0 ? ANIM.jump : ANIM.fall;
     else if (motor.speed > (MOVEMENT.walkSpeed + MOVEMENT.runSpeed) / 2) anim = ANIM.run;
     else if (motor.speed > 0.3) anim = ANIM.walk;
+
+    net.update(performance.now(), {
+      x: motor.position.x,
+      y: motor.position.y,
+      z: motor.position.z,
+      yaw: s.yaw,
+      anim,
+    });
 
     avatar.object.position.copy(s.rendered);
     avatar.object.rotation.y = s.yaw;
