@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** đã có khung dự án (P0.1), dữ liệu bản đồ v0 (P1.1) và campus 3D dạng khối xem được bằng camera bay (P1.2). Chưa có nhân vật. Tiến độ từng gói việc ở [roadmap](docs/10-roadmap.md).
+**Trạng thái:** P0.1 → P1.3 xong: mở trang là điều khiển được một nhân vật đi khắp campus 3D dạng khối (bàn phím + chuột, hoặc joystick cảm ứng trên điện thoại). Chưa có multiplayer.
 
 ## Chạy thử
 
@@ -18,7 +18,7 @@ pnpm dev
 
 | App | Địa chỉ | Ghi chú |
 |---|---|---|
-| `web` — game | http://localhost:5173 | Campus 3D dạng khối + bảng debug (góc nhìn, cắt lớp theo tầng, lưới va chạm) |
+| `web` — game | http://localhost:5173 | Nhân vật đi trong campus 3D. WASD/mũi tên, Shift chạy, Space nhảy, kéo chuột xoay, lăn zoom. Nút **Debug** góc phải: camera tự do, cắt lớp theo tầng, lưới va chạm |
 | `web` — bản đồ debug | http://localhost:5173/debug/map | Sơ đồ 2D từng tầng, toạ độ và khu vực dưới con trỏ |
 | `admin` | http://localhost:5174 | Trang trống, xây ở P5 |
 | `api` | http://localhost:3001/api/health | REST (Fastify) |

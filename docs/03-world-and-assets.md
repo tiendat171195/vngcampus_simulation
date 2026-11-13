@@ -269,6 +269,8 @@ assets-src/*.blend
 
 **Thẻ tên:** vẽ bằng Canvas 2D (hiển thị tiếng Việt có dấu chuẩn theo font trình duyệt) vào một atlas texture, render dạng sprite; mờ dần theo khoảng cách.
 
+**Hiện tại (P1.3):** một nhân vật khối dựng bằng code (`apps/web/src/game/avatars/Avatar.ts`) — 12 xương, skin cứng, animation thủ tục (đứng, đi/chạy liền mạch theo tốc độ, nhảy, rơi, ngồi, nhún khi tiếp đất), có dây đeo và thẻ nhân viên, màu chỉnh được theo 5 vùng (da, tóc, áo, quần, giày). Mọi avatar dùng chung buffer hình học, mỗi người chỉ giữ mảng màu riêng; 1 draw call/người. Đây là bản tạm để có thứ đi lại được; bản thật làm ở P3.3.
+
 **Nguồn khởi đầu:** bộ CC0 của Quaternius — *Universal Base Characters* (6 nhân vật đã rig, có glTF) và *Universal Animation Library* (hơn 120 animation, cùng bộ xương) — để có nhân vật chạy được ngay, sau đó chỉnh phong cách. Không dùng dịch vụ avatar bên thứ ba (Ready Player Me đã đóng dịch vụ công khai từ 31/01/2026).
 
 ## 8. Tư liệu cần bạn cung cấp

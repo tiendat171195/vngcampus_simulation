@@ -1,7 +1,8 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useRef } from 'react';
-import { statsSink } from './debug/debugStore';
+import { statsSink, useDebugStore } from './debug/debugStore';
 import { OrbitCamera } from './debug/OrbitCamera';
+import { Player } from './player/Player';
 import { CampusWorld } from './world/CampusWorld';
 import { PALETTE } from './world/palette';
 import { Sky } from './world/Sky';
@@ -35,10 +36,12 @@ function StatsSampler() {
 }
 
 export function GameCanvas() {
+  const following = useDebugStore((state) => state.cameraMode === 'follow');
+
   return (
     <div className="scene">
       <Canvas
-        camera={{ fov: 55, near: 0.5, far: 2000, position: [-40, 150, 215] }}
+        camera={{ fov: 60, near: 0.3, far: 2000, position: [0, 4, -62] }}
         dpr={[1, 2]}
         flat
         gl={{ antialias: true, powerPreference: 'high-performance' }}
@@ -49,8 +52,10 @@ export function GameCanvas() {
         <hemisphereLight args={[PALETTE.skylight, PALETTE.groundBounce, 0.9]} />
         <directionalLight position={SUN_POSITION} intensity={2} color={PALETTE.sunlight} />
         <Sky />
-        <CampusWorld />
-        <OrbitCamera />
+        <CampusWorld>
+          <Player />
+        </CampusWorld>
+        {!following && <OrbitCamera />}
         <StatsSampler />
       </Canvas>
     </div>

@@ -28,6 +28,10 @@ export class MeshBatch {
     return this.indices.length / 3;
   }
 
+  get vertexCount(): number {
+    return this.positions.length / 3;
+  }
+
   get isEmpty(): boolean {
     return this.indices.length === 0;
   }

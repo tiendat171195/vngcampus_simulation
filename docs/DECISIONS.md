@@ -15,6 +15,22 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Nhân vật tạm dựng bằng code thay vì bộ CC0
+
+- Gói việc: P1.3
+- Bối cảnh: P1.3 ghi "nhân vật mẫu có xương (CC0)". Bộ Quaternius là file zip 120–600 MB ở định dạng FBX/glTF, cần chuyển đổi và nén — việc của pipeline asset (P6.1), chưa có.
+- Quyết định: dựng một nhân vật khối bằng code (12 xương, skin cứng) với animation thủ tục. Đủ để kiểm chứng điều khiển, camera, va chạm và LOD đám đông; không thêm byte nào vào lần tải đầu.
+- Khác plan ở đâu: đã ghi chú ở `03-world-and-assets.md` §7.
+- Hệ quả: P3.3 thay bằng nhân vật module thật (gộp mesh, bảng màu, chuỗi cấu hình). Giao diện `Avatar` (`update(dt, { anim, speed })`, `setLook`) được giữ để phần còn lại không phải sửa.
+
+## 2026-11-13 — Điều khiển: joystick nổi, chạy bằng cách đẩy hết cần
+
+- Gói việc: P1.3
+- Bối cảnh: cần một sơ đồ chạm dùng được bằng một ngón trên điện thoại cầm dọc.
+- Quyết định: chạm ở 45% bên trái màn hình làm joystick hiện ngay dưới ngón tay; đẩy quá 85% bán kính thì chạy. Phần còn lại kéo để xoay camera, hai ngón để zoom. Nút nhảy chỉ hiện trên thiết bị cảm ứng. Mô phỏng chạy bước cố định 60 Hz, vẽ nội suy giữa hai bước. Camera tự do của P1.2 chuyển vào bảng Debug (thu gọn mặc định).
+- Khác plan ở đâu: khớp `04-client.md` §5–§6; không đổi tài liệu.
+- Hệ quả: chưa có emote, tương tác, chạm-để-đi (để P2.3, P4.3, P6.6).
+
 ## 2026-11-13 — Greybox không dùng tone mapping; lớp phẳng vẽ bằng polygon offset
 
 - Gói việc: P1.2

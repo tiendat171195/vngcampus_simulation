@@ -27,17 +27,121 @@ body {
   touch-action: none;
 }
 
-.panel {
+.input-layer {
   position: fixed;
-  left: 12px;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.input-layer:active {
+  cursor: grabbing;
+}
+
+.stick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 112px;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-radius: 50%;
+  background: rgb(16 20 24 / 25%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+
+.stick-knob {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 80%);
+}
+
+.jump-button {
+  display: none;
+  position: absolute;
+  right: calc(24px + env(safe-area-inset-right));
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  width: 72px;
+  height: 72px;
+  border: 2px solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+  background: rgb(16 20 24 / 35%);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .jump-button {
+    display: block;
+  }
+
+  .hint {
+    display: none;
+  }
+}
+
+.hint {
+  position: fixed;
+  left: 50%;
   bottom: calc(12px + env(safe-area-inset-bottom));
-  width: min(340px, calc(100vw - 24px));
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgb(16 20 24 / 60%);
+  color: #e9edf1;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.debug {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.debug-toggle {
+  padding: 5px 10px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  background: rgb(16 20 24 / 65%);
+  color: #e9edf1;
+  font: inherit;
+  cursor: pointer;
+}
+
+.debug-toggle[aria-expanded="true"] {
+  background: #e9edf1;
+  color: #101418;
+}
+
+.panel {
+  width: min(330px, calc(100vw - 20px));
   padding: 12px 14px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 12px;
-  background: rgb(16 20 24 / 82%);
+  background: rgb(16 20 24 / 86%);
   backdrop-filter: blur(8px);
-  font-size: 13px;
+}
+
+.panel[hidden] {
+  display: none;
 }
 
 .panel h1 {
