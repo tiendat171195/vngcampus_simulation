@@ -7,8 +7,13 @@ export type GameEvent =
   | { type: 'area.entered' | 'area.left'; userId: string; areaId: string }
   | { type: 'area.dwell'; userId: string; areaId: string; seconds: number }
   | { type: 'entity.interacted'; userId: string; entityId: string; action?: string }
-  /** `nearbyUserIds`: everyone within the objective's reach, measured by the server. */
-  | { type: 'emote.performed'; userId: string; emote: string; nearbyUserIds: string[] }
+  /** `nearby`: other players close by and how far, measured by the server. */
+  | {
+      type: 'emote.performed';
+      userId: string;
+      emote: string;
+      nearby: Array<{ userId: string; distance: number }>;
+    }
   /** `correct` is decided by the server from the question bank, never by the client. */
   | {
       type: 'quiz.answered';

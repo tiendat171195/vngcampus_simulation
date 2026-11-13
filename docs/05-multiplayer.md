@@ -83,8 +83,8 @@ Tên message và schema payload định nghĩa một lần trong `packages/share
 | `move` | `[seq, x, y, z, yaw, anim]` | 10 Hz, chỉ gửi khi thay đổi; gửi thêm 1 gói khi dừng hẳn |
 | `emote` | `{ id }` | |
 | `chat` | `{ ch: "near", text }` | ≤ 200 ký tự |
-| `interact` | `{ id, action? }` | Nhặt, nói chuyện NPC, mở kiosk… |
-| `quiz:answer` | `{ runId, qid, choice }` | |
+| `interact` | `{ id }` | Nhặt, nói chuyện NPC, mở kiosk… Trong vòng 3 m |
+| `quiz:answer` | `{ missionId, objectiveId, questionId, choice }` | Chỉ nhận câu đang được hỏi |
 | `seat:take` / `seat:leave` | `{ seatId }` | |
 | `afk` | `{ on }` | Khi tab ẩn/hiện |
 | `ping` | `{ t }` | Mỗi 5 giây, để đo trễ và lệch đồng hồ |
@@ -98,11 +98,12 @@ Tên message và schema payload định nghĩa một lần trong `packages/share
 | `correct` | `{ x, y, z, reason }` | Kéo về vị trí hợp lệ |
 | `chat` | `{ from, name, ch, text, ts }` | Chỉ gửi cho người trong tầm |
 | `pong` | `{ t, serverTime }` | |
-| `mission:state` | Nhiệm vụ đang chạy + tiến độ của mình | Khi vào phòng và khi nhiệm vụ đổi |
-| `mission:progress` | `{ missionId, objectiveId, current, target, done }` | |
-| `mission:entities` | Vật thể chỉ mình thấy | |
-| `mission:completed` | `{ missionId, rewards, streak, rank? }` | |
-| `quiz:question` / `quiz:result` | Câu hỏi (không kèm đáp án) / kết quả | |
+| `mission:state` | `{ missions: MissionView[] }` — nhiệm vụ đang chạy + tiến độ của mình | Khi vào phòng và khi tập nhiệm vụ đổi |
+| `mission:progress` | `{ missionId, objective }` | Sau khi đã ghi DB |
+| `mission:entities` | `{ entities }` — mọi vật thể nhiệm vụ người này thấy (chung còn lại + riêng) | Gửi lại cả danh sách khi có thay đổi |
+| `mission:completed` | `{ missionId, title, points, xp, multiplier, streak, streakBonus, level, durationMs }` | |
+| `quiz:question` / `quiz:result` | Câu hỏi (không kèm đáp án) / `{ correct, explanation?, finished }` | |
+| `notice` | `{ text }` | "Lại gần hơn một chút", "Vật này không còn ở đây"… |
 | `announce` | `{ level, text, ttl }` | Thông báo từ admin |
 | `toast` | `{ text }` | "X vừa hoàn thành nhiệm vụ" (có tiết lưu) |
 | `error` | `{ code, message }` | |

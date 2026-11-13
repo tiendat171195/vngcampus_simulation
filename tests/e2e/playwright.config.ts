@@ -58,6 +58,8 @@ export default defineConfig({
       env: {
         NODE_ENV: 'test',
         REALTIME_PORT: String(PORTS.realtime),
+        DATABASE_URL:
+          process.env.E2E_DATABASE_URL ?? 'postgres://campus:campus@127.0.0.1:5432/campus_e2e',
         // Players join with the API's access tokens, like in production.
         DEV_GUEST_AUTH: 'off',
         AUTH_JWKS_URL: `http://127.0.0.1:${PORTS.api}/api/v1/auth/jwks`,

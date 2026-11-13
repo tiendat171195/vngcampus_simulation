@@ -10,7 +10,9 @@ import {
   EMOTES,
   encodePosition,
   healthResponseSchema,
+  type MissionStateMessage,
   MSG,
+  missionDefinitionSchema,
   type OnlineEntry,
   PLAYER_STATUS,
   type PongMessage,
@@ -20,11 +22,38 @@ import { boot, type ColyseusTestServer } from '@colyseus/testing';
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { createTokenVerifier } from './auth';
+import { MissionRuntime } from './missions/runtime';
+import { memorySource } from './missions/source';
 import type { CampusRoom } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
 import { createServer } from './server';
 
 let colyseus: ColyseusTestServer;
+/** A running mission with one objective: check in at the main gate, where players appear. */
+const gateMission = {
+  id: '0190f0c2-0000-7000-8000-0000000000ff',
+  kind: 'daily' as const,
+  startsAt: new Date(Date.now() - 3_600_000),
+  endsAt: new Date(Date.now() + 3_600_000),
+  definition: missionDefinitionSchema.parse({
+    kind: 'daily',
+    title: { vi: 'Điểm danh' },
+    description: { vi: 'Có mặt ở cổng chính.' },
+    startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+    endsAt: new Date(Date.now() + 3_600_000).toISOString(),
+    mapVersion: '0.1.0',
+    objectives: [
+      {
+        id: 'o1',
+        type: 'visit',
+        title: { vi: 'Ghé cổng chính' },
+        target: 1,
+        params: { targets: [{ areaId: 'area.gate_main' }] },
+      },
+    ],
+    rewards: [{ type: 'points', amount: 10 }],
+  }),
+};
 /** Signs tokens the way the API does, with a key only this test knows. */
 let signToken: (
   claims: { sub: string; name: string; guest?: boolean; avatar?: string; hidden?: boolean },
@@ -56,8 +85,11 @@ beforeAll(async () => {
       .setAudience('campus')
       .setExpirationTime('5m')
       .sign(privateKey);
+  const missions = new MissionRuntime(memorySource([gateMission]));
+  await missions.refresh();
   colyseus = await boot(
     createServer({
+      missions,
       devGuestAuth: true,
       verifyToken: createTokenVerifier(jwks),
       softCap: 2,
@@ -530,5 +562,38 @@ describe('access tokens', () => {
     await expect(
       colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token: 'not.a.token' }),
     ).rejects.toThrow();
+  });
+});
+
+describe('missions in the room', () => {
+  it('sends the running missions on arrival and counts the check-in at the gate', async () => {
+    const token = await signToken({
+      sub: '0190f0c2-0000-7000-8000-000000000005',
+      name: 'Điểm Danh',
+    });
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, { open: true, token });
+    const received: Array<{ type: string; payload: unknown }> = [];
+    for (const type of [
+      MSG.missionState,
+      MSG.missionProgress,
+      MSG.missionCompleted,
+      MSG.missionEntities,
+    ])
+      room.onMessage(type, (payload) => received.push({ type, payload }));
+    await settle(400);
+    const state = received.find((message) => message.type === MSG.missionState)
+      ?.payload as MissionStateMessage;
+    expect(state.missions.map((mission) => mission.title.vi)).toEqual(['Điểm danh']);
+    // Players appear at the gate, so the check-in counts at once.
+    expect(received.some((message) => message.type === MSG.missionCompleted)).toBe(true);
+  });
+
+  it('answers a mission interaction it cannot place with a notice', async () => {
+    const room = await join();
+    const notices: string[] = [];
+    room.onMessage(MSG.notice, (message: { text: string }) => notices.push(message.text));
+    room.send(MSG.interact, { id: 'o9:poi.nowhere' });
+    await settle(200);
+    expect(notices).toEqual(['Vật này không còn ở đây.']);
   });
 });

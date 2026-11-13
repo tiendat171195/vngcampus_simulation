@@ -46,6 +46,8 @@ function play(ctx: MissionCtx, userId: string, events: GameEvent[], from?: Progr
 }
 
 const count = (progress: Progress, id: string) => progress[id]?.current;
+/** Players standing 2 m away. */
+const near = (...ids: string[]) => ids.map((userId) => ({ userId, distance: 2 }));
 /** The questions the quiz objective is asking in this progress. */
 const questionsOf = (progress: Progress) =>
   ((progress.o4?.data ?? { questions: [] }) as { questions: string[] }).questions;
@@ -106,12 +108,27 @@ describe('social', () => {
   it('counts different colleagues once each, never oneself, with the right emote', () => {
     const ctx = contextOf();
     const { progress } = play(ctx, 'u1', [
-      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearbyUserIds: ['u1', 'u2', 'u3'] },
-      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearbyUserIds: ['u2', 'u3'] },
-      { type: 'emote.performed', userId: 'u1', emote: 'dance', nearbyUserIds: ['u4'] },
-      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearbyUserIds: ['u4', 'u4'] },
+      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearby: near('u1', 'u2', 'u3') },
+      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearby: near('u2', 'u3') },
+      { type: 'emote.performed', userId: 'u1', emote: 'dance', nearby: near('u4') },
+      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearby: near('u4', 'u4') },
     ]);
     expect(count(progress, 'o2')).toBe(3);
+  });
+
+  it('only counts colleagues within the radius', () => {
+    const { progress } = play(contextOf(), 'u1', [
+      {
+        type: 'emote.performed',
+        userId: 'u1',
+        emote: 'wave',
+        nearby: [
+          { userId: 'u2', distance: 3.9 },
+          { userId: 'u3', distance: 6 },
+        ],
+      },
+    ]);
+    expect(count(progress, 'o2')).toBe(1);
   });
 });
 
@@ -191,7 +208,7 @@ describe('the whole mission', () => {
         type: 'emote.performed',
         userId: 'u1',
         emote: 'wave',
-        nearbyUserIds: ['a', 'b', 'c', 'd', 'e'],
+        nearby: near('a', 'b', 'c', 'd', 'e'),
       },
       ...items.map(
         (item): GameEvent => ({ type: 'entity.interacted', userId: 'u1', entityId: item.id }),
@@ -216,12 +233,12 @@ describe('the whole mission', () => {
   it('in sequential mode, listens to one objective at a time', () => {
     const ctx = contextOf({ ...exampleMission, objectiveMode: 'sequential' });
     const early = play(ctx, 'u1', [
-      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearbyUserIds: ['a'] },
+      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearby: near('a') },
     ]);
     expect(count(early.progress, 'o2')).toBe(0);
     const inOrder = play(ctx, 'u1', [
       { type: 'area.entered', userId: 'u1', areaId: 'area.gate_main' },
-      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearbyUserIds: ['a'] },
+      { type: 'emote.performed', userId: 'u1', emote: 'wave', nearby: near('a') },
     ]);
     expect(count(inOrder.progress, 'o2')).toBe(1);
   });

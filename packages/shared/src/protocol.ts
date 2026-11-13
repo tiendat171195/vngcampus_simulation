@@ -32,6 +32,24 @@ export const MSG = {
    * avatar). The server reads the new profile from it, so nobody can dress up as someone else.
    */
   profile: 'profile',
+  /** Client → server: `{ id }`, use a mission entity (pick up, talk to a kiosk). Within 3 m. */
+  interact: 'interact',
+  /** Client → server: `{ missionId, objectiveId, questionId, choice }`. */
+  quizAnswer: 'quiz:answer',
+  /** Server → client: every running mission with this player's progress (MissionStateMessage). */
+  missionState: 'mission:state',
+  /** Server → client: one objective moved on (MissionProgressMessage). */
+  missionProgress: 'mission:progress',
+  /** Server → client: mission things this player sees (MissionEntitiesMessage). */
+  missionEntities: 'mission:entities',
+  /** Server → client: the mission is done and what it earned (MissionCompletedMessage). */
+  missionCompleted: 'mission:completed',
+  /** Server → client: the question to answer at a kiosk, without the answer (QuizQuestionMessage). */
+  quizQuestion: 'quiz:question',
+  /** Server → client: whether an answer was right (QuizResultMessage). */
+  quizResult: 'quiz:result',
+  /** Server → client: `{ text }`, something worth telling everyone in the channel. */
+  toast: 'toast',
 } as const;
 
 /** Emotes, by wire id. Never renumber; add new ones at the end. */
@@ -183,3 +201,109 @@ export interface ChannelInfo {
   /** Whether automatic assignment still sends new players here. */
   open: boolean;
 }
+
+// ---------- missions (docs/06 §8) ----------
+
+export const interactSchema = z.object({ id: z.string().min(1).max(120) });
+export const quizAnswerSchema = z.object({
+  missionId: z.string().min(1).max(64),
+  objectiveId: z.string().min(1).max(16),
+  questionId: z.string().min(1).max(64),
+  choice: z.number().int().min(0).max(9),
+});
+
+/** Text in the player's language; only Vietnamese is required. */
+export interface MissionText {
+  vi: string;
+  en?: string;
+}
+
+export interface ObjectiveView {
+  id: string;
+  type: string;
+  title: MissionText;
+  hint?: MissionText;
+  current: number;
+  target: number;
+  done: boolean;
+  optional: boolean;
+  /** What the objective's presenter needs (targets reached, items picked…); never answers. */
+  view: unknown;
+}
+
+export interface MissionView {
+  id: string;
+  kind: string;
+  title: MissionText;
+  description: MissionText;
+  startsAt: string;
+  endsAt: string;
+  objectiveMode: 'all' | 'sequential' | { anyOf: number };
+  objectives: ObjectiveView[];
+  /** Points and xp for completing it. */
+  rewards: { points: number; xp: number };
+  completed: boolean;
+}
+
+export interface MissionStateMessage {
+  missions: MissionView[];
+}
+
+export interface MissionProgressMessage {
+  missionId: string;
+  objective: ObjectiveView;
+}
+
+/** Something to see or use in the world for a mission. */
+export interface MissionEntity {
+  id: string;
+  missionId: string;
+  objectiveId: string;
+  kind: 'item' | 'kiosk';
+  item?: string;
+  /** Feet position, metres. */
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface MissionEntitiesMessage {
+  entities: MissionEntity[];
+}
+
+export interface MissionCompletedMessage {
+  missionId: string;
+  title: MissionText;
+  points: number;
+  xp: number;
+  multiplier: number;
+  streak: number | null;
+  streakBonus: number;
+  level: number;
+  durationMs: number;
+}
+
+export interface QuizQuestionMessage {
+  missionId: string;
+  objectiveId: string;
+  questionId: string;
+  text: MissionText;
+  choices: MissionText[];
+  /** 1-based position in this run, and the run length. */
+  index: number;
+  total: number;
+  triesLeft: number;
+}
+
+export interface QuizResultMessage {
+  missionId: string;
+  objectiveId: string;
+  questionId: string;
+  correct: boolean;
+  explanation?: MissionText;
+  /** No more questions in this run. */
+  finished: boolean;
+}
+
+/** How close a player must be to use a mission entity, in metres. */
+export const INTERACT_RANGE = 3;

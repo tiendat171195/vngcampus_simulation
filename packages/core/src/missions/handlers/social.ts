@@ -12,9 +12,10 @@ export const socialHandler: ObjectiveHandler<'social', SocialState> = {
   init: () => ({ greeted: [] }),
   onEvent(_ctx, objective, state, event, player) {
     if (event.type !== 'emote.performed' || event.emote !== objective.params.emote) return null;
-    const fresh = event.nearbyUserIds.filter(
-      (id) => id !== player.userId && !state.greeted.includes(id),
-    );
+    const fresh = event.nearby
+      .filter((other) => other.distance <= objective.params.radius)
+      .map((other) => other.userId)
+      .filter((id) => id !== player.userId && !state.greeted.includes(id));
     if (fresh.length === 0) return null;
     const greeted = [...state.greeted, ...new Set(fresh)];
     return { state: { greeted }, current: Math.min(objective.target, greeted.length) };

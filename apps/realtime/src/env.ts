@@ -11,6 +11,8 @@ const envSchema = z.object({
   DEV_GUEST_AUTH: z.enum(['on', 'off']).optional(),
   /** `on` honours `?spawn=<poi id>` from the client. Default: like DEV_GUEST_AUTH. */
   DEV_SPAWN: z.enum(['on', 'off']).optional(),
+  /** Missions and progress (docs/06). Unreachable: the campus runs without missions. */
+  DATABASE_URL: z.string().default('postgres://campus:campus@127.0.0.1:5432/campus'),
   /** Where the API publishes the keys that sign access tokens. */
   AUTH_JWKS_URL: z.string().url().default('http://127.0.0.1:3001/api/v1/auth/jwks'),
   /** Channel sizes; defaults come from CHANNEL in @campus/shared. Lowered in tests. */

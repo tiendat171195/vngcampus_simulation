@@ -166,6 +166,8 @@ Handler là hàm gần như thuần: nhận trạng thái cũ + sự kiện, tr�
 
 Vì mỗi người chỉ có một phiên tại một thời điểm (xem [05](05-multiplayer.md)), tiến độ của một người chỉ có **một nơi ghi** — không cần khoá phân tán.
 
+**Đã làm (P4.2):** `apps/realtime/src/missions` — `MissionRuntime` làm mới từ Postgres mỗi 15 giây (chưa có Redis nên chưa có `missions:changed`), nạp cả ngân hàng câu hỏi vào bộ nhớ; `RoomMissionBinding` là TypeScript thuần nhận hook từ phòng (gửi tin, vị trí đã duyệt, danh sách người chơi) nên test được không cần Colyseus. Mỗi người một hàng đợi ghi tuần tự; ghi DB lỗi thì không đổi gì và không báo. Vật phẩm `shared` bị giữ chỗ ngay khi có người nhặt (trước khi ghi) để không ai nhặt trùng. Danh tính dev (không phải UUID) vẫn chơi được nhưng không lưu. Vị trí dùng để kiểm tra khu vực/khoảng cách luôn là vị trí server đã duyệt.
+
 ### 5.4 Luồng xử lý một tương tác
 
 ```mermaid

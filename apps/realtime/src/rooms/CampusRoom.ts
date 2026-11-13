@@ -10,9 +10,11 @@ import {
   type CorrectMessage,
   chatSchema,
   decodePosition,
+  EMOTE_BY_ID,
   emoteSchema,
   encodePosition,
   encodeYaw,
+  interactSchema,
   joinOptionsSchema,
   MSG,
   moveSchema,
@@ -23,6 +25,7 @@ import {
   type PongMessage,
   pingSchema,
   profileSchema,
+  quizAnswerSchema,
   seatTakeSchema,
 } from '@campus/shared';
 import {
@@ -35,6 +38,8 @@ import {
 } from '@colyseus/core';
 import type { Identity, TokenVerifier } from '../auth';
 import { countMessage, recordPatch } from '../metrics';
+import { RoomMissionBinding } from '../missions/binding';
+import type { MissionRuntime } from '../missions/runtime';
 import {
   type Accepted,
   checkMove,
@@ -54,6 +59,8 @@ export interface CampusRoomOptions {
   devSpawn?: boolean;
   /** Checks API access tokens; without it only development identities can join. */
   verifyToken?: TokenVerifier;
+  /** The missions running in this process; without it the room has none. */
+  missions?: MissionRuntime;
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
@@ -122,7 +129,8 @@ export class CampusRoom extends Room<{
   override state = new RoomState();
   override patchRate = 1000 / NET.serverPatchHz;
 
-  private config!: Required<Omit<CampusRoomOptions, 'verifyToken'>>;
+  private config!: Required<Omit<CampusRoomOptions, 'verifyToken' | 'missions'>>;
+  private missions: RoomMissionBinding | null = null;
   private verifyToken: TokenVerifier | undefined;
   private readonly createdAt = Date.now();
   private readonly tracking = new Map<string, Tracking>();
@@ -150,6 +158,22 @@ export class CampusRoom extends Room<{
       idleKickSeconds: options.idleKickSeconds ?? 30 * 60,
     };
     this.verifyToken = options.verifyToken;
+    if (options.missions)
+      this.missions = new RoomMissionBinding(options.missions, {
+        send: (sessionId, type, payload) =>
+          this.clients.find((client) => client.sessionId === sessionId)?.send(type, payload),
+        broadcast: (type, payload) => this.broadcast(type, payload),
+        position: (sessionId) => {
+          const accepted = this.tracking.get(sessionId)?.accepted;
+          return accepted ? { x: accepted.x, y: accepted.y, z: accepted.z } : null;
+        },
+        players: () =>
+          [...this.state.players.entries()].map(([sessionId, player]) => ({
+            sessionId,
+            userId: player.userId,
+          })),
+        now: () => this.now(),
+      });
     this.maxClients = this.config.hardCap;
     this.state.channel = await this.freeChannelNumber();
     await this.updateListing();
@@ -161,6 +185,11 @@ export class CampusRoom extends Room<{
     this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
     this.onMessage(MSG.chat, (client, payload) => this.handleChat(client, payload));
     this.onMessage(MSG.profile, (client, payload) => void this.handleProfile(client, payload));
+    this.onMessage(MSG.interact, (client, payload) => void this.handleInteract(client, payload));
+    this.onMessage(MSG.quizAnswer, (client, payload) => {
+      const parsed = quizAnswerSchema.safeParse(payload);
+      if (parsed.success) void this.missions?.answer(client.sessionId, parsed.data);
+    });
     this.onMessage(MSG.afk, (client, payload) => {
       const tracking = this.tracking.get(client.sessionId);
       const parsed = afkSchema.safeParse(payload);
@@ -244,6 +273,7 @@ export class CampusRoom extends Room<{
 
     await this.updateListing();
     await this.updateDirectory(client.sessionId);
+    void this.missions?.join(client.sessionId, identity.userId, identity.name);
     // One person, one session: any older session of this user, in any channel, is closed.
     this.presence.publish(SESSION_TOPIC, { userId: identity.userId, sessionId: client.sessionId });
   }
@@ -272,11 +302,13 @@ export class CampusRoom extends Room<{
     if (player) await this.unlist(player.userId, client.sessionId);
     this.state.players.delete(client.sessionId);
     this.tracking.delete(client.sessionId);
+    this.missions?.leave(client.sessionId);
     await this.updateListing();
   }
 
   override async onDispose(): Promise<void> {
     clearInterval(this.housekeeping);
+    this.missions?.dispose();
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
@@ -321,7 +353,10 @@ export class CampusRoom extends Room<{
 
     const moved = Math.hypot(next.x - tracking.accepted.x, next.z - tracking.accepted.z) > 0.05;
     tracking.accepted = { ...next, at: now };
-    if (moved) this.markActive(client.sessionId);
+    if (moved) {
+      this.markActive(client.sessionId);
+      this.missions?.move(client.sessionId);
+    }
     if (player.seatId) {
       const seat = campusIndex.pois.get(player.seatId);
       if (!seat || distance(seat.position, [next.x, next.z]) > SEAT_LEASH)
@@ -365,6 +400,17 @@ export class CampusRoom extends Room<{
     player.emote = parsed.data.id;
     // The sequence number lets clients replay the same emote twice in a row.
     player.emoteSeq = (player.emoteSeq + 1) % 65536;
+    const name = EMOTE_BY_ID.get(parsed.data.id);
+    if (name) this.missions?.emote(client.sessionId, name);
+  }
+
+  /** Using a mission entity; the binding checks distance and what it is. */
+  private async handleInteract(client: Client, payload: unknown): Promise<void> {
+    const parsed = interactSchema.safeParse(payload);
+    if (!parsed.success || !this.missions) return;
+    this.markActive(client.sessionId);
+    const problem = await this.missions.interact(client.sessionId, parsed.data.id);
+    if (problem) client.send(MSG.notice, { text: problem } satisfies NoticeMessage);
   }
 
   /**
@@ -451,6 +497,7 @@ export class CampusRoom extends Room<{
   /** Once a second: idle players become away, then are asked to leave; the directory follows. */
   private async tidy(): Promise<void> {
     const now = this.now();
+    this.missions?.tick();
     for (const client of this.clients) {
       const tracking = this.tracking.get(client.sessionId);
       if (!tracking) continue;

@@ -15,6 +15,18 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Runtime nhiệm vụ trong phòng
+
+- Gói việc: P4.2
+- Quyết định:
+  - Vật thể nhiệm vụ (chung và riêng) đi bằng message `mission:entities` gửi riêng từng người, không đặt trong state đồng bộ của phòng: người này nhặt vật phẩm riêng thì người khác không cần biết, và vật phẩm chung đã bị lấy chỉ cần gửi lại danh sách.
+  - Sự kiện `emote.performed` mang danh sách người gần kèm khoảng cách (≤ 15 m); mỗi objective `social` tự lọc theo bán kính của nó.
+  - Realtime đọc/ghi Postgres trực tiếp (`DATABASE_URL`); không có DB thì phòng vẫn chạy, chỉ không có nhiệm vụ. Làm mới mỗi 15 giây, chưa dùng Redis pub/sub (P7).
+  - Danh tính dev (bot thử tải) không được lưu tiến độ.
+  - Thông báo "X vừa hoàn thành nhiệm vụ" giới hạn một lần mỗi 5 giây mỗi phòng.
+- Khác plan ở đâu: `05-multiplayer.md` §4 (payload message), `06-missions.md` §5.1, §5.3.
+- Hệ quả: P4.3 vẽ vật thể từ `mission:entities` và cần presenter cho `visit`/`collect`/`quiz`/`social`.
+
 ## 2026-11-13 — Engine nhiệm vụ: chi tiết chốt khi làm
 
 - Gói việc: P4.1
