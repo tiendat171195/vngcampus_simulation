@@ -6,7 +6,7 @@ import {
   MOVEMENT,
   PLAYER_STATUS,
 } from '@campus/shared';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import {
   Color,
@@ -15,7 +15,9 @@ import {
   Matrix4,
   MeshLambertMaterial,
   Quaternion,
+  Raycaster,
   type Sprite,
+  Vector2,
   Vector3,
 } from 'three';
 import { Avatar } from '../avatars/Avatar';
@@ -26,6 +28,7 @@ import { MeshBatch } from '../world/MeshBatch';
 import { BubbleView } from './bubbles';
 import type { Sample } from './Interpolator';
 import { net } from './net';
+import { remotePicker } from './pick';
 
 /** Remote players drawn as full avatars, nearest first; the rest become impostors. */
 const DETAIL_CAP: Record<QualityLevel, number> = { low: 24, medium: 48, high: 96 };
@@ -33,6 +36,9 @@ const TAG_CAP = 12;
 const TAG_DISTANCE = 24;
 const MAX_IMPOSTORS = 256;
 const HEAD_HEIGHT = 2.05;
+/** How close to a body a tap must land, and how far away someone can be picked, in metres. */
+const PICK_RADIUS = 0.45;
+const PICK_RANGE = 40;
 
 interface View {
   avatar: Avatar | null;
@@ -81,6 +87,38 @@ export function RemotePlayers() {
   const group = useMemo(() => new Group(), []);
   const impostors = useMemo(createImpostors, []);
   const views = useMemo(() => new Map<string, View>(), []);
+  const camera = useThree((state) => state.camera);
+
+  // Tapping someone opens their profile card: the nearest figure whose body the ray passes.
+  useEffect(() => {
+    const raycaster = new Raycaster();
+    const ndc = new Vector2();
+    const feet = new Vector3();
+    const head = new Vector3();
+    const onRay = new Vector3();
+    remotePicker.pick = (x, y) => {
+      ndc.set(x, y);
+      raycaster.setFromCamera(ndc, camera);
+      let best: string | null = null;
+      let bestDistance = PICK_RANGE;
+      for (const [id, view] of views) {
+        if (!view.visible) continue;
+        const { sample } = view;
+        feet.set(sample.x, sample.y + 0.1, sample.z);
+        head.set(sample.x, sample.y + 1.7, sample.z);
+        if (raycaster.ray.distanceSqToSegment(feet, head, onRay) > PICK_RADIUS ** 2) continue;
+        const along = onRay.distanceTo(raycaster.ray.origin);
+        if (along < bestDistance) {
+          bestDistance = along;
+          best = id;
+        }
+      }
+      return best ? (net.remotes.get(best) ?? null) : null;
+    };
+    return () => {
+      remotePicker.pick = () => null;
+    };
+  }, [camera, views]);
   const scratch = useMemo(
     () => ({
       matrix: new Matrix4(),

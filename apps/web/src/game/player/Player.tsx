@@ -8,6 +8,7 @@ import { Avatar } from '../avatars/Avatar';
 import { input, readMove } from '../core/input';
 import { hudSink, useSession } from '../core/session';
 import { useSettings } from '../core/settings';
+import { tutorialSink } from '../core/tutorial';
 import { playerSink, useDebugStore } from '../debug/debugStore';
 import { BubbleView } from '../net/bubbles';
 import { net } from '../net/net';
@@ -165,6 +166,7 @@ export function Player() {
         until: now + EMOTES[emoteName].seconds * 1000,
       };
       net.sendEmote(requested);
+      if (emoteName === 'wave') tutorialSink.waved = true;
     }
 
     // Interaction: sit on the free seat the prompt points at.
@@ -183,6 +185,7 @@ export function Player() {
       steps++;
     }
     if (steps === MAX_STEPS_PER_FRAME) s.accumulator = 0;
+    if (wantsToMove) tutorialSink.walked += motor.speed * dt;
 
     // Draw between the last two simulation steps, so motion stays smooth at any refresh rate.
     s.rendered.lerpVectors(s.previous, motor.position, s.accumulator / STEP);
@@ -258,8 +261,10 @@ export function Player() {
 
     if (following) {
       rig.sensitivity = useSettings.getState().lookSensitivity;
+      const headingBefore = rig.heading;
       rig.look(input.lookX, input.lookY, input.zoom);
       rig.update(dt, camera, s.rendered, world.bvh);
+      tutorialSink.turned += Math.abs(angleDelta(headingBefore, rig.heading));
       // Up close the body would fill the screen.
       avatar.setBodyVisible(rig.armLength > 0.9);
     } else {

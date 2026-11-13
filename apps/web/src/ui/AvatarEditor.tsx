@@ -70,7 +70,7 @@ function Preview({ config }: { config: AvatarConfig }) {
  * Dressing room (docs/03 §7): every part and colour, previewed in 3D, saved to the account and
  * shown to everyone in the channel at once.
  */
-export function AvatarEditor() {
+export function AvatarEditor({ firstRun = false }: { firstRun?: boolean }) {
   const current = useSession((state) => state.avatar);
   const setAvatar = useSession((state) => state.setAvatar);
   const setModal = useSession((state) => state.setModal);
@@ -114,7 +114,8 @@ export function AvatarEditor() {
         </div>
 
         <div className="avatar-options">
-          <h1>Avatar của bạn</h1>
+          <h1>{firstRun ? 'Chọn ngoại hình của bạn' : 'Avatar của bạn'}</h1>
+          {firstRun && <p className="note">Đổi lại lúc nào cũng được, trong mục Hồ sơ.</p>}
           {ROWS.map((row) => (
             <div key={row.label} className="avatar-row">
               <span className="group-label">{row.label}</span>
@@ -164,7 +165,7 @@ export function AvatarEditor() {
             </button>
             <span className="spacer" />
             <button type="button" className="avatar-action" onClick={close}>
-              Huỷ
+              {firstRun ? 'Để sau' : 'Huỷ'}
             </button>
             <button
               type="button"

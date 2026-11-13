@@ -186,10 +186,21 @@ export function providerUrl(provider: SignInProvider, consent: number | null): s
 export async function saveProfile(changes: {
   displayName?: string;
   avatar?: string;
+  departmentId?: string | null;
+  title?: string | null;
+  hidePresence?: boolean;
 }): Promise<UserDto | string> {
   if (!(await accessToken())) return 'Phiên đăng nhập đã hết, hãy tải lại trang.';
   const reply = await call<SessionResponse>('PATCH', '/me', changes);
   if (reply?.status === 200) return hold(reply.body as SessionResponse).user;
+  return errorMessage(reply);
+}
+
+/** Signs in as an existing guest account with its recovery code (from another device). */
+export async function recoverGuest(code: string): Promise<UserDto | string> {
+  const reply = await call<SessionResponse>('POST', '/auth/guest/recover', { code: code.trim() });
+  if (reply?.status === 200) return hold(reply.body as SessionResponse).user;
+  if (!reply) return 'Không kết nối được máy chủ.';
   return errorMessage(reply);
 }
 

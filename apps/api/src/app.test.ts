@@ -1,9 +1,11 @@
-import { type Db, users } from '@campus/db';
+import { type Db, importDepartments, parseDepartmentsCsv, users } from '@campus/db';
 import {
   type BootstrapResponse,
+  type DepartmentDto,
   type GuestSignUpResponse,
   healthResponseSchema,
   PRIVACY_NOTICE_VERSION,
+  type PublicProfileDto,
   type SessionResponse,
   type UserDto,
 } from '@campus/shared';
@@ -321,5 +323,110 @@ describe('recovery codes', () => {
       payload: { code: recoveryCode },
     });
     expect(current.statusCode).toBe(200);
+  });
+});
+
+describe('profile and colleagues', () => {
+  it('imports departments once, however often the file is loaded', async () => {
+    const rows = parseDepartmentsCsv('name,parent\nKhối Công nghệ,\nPhòng Nền tảng,Khối Công nghệ');
+    expect(await importDepartments(db, rows)).toEqual({ added: 2, total: 2 });
+    expect(await importDepartments(db, rows)).toEqual({ added: 0, total: 2 });
+
+    const { body } = await signUp('Xem Phòng Ban');
+    const list = await app.inject({
+      method: 'GET',
+      url: '/api/v1/departments',
+      headers: { authorization: `Bearer ${body.accessToken}` },
+    });
+    const departments = list.json() as DepartmentDto[];
+    expect(departments.map((d) => d.name)).toEqual(['Khối Công nghệ', 'Phòng Nền tảng']);
+    expect(departments[1]?.parentId).toBe(departments[0]?.id);
+    expect((await app.inject({ method: 'GET', url: '/api/v1/departments' })).statusCode).toBe(401);
+  });
+
+  it('saves department, title and the online-list choice, and shows them on the card', async () => {
+    const { body } = await signUp('Có Hồ Sơ');
+    const auth = { authorization: `Bearer ${body.accessToken}` };
+    const departments = (
+      await app.inject({ method: 'GET', url: '/api/v1/departments', headers: auth })
+    ).json() as DepartmentDto[];
+    const department = departments[0] as DepartmentDto;
+
+    const saved = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/me',
+      headers: auth,
+      payload: { departmentId: department.id, title: '  Kỹ sư phần mềm ', hidePresence: true },
+    });
+    expect(saved.statusCode).toBe(200);
+    const session = saved.json() as SessionResponse;
+    expect(session.user).toMatchObject({
+      departmentId: department.id,
+      title: 'Kỹ sư phần mềm',
+      hidePresence: true,
+    });
+    expect((await deps.keys.verify(session.accessToken)).hidden).toBe(true);
+
+    const viewer = await signUp('Người Xem Thẻ');
+    const card = await app.inject({
+      method: 'GET',
+      url: `/api/v1/users/${body.user.id}`,
+      headers: { authorization: `Bearer ${viewer.body.accessToken}` },
+    });
+    expect(card.json()).toEqual({
+      id: body.user.id,
+      displayName: 'Có Hồ Sơ',
+      isGuest: true,
+      avatar: '',
+      department: department.name,
+      title: 'Kỹ sư phần mềm',
+    } satisfies PublicProfileDto);
+
+    // Clearing works; nonsense does not.
+    const cleared = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/me',
+      headers: auth,
+      payload: { departmentId: null, title: '' },
+    });
+    expect((cleared.json() as SessionResponse).user).toMatchObject({
+      departmentId: null,
+      title: null,
+    });
+    for (const payload of [
+      { departmentId: '01900000-0000-7000-8000-000000000000' },
+      { departmentId: 'abc' },
+      { title: '<b>Sếp</b>' },
+      { title: 'x'.repeat(41) },
+      { hidePresence: 'yes' },
+    ]) {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/api/v1/me',
+        headers: auth,
+        payload,
+      });
+      expect(response.statusCode, JSON.stringify(payload)).toBe(400);
+    }
+  });
+
+  it('shows no card for banned people, unknown ids, or to someone signed out', async () => {
+    const { body } = await signUp('Bị Ẩn');
+    const viewer = await signUp('Tò Mò');
+    const auth = { authorization: `Bearer ${viewer.body.accessToken}` };
+    await db.update(users).set({ status: 'banned' }).where(eq(users.id, body.user.id));
+    for (const id of [body.user.id, 'guest:abc', '01900000-0000-7000-8000-000000000000']) {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/v1/users/${id}`,
+        headers: auth,
+      });
+      expect(response.statusCode, id).toBe(404);
+    }
+    const signedOut = await app.inject({
+      method: 'GET',
+      url: `/api/v1/users/${viewer.body.user.id}`,
+    });
+    expect(signedOut.statusCode).toBe(401);
   });
 });

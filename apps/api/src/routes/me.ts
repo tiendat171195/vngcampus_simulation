@@ -1,4 +1,4 @@
-import { authIdentities, users } from '@campus/db';
+import { authIdentities, departments, users } from '@campus/db';
 import {
   AVATAR_MAX_LENGTH,
   displayNameSchema,
@@ -22,6 +22,16 @@ const patchBody = z
   .object({
     displayName: displayNameSchema.optional(),
     avatar: z.string().max(AVATAR_MAX_LENGTH).refine(isAvatar, 'Avatar không hợp lệ.').optional(),
+    departmentId: z.uuid().nullable().optional(),
+    title: z
+      .string()
+      .trim()
+      .max(40)
+      .refine((value) => !/[<>]/.test(value), 'Chức danh không được chứa < hoặc >.')
+      .transform((value) => value || null)
+      .nullable()
+      .optional(),
+    hidePresence: z.boolean().optional(),
   })
   .strict();
 const consentBody = z.object({ version: z.literal(PRIVACY_NOTICE_VERSION) }).strict();
@@ -67,8 +77,22 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
         .set({ displayName: parsed.data.displayName })
         .where(eq(users.id, claims.sub));
     }
-    if (parsed.data.avatar !== undefined)
-      await db.update(users).set({ avatar: parsed.data.avatar }).where(eq(users.id, claims.sub));
+    const { avatar, departmentId, title, hidePresence } = parsed.data;
+    if (departmentId) {
+      const [known] = await db
+        .select({ id: departments.id })
+        .from(departments)
+        .where(eq(departments.id, departmentId));
+      if (!known) throw new ApiError(400, 'unknown_department', 'Không có phòng ban này.');
+    }
+    const changes = {
+      ...(avatar !== undefined ? { avatar } : {}),
+      ...(departmentId !== undefined ? { departmentId } : {}),
+      ...(title !== undefined ? { title } : {}),
+      ...(hidePresence !== undefined ? { hidePresence } : {}),
+    };
+    if (Object.keys(changes).length > 0)
+      await db.update(users).set(changes).where(eq(users.id, claims.sub));
     const user = await load(claims.sub);
     return {
       accessToken: await keys.sign(claimsFor(user, claims.sid)),

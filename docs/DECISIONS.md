@@ -15,6 +15,18 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Hồ sơ, phòng ban tự chọn, lần đầu vào game
+
+- Gói việc: P3.4
+- Quyết định:
+  - **Phòng ban do mỗi người tự chọn** từ danh sách nhập bằng CSV (chỉ tên và phòng cha), không nhập danh sách nhân sự theo email: đúng nguyên tắc "phòng ban tuỳ chọn" ở docs/09 §8, và không phải giữ dữ liệu nhân sự của người chưa từng vào game. Thêm cột `title` (chức danh tự ghi). Migration `0001_profile`.
+  - Ẩn khỏi danh sách online đi trong token (claim `hidden`), cập nhật giữa chừng bằng message `profile` như tên và avatar.
+  - Thẻ hồ sơ mở từ bảng Mọi người hoặc chạm vào người trong campus; chưa có cấp/huy hiệu/streak (P4) và nút báo cáo (P5).
+  - Lần đầu trên một trình duyệt (cờ trong `localStorage`): nếu tài khoản chưa có avatar thì mở trình chỉnh avatar ("Để sau" giữ avatar sinh tự động), rồi thẻ hướng dẫn 3 bước — đi, xoay camera, vẫy tay — tự chuyển bước khi làm xong, có "Bỏ qua". Plan nói "3–4 lựa chọn mỗi mục"; dùng luôn trình chỉnh đầy đủ cho đơn giản.
+  - Mã khôi phục của khách: tạo trong bảng Hồ sơ, dùng ở màn hình chào ("Đã có tài khoản khách?").
+- Khác plan ở đâu: `07-backend-data.md` §2.1, §4; `05-multiplayer.md` §7.
+- Hệ quả: hướng dẫn lần đầu nhớ theo trình duyệt, không theo tài khoản — vào bằng máy mới sẽ thấy lại (có nút bỏ qua).
+
 ## 2026-11-13 — Avatar module dựng bằng code thay cho bộ asset Quaternius
 
 - Gói việc: P3.3

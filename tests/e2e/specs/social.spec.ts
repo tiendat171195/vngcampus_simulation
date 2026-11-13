@@ -90,7 +90,8 @@ test('a new avatar is saved and seen by others straight away', async ({ browser 
     (await remotes(watcher.page)).find((remote) => remote.name === name)?.avatar;
   await expect.poll(() => avatarOf('Thay Áo')).toBe('');
 
-  await dresser.page.getByRole('button', { name: 'Avatar' }).click();
+  await dresser.page.getByRole('button', { name: 'Hồ sơ' }).click();
+  await dresser.page.getByRole('button', { name: 'Đổi avatar' }).click();
   const editor = dresser.page.getByTestId('avatar-editor');
   const row = (label: string) => editor.locator('.avatar-row', { hasText: label });
   await row('Tóc').getByRole('button', { name: 'Đuôi ngựa', exact: true }).click();
@@ -109,4 +110,85 @@ test('a new avatar is saved and seen by others straight away', async ({ browser 
   await expect.poll(() => avatarOf('Thay Áo')).toBe(saved);
   await dresser.context.close();
   await watcher.context.close();
+});
+
+test('a first visit asks for a look, then teaches walking, looking and waving', async ({
+  browser,
+}) => {
+  const newcomer = await enterAs(browser, 'Người Mới', {}, '', true);
+  const { page } = newcomer;
+  const editor = page.getByTestId('avatar-editor');
+  await expect(editor).toContainText('Chọn ngoại hình của bạn');
+  await editor
+    .locator('.avatar-row', { hasText: 'Tóc' })
+    .getByRole('button', { name: 'Bob', exact: true })
+    .click();
+  await editor.getByRole('button', { name: 'Lưu' }).click();
+
+  const tutorial = page.getByTestId('tutorial');
+  await expect(tutorial).toContainText('Đi lại');
+  await page.locator('.input-layer').click({ position: { x: 600, y: 300 } });
+  await page.keyboard.down('KeyW');
+  await expect(tutorial).toContainText('Nhìn quanh', { timeout: 30_000 });
+  await page.keyboard.up('KeyW');
+  const layer = page.locator('.input-layer');
+  const box = await layer.boundingBox();
+  if (!box) throw new Error('no input layer');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 300, box.y + box.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await expect(tutorial).toContainText('Chào mọi người');
+  await page.keyboard.press('Digit1');
+  await expect(tutorial).toContainText('Xong rồi');
+  await expect(tutorial).toHaveCount(0, { timeout: 10_000 });
+
+  // Not again on the next visit.
+  await page.reload();
+  await enterFromSplash(page);
+  await page.waitForTimeout(1000);
+  await expect(page.getByTestId('avatar-editor')).toHaveCount(0);
+  await expect(page.getByTestId('tutorial')).toHaveCount(0);
+  await newcomer.context.close();
+});
+
+test('profiles: department, title and staying off the online list; cards for colleagues', async ({
+  browser,
+}) => {
+  const me = await enterAs(browser, 'Có Phòng Ban', {}, '&spawn=poi.checkpoint.koi');
+  const colleague = await enterAs(browser, 'Đồng Nghiệp Tò Mò', {}, '&spawn=poi.checkpoint.koi');
+
+  await me.page.getByRole('button', { name: 'Hồ sơ' }).click();
+  const panel = me.page.getByRole('region', { name: 'Hồ sơ' });
+  await panel.getByLabel('Chức danh (không bắt buộc)').fill('Kỹ sư thử nghiệm');
+  await panel.getByLabel('Ẩn tôi khỏi danh sách online').check();
+  await panel.getByRole('button', { name: 'Lưu hồ sơ' }).click();
+  await expect(panel.getByRole('status')).toHaveText('Đã lưu.');
+
+  // Off the online list, but the card still opens from the people list of someone nearby…
+  await colleague.page.getByRole('button', { name: 'Mọi người' }).click();
+  await colleague.page.getByLabel('Tìm theo tên').fill('co phong ban');
+  await expect(colleague.page.getByTestId('people-list')).toContainText('Không tìm thấy ai.');
+  await panel.getByLabel('Ẩn tôi khỏi danh sách online').uncheck();
+  await panel.getByRole('button', { name: 'Lưu hồ sơ' }).click();
+  await colleague.page.getByLabel('Tìm theo tên').fill('co phong ba');
+  const row = colleague.page.getByTestId('people-list').locator('li', { hasText: 'Có Phòng Ban' });
+  await row.getByRole('button', { name: 'Hồ sơ' }).click();
+  const card = colleague.page.getByTestId('profile-card');
+  await expect(card).toContainText('Kỹ sư thử nghiệm');
+  await expect(card).toContainText('Khách');
+
+  // A guest can make a recovery code and use it in another browser.
+  await panel.getByRole('button', { name: 'Tạo mã khôi phục' }).click();
+  const code = (await panel.getByTestId('recovery-code').textContent()) ?? '';
+  const elsewhere = await browser.newContext();
+  const other = await elsewhere.newPage();
+  await other.goto('/?debug');
+  await other.getByRole('button', { name: 'Đã có tài khoản khách? Dùng mã khôi phục' }).click();
+  await other.getByLabel('Mã khôi phục').fill(code);
+  await other.getByRole('button', { name: 'Vào lại tài khoản khách' }).click();
+  await expect(other.locator('.splash-name-input').first()).toHaveValue('Có Phòng Ban');
+  await elsewhere.close();
+  await me.context.close();
+  await colleague.context.close();
 });

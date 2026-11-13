@@ -178,7 +178,8 @@ sequenceDiagram
 - Realtime ghi danh bạ vào **presence của Colyseus** (hash `campus:online`: userId → `{ name, channel, roomId, area, status }`), cập nhật khi thay đổi. Một tiến trình dùng bộ nhớ trong; khi bật Redis presence (bậc 2) thì dữ liệu nằm ở Redis mà không phải sửa mã. `GET /rt/online?q=` trả danh sách, tìm theo tên không dấu, bỏ các dòng của phòng không còn tồn tại.
 - API cung cấp danh sách online có tìm kiếm và tổng số theo kênh/khu.
 - "Tìm đồng nghiệp": bảng **Mọi người** → gõ tên → thấy kênh và khu → nút **Tới kênh này** → vào kênh đó, **giữ nguyên vị trí** (client gửi `resume`, server chấp nhận nếu chỗ đó đi được). Mũi tên chỉ đường tới người đó: V1.
-- Quyền riêng tư: mỗi người có tuỳ chọn **ẩn khỏi danh sách online** (vẫn hiện trong thế giới với người đứng gần).
+- Quyền riêng tư: mỗi người có tuỳ chọn **ẩn khỏi danh sách online** (vẫn hiện trong thế giới với người đứng gần). Tuỳ chọn đi trong access token (claim `hidden`); đổi giữa chừng thì client gửi `profile` với token mới và server gỡ/ghi lại dòng trong danh bạ.
+- Thẻ hồ sơ: bấm "Hồ sơ" ở một dòng trong bảng Mọi người, hoặc chạm vào người đó trong campus (tia từ camera, chọn người gần nhất mà tia đi qua thân trong vòng 0,45 m, tối đa 40 m). Nội dung lấy từ `GET /api/v1/users/:id`.
 
 ## 8. Chat
 

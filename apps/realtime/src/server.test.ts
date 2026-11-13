@@ -27,7 +27,7 @@ import { createServer } from './server';
 let colyseus: ColyseusTestServer;
 /** Signs tokens the way the API does, with a key only this test knows. */
 let signToken: (
-  claims: { sub: string; name: string; guest?: boolean; avatar?: string },
+  claims: { sub: string; name: string; guest?: boolean; avatar?: string; hidden?: boolean },
   issuer?: string,
 ) => Promise<string>;
 let nextId = 0;
@@ -47,6 +47,7 @@ beforeAll(async () => {
       role: 'player',
       guest: claims.guest ?? false,
       avatar: claims.avatar ?? '',
+      hidden: claims.hidden ?? false,
       sid: 's',
     })
       .setProtectedHeader({ alg: 'ES256', kid: 'test' })
@@ -498,6 +499,27 @@ describe('access tokens', () => {
     await settle(200);
     expect(me(room)).toMatchObject({ name: 'Đã Thay Đồ' });
     expect(me(room)?.avatar).not.toBe(first);
+  });
+
+  it('keeps people who asked for it out of the online list, and back in when they change their mind', async () => {
+    const sub = '0190f0c2-0000-7000-8000-000000000004';
+    const names = async () =>
+      ((await colyseus.http.get('/online?q=kin dao')).data as OnlineEntry[]).map((e) => e.name);
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+      open: true,
+      token: await signToken({ sub, name: 'Kín Đáo', hidden: true }),
+    });
+    await settle(300);
+    expect(me(room)?.name).toBe('Kín Đáo');
+    expect(await names()).toEqual([]);
+
+    room.send(MSG.profile, { token: await signToken({ sub, name: 'Kín Đáo', hidden: false }) });
+    await settle(300);
+    expect(await names()).toEqual(['Kín Đáo']);
+
+    room.send(MSG.profile, { token: await signToken({ sub, name: 'Kín Đáo', hidden: true }) });
+    await settle(300);
+    expect(await names()).toEqual([]);
   });
 
   it('turns away forged or foreign tokens', async () => {

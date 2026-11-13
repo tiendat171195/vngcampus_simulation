@@ -5,6 +5,7 @@
  */
 import { sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
@@ -26,6 +27,16 @@ const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 };
 
+/** Departments people can say they belong to (P3.4); imported from a CSV file. */
+export const departments = pgTable('departments', {
+  id: uuid('id').primaryKey(),
+  name: text('name').notNull().unique(),
+  parentId: uuid('parent_id').references((): AnyPgColumn => departments.id, {
+    onDelete: 'set null',
+  }),
+  ...timestamps,
+});
+
 export const users = pgTable('users', {
   id: uuid('id').primaryKey(),
   displayName: text('display_name').notNull(),
@@ -36,6 +47,10 @@ export const users = pgTable('users', {
   /** Avatar configuration string (P3.3). */
   avatar: text('avatar').notNull().default(''),
   locale: text('locale').notNull().default('vi'),
+  /** Chosen by the person, optional (docs/09 §8: collect the minimum). */
+  departmentId: uuid('department_id').references(() => departments.id, { onDelete: 'set null' }),
+  /** Job title as the person writes it, optional. */
+  title: text('title'),
   /** Keep this person out of the online directory (P3.4). */
   hidePresence: boolean('hide_presence').notNull().default(false),
   /** Version of the privacy notice the person accepted. */

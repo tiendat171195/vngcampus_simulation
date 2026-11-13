@@ -2,7 +2,14 @@ import type { BootstrapResponse, SignInProvider, UserDto } from '@campus/shared'
 import { type FormEvent, useEffect, useState } from 'react';
 import { type Phase, useSession } from '../game/core/session';
 import { loadName, nameProblem, saveName } from '../game/net/identity';
-import { loadBootstrap, providerUrl, resume, signIn, signOut } from '../services/auth';
+import {
+  loadBootstrap,
+  providerUrl,
+  recoverGuest,
+  resume,
+  signIn,
+  signOut,
+} from '../services/auth';
 
 const STEPS: Array<{ phase: Phase; label: string }> = [
   { phase: 'loading', label: 'Tải trò chơi' },
@@ -51,6 +58,8 @@ export function Splash() {
   const [agree, setAgree] = useState(false);
   const [problem, setProblem] = useState<string | null>(takeSignInFailure);
   const [busy, setBusy] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  const [code, setCode] = useState('');
   const ready = phase === 'ready';
   const checking = account === undefined;
   const member = account && !account.isGuest ? account : null;
@@ -225,6 +234,46 @@ export function Splash() {
                 Đăng nhập bằng {provider.label}
               </button>
             ))}
+          </div>
+        )}
+        {!checking && !account && guestsAllowed && (
+          <div className="splash-recover">
+            {recovering ? (
+              <>
+                <input
+                  className="splash-name-input"
+                  value={code}
+                  placeholder="Mã khôi phục"
+                  aria-label="Mã khôi phục"
+                  autoComplete="off"
+                  onChange={(event) => {
+                    setCode(event.target.value);
+                    setProblem(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  className="splash-provider"
+                  disabled={busy || code.trim().length < 10}
+                  onClick={() => {
+                    setBusy(true);
+                    void recoverGuest(code).then((result) => {
+                      setBusy(false);
+                      if (typeof result === 'string') return setProblem(result);
+                      setAccount(result);
+                      setName(result.displayName);
+                      setRecovering(false);
+                    });
+                  }}
+                >
+                  Vào lại tài khoản khách
+                </button>
+              </>
+            ) : (
+              <button type="button" className="splash-link" onClick={() => setRecovering(true)}>
+                Đã có tài khoản khách? Dùng mã khôi phục
+              </button>
+            )}
           </div>
         )}
         {readyMs !== null && (

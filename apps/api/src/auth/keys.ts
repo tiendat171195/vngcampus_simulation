@@ -25,6 +25,8 @@ export interface AccessClaims {
   guest: boolean;
   /** Avatar string ('' until made), so the realtime server can dress the player. */
   avatar: string;
+  /** Kept out of the online list (P3.4). */
+  hidden: boolean;
   /** Session id, to tie a token to the session that issued it. */
   sid: string;
 }
@@ -69,6 +71,7 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
         role: claims.role,
         guest: claims.guest,
         avatar: claims.avatar,
+        hidden: claims.hidden,
         sid: claims.sid,
       })
         .setProtectedHeader({ alg: ALGORITHM, kid })
@@ -86,6 +89,7 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
         role: String(payload.role ?? 'player'),
         guest: payload.guest === true,
         avatar: typeof payload.avatar === 'string' ? payload.avatar : '',
+        hidden: payload.hidden === true,
         sid: String(payload.sid ?? ''),
       };
     },

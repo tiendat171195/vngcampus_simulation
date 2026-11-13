@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong phase P1, P2 (mốc M2 "gặp nhau") và P3.1: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản: khách (tên tự đặt) hoặc tài khoản công ty qua Google/OIDC, giới hạn theo domain email; khách liên kết lên tài khoản công ty mà không mất gì; có thông báo quyền riêng tư và ghi nhận đồng ý. Tự chọn avatar (dáng, tóc, áo, quần/váy, giày, phụ kiện, màu) với bản xem trước 3D; mọi người thấy ngay.
+**Trạng thái:** xong phase P1, P2 (mốc M2 "gặp nhau") và P3 (mốc M3 "có danh tính"): nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản: khách (tên tự đặt) hoặc tài khoản công ty qua Google/OIDC, giới hạn theo domain email; khách liên kết lên tài khoản công ty mà không mất gì; có thông báo quyền riêng tư và ghi nhận đồng ý. Tự chọn avatar (dáng, tóc, áo, quần/váy, giày, phụ kiện, màu) với bản xem trước 3D; mọi người thấy ngay. Hồ sơ có phòng ban, chức danh, tuỳ chọn ẩn khỏi danh sách online; chạm vào đồng nghiệp để xem thẻ hồ sơ; lần đầu vào có hướng dẫn 3 bước.
 
 ## Chạy thử
 
@@ -69,6 +69,7 @@ Không có Docker thì dùng một Postgres cài sẵn, tạo user `campus` (m�
 | `pnpm check` | Tất cả các bước trên theo thứ tự — chạy trước khi commit; CI chạy đúng chuỗi này |
 | `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước, cần Postgres): đăng nhập khách và qua IdP giả lập, hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang, emote, chat, chuyển kênh |
 | `pnpm load -- --url http://127.0.0.1:2567 --bots 500` | Thử tải realtime bằng bot (server cần `DEV_GUEST_AUTH=on`); kết quả mẫu ở `docs/05-multiplayer.md` §11 |
+| `pnpm db:import-departments -- <file.csv>` | Nạp danh sách phòng ban (cột `name`, `parent`) vào database ở `DATABASE_URL` |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
 
 Chạy lệnh cho một gói: `pnpm --filter @campus/api test`.

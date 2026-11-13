@@ -12,6 +12,9 @@ export const toUserDto = (user: UserRow): UserDto => ({
   locale: user.locale,
   email: user.email,
   consentVersion: user.consentVersion,
+  departmentId: user.departmentId,
+  title: user.title,
+  hidePresence: user.hidePresence,
 });
 
 /** Claims of an access token for this user in session `sid`. */
@@ -21,5 +24,6 @@ export const claimsFor = (user: UserRow, sid: string) => ({
   role: user.role,
   guest: user.isGuest,
   avatar: user.avatar,
+  hidden: user.hidePresence,
   sid,
 });

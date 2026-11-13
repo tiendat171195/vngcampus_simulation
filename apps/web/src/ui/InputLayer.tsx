@@ -1,6 +1,8 @@
 import { EMOTE_BY_ID } from '@campus/shared';
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef } from 'react';
 import { input, releaseAll } from '../game/core/input';
+import { useSession } from '../game/core/session';
+import { remotePicker } from '../game/net/pick';
 
 /** Stick travel, in pixels, that counts as "all the way". */
 const STICK_RADIUS = 56;
@@ -37,6 +39,8 @@ export function InputLayer() {
     stick: null as { id: number; x: number; y: number } | null,
     look: new Map<number, { x: number; y: number }>(),
     pinch: 0,
+    /** A press that may turn out to be a tap (on a colleague, to open their card). */
+    tap: null as { id: number; x: number; y: number; t: number } | null,
   });
 
   useEffect(() => {
@@ -92,6 +96,10 @@ export function InputLayer() {
     }
     p.look.set(event.pointerId, { x: event.clientX, y: event.clientY });
     p.pinch = 0;
+    p.tap =
+      p.look.size === 1
+        ? { id: event.pointerId, x: event.clientX, y: event.clientY, t: performance.now() }
+        : null;
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -112,6 +120,8 @@ export function InputLayer() {
     const last = p.look.get(event.pointerId);
     if (!last) return;
     const current = { x: event.clientX, y: event.clientY };
+    if (p.tap?.id === event.pointerId && Math.hypot(current.x - p.tap.x, current.y - p.tap.y) > 8)
+      p.tap = null;
     p.look.set(event.pointerId, current);
     if (p.look.size >= 2) {
       const [a, b] = [...p.look.values()] as [{ x: number; y: number }, { x: number; y: number }];
@@ -136,6 +146,23 @@ export function InputLayer() {
     }
     p.look.delete(event.pointerId);
     p.pinch = 0;
+    const tap = p.tap;
+    p.tap = null;
+    if (
+      tap?.id === event.pointerId &&
+      event.type === 'pointerup' &&
+      performance.now() - tap.t < 400
+    ) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const remote = remotePicker.pick(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      if (remote)
+        useSession
+          .getState()
+          .setProfileCard({ userId: remote.userId, name: remote.name, guest: remote.tag !== '' });
+    }
   };
 
   return (

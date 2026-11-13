@@ -10,6 +10,7 @@ const REFRESH_MS = 4000;
  * Moving to a colleague's channel keeps one's place in the campus.
  */
 export function PeoplePanel({ hidden }: { hidden: boolean }) {
+  const setProfileCard = useSession((state) => state.setProfileCard);
   const myChannel = useSession((state) => state.net.channel);
   const [query, setQuery] = useState('');
   const [people, setPeople] = useState<OnlineEntry[]>([]);
@@ -68,11 +69,21 @@ export function PeoplePanel({ hidden }: { hidden: boolean }) {
                 {person.area && ` · ${person.area}`}
               </span>
             </span>
-            {person.channel !== myChannel && (
-              <button type="button" disabled={busy} onClick={() => void go(person.roomId)}>
-                Tới kênh này
+            <span className="person-actions">
+              <button
+                type="button"
+                onClick={() =>
+                  setProfileCard({ userId: person.userId, name: person.name, guest: false })
+                }
+              >
+                Hồ sơ
               </button>
-            )}
+              {person.channel !== myChannel && (
+                <button type="button" disabled={busy} onClick={() => void go(person.roomId)}>
+                  Tới kênh này
+                </button>
+              )}
+            </span>
           </li>
         ))}
       </ul>

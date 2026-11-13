@@ -119,7 +119,17 @@ Ngoài nghiệm thu: emote, ghế, chat gần có lọc từ, danh bạ online v
 | P3.1 | DB + API nền + khách | Drizzle schema và migration (users, auth_identities, sessions, settings; `user_stats` chuyển sang P4.1). Khung Fastify: định dạng lỗi, zod, rate limit. Đăng nhập khách, JWT ký bất đối xứng, refresh xoay vòng. `/me`, `/world/bootstrap`. Realtime kiểm tra JWT thật | M | Xong |
 | P3.2 | Đăng nhập OIDC | Google + OIDC tổng quát, danh sách domain cho phép, liên kết khách → tài khoản thật, màn hình đồng ý + thông báo quyền riêng tư | S | Xong |
 | P3.3 | Avatar module | Các phần rời từ bộ nhân vật CC0, gộp thành một skinned mesh, bảng màu đỉnh, chuỗi cấu hình. Trình chỉnh avatar có xem trước 3D. Lưu và đồng bộ cho người khác. LOD1 + impostor | L | Xong |
-| P3.4 | Hồ sơ và lần đầu vào game | Thẻ hồ sơ, phòng ban (script nhập CSV), tuỳ chọn ẩn khỏi danh sách online, luồng lần đầu (tên → avatar → hướng dẫn) | S | Chưa làm |
+| P3.4 | Hồ sơ và lần đầu vào game | Thẻ hồ sơ, phòng ban (script nhập CSV), tuỳ chọn ẩn khỏi danh sách online, luồng lần đầu (tên → avatar → hướng dẫn) | S | Xong |
+
+**Kết quả nghiệm thu P3 (13/11/2026):**
+
+| Tiêu chí | Kết quả |
+|---|---|
+| Đăng nhập trên điện thoại và laptop ra cùng một người, cùng avatar | Đạt — tài khoản công ty: cùng danh tính IdP ra cùng tài khoản (test API); khách: mã khôi phục (test API + e2e). Avatar lưu ở tài khoản, đi theo token |
+| Khách liên kết tài khoản thật không mất tiến độ | Đạt — giữ nguyên id tài khoản (test API + e2e); mã khôi phục của khách bị thu hồi |
+| Token sai hoặc tài khoản bị khoá không vào được phòng (có test) | Đạt một phần — token giả/sai bên phát hành bị từ chối (test realtime); tài khoản bị khoá không lấy được token mới (test API), nhưng token còn hạn (≤ 15 phút) vẫn vào được cho tới khi P5 có tín hiệu moderation |
+
+Ngoài nghiệm thu: thông báo quyền riêng tư và ghi nhận đồng ý, IdP giả lập cho dev/e2e, trình chỉnh avatar, thẻ hồ sơ, ẩn khỏi danh sách online, hướng dẫn lần đầu. Đăng nhập Google/Microsoft thật chưa thử (cần client id của công ty — D2).
 
 **Nghiệm thu:**
 - Đăng nhập trên điện thoại và laptop ra cùng một người, cùng avatar.

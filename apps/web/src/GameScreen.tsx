@@ -2,6 +2,7 @@ import { avatarFromSeed, formatAvatar } from '@campus/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from './game/core/session';
 import { useSettings } from './game/core/settings';
+import { firstRunDone, markFirstRunDone, tutorialDone } from './game/core/tutorial';
 import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
 import { net } from './game/net/net';
@@ -13,7 +14,9 @@ import { ChatBox } from './ui/ChatBox';
 import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
 import { MiniMap } from './ui/MiniMap';
+import { ProfileCard } from './ui/ProfileCard';
 import { Toolbar } from './ui/Toolbar';
+import { Tutorial } from './ui/Tutorial';
 
 /** Everything that needs three.js. Loaded on demand, while the splash screen is showing. */
 export default function GameScreen() {
@@ -21,6 +24,9 @@ export default function GameScreen() {
   const following = useDebugStore((state) => state.cameraMode === 'follow');
   const showHints = useSettings((state) => state.showHints);
   const modal = useSession((state) => state.modal);
+  const [firstRun, setFirstRun] = useState(false);
+  const [tutorial, setTutorial] = useState(false);
+  const endTutorial = useCallback(() => setTutorial(false), []);
   const steering = playing && following && modal === null;
   const [mountCanvas, setMountCanvas] = useState(false);
 
@@ -57,6 +63,21 @@ export default function GameScreen() {
   useEffect(() => {
     if (playing) void connect();
   }, [playing, connect]);
+
+  // First visit on this browser (docs/01 §4.1): choose a look, then three steps of tutorial.
+  useEffect(() => {
+    if (!playing || firstRunDone()) return;
+    markFirstRunDone();
+    if (!currentUser()?.avatar) {
+      setFirstRun(true);
+      useSession.getState().setModal('avatar');
+    } else if (!tutorialDone()) setTutorial(true);
+  }, [playing]);
+  useEffect(() => {
+    if (!firstRun || modal !== null) return;
+    setFirstRun(false);
+    if (!tutorialDone()) setTutorial(true);
+  }, [firstRun, modal]);
 
   // A hidden tab shows as away to the others.
   useEffect(() => {
@@ -107,7 +128,9 @@ export default function GameScreen() {
       )}
       {playing && <ConnectionBanner onRetry={() => void connect()} />}
       {playing && <Toolbar />}
-      {playing && modal === 'avatar' && <AvatarEditor />}
+      {playing && modal === 'avatar' && <AvatarEditor firstRun={firstRun} />}
+      {playing && <ProfileCard />}
+      {steering && tutorial && <Tutorial onFinish={endTutorial} />}
     </>
   );
 }

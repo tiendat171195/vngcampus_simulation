@@ -24,9 +24,20 @@ export async function enterAs(
   options: BrowserContextOptions = {},
   /** Extra query parameters, starting with `&`. */
   query = '',
+  /** Go through the first-visit steps (avatar choice, tutorial) instead of skipping them. */
+  firstVisit = false,
 ) {
   const context = await browser.newContext(options);
-  await context.addInitScript((name) => window.localStorage.setItem('campus.name.v1', name), name);
+  await context.addInitScript(
+    ([name, skip]) => {
+      window.localStorage.setItem('campus.name.v1', name);
+      if (skip) {
+        window.localStorage.setItem('campus.firstrun.v1', 'done');
+        window.localStorage.setItem('campus.tutorial.v1', 'done');
+      }
+    },
+    [name, !firstVisit] as const,
+  );
   const page = await context.newPage();
   await page.goto(`/?debug${query}`);
   await enterFromSplash(page);

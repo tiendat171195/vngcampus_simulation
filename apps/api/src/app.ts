@@ -7,6 +7,7 @@ import type { AccessClaims, KeyRing } from './auth/keys';
 import type { OidcProvider } from './auth/oidc';
 import { ApiError, sendError } from './errors';
 import { authRoutes } from './routes/auth';
+import { directoryRoutes } from './routes/directory';
 import { meRoutes } from './routes/me';
 import { oidcRoutes } from './routes/oidc';
 import { worldRoutes } from './routes/world';
@@ -70,6 +71,7 @@ export async function buildApp(
       await authRoutes(v1, deps);
       await oidcRoutes(v1, deps);
       await meRoutes(v1, deps);
+      await directoryRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },
     { prefix: '/api/v1' },

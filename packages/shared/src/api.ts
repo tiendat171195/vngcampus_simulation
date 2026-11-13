@@ -20,6 +20,28 @@ export interface UserDto {
   email: string | null;
   /** Privacy notice version this person agreed to; null if never. */
   consentVersion: number | null;
+  /** Chosen from GET /departments; optional. */
+  departmentId: string | null;
+  /** Job title as the person wrote it; optional. */
+  title: string | null;
+  /** Kept out of the online list (still seen in the world by people nearby). */
+  hidePresence: boolean;
+}
+
+export interface DepartmentDto {
+  id: string;
+  name: string;
+  parentId: string | null;
+}
+
+/** What anyone signed in may see about a colleague (the profile card). */
+export interface PublicProfileDto {
+  id: string;
+  displayName: string;
+  isGuest: boolean;
+  avatar: string;
+  department: string | null;
+  title: string | null;
 }
 
 export interface SessionResponse {

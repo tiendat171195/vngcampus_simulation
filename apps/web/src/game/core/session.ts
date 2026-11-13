@@ -54,6 +54,9 @@ interface SessionState {
   /** A full-screen dialog over the game; the game ignores keys and touches meanwhile. */
   modal: 'avatar' | null;
   setModal(modal: 'avatar' | null): void;
+  /** The colleague whose profile card is open. */
+  profileCard: { userId: string; name: string; guest: boolean } | null;
+  setProfileCard(card: { userId: string; name: string; guest: boolean } | null): void;
   net: NetSummary;
   setPhase(phase: Phase): void;
   setDisplayName(name: string): void;
@@ -83,6 +86,8 @@ export const useSession = create<SessionState>((set, get) => ({
   setAvatar: (avatar) => set({ avatar }),
   modal: null,
   setModal: (modal) => set({ modal }),
+  profileCard: null,
+  setProfileCard: (profileCard) => set({ profileCard }),
   net: { status: 'idle', channel: null, players: 0 },
   setPhase: (phase) => set({ phase }),
   setDisplayName: (displayName) => set({ displayName }),

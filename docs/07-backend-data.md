@@ -40,7 +40,7 @@ erDiagram
 | `users` | `id` (UUIDv7), `display_name`, `email?` (unique), `is_guest`, `role` (player/editor/moderator/admin), `status` (active/muted/banned), `department_id?`, `title?`, `avatar` (chuỗi cấu hình), `locale`, `hide_presence`, `consent_version`, `created_at`, `last_seen_at` | |
 | `auth_identities` | `user_id`, `provider` (guest/google/microsoft/oidc/zalo), `subject` | Unique `(provider, subject)`; một người có thể có nhiều danh tính |
 | `sessions` | `user_id`, `refresh_hash`, `family_id`, `expires_at`, `revoked_at?`, `user_agent` | Chỉ lưu hash của refresh token |
-| `departments` | `id`, `name`, `parent_id?` | Nhập từ CSV hoặc từ claim của IdP |
+| `departments` | `id`, `name` (unique), `parent_id?` | Nhập từ CSV: `pnpm db:import-departments <file.csv>` (cột `name`, `parent`; chạy lại an toàn, không xoá). Mỗi người tự chọn phòng ban của mình (không bắt buộc) |
 
 ### 2.2 Nhiệm vụ
 
@@ -103,8 +103,11 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 | POST | `/auth/guest/recover` | Lấy lại tài khoản khách bằng mã khôi phục |
 | GET | `/auth/oidc/:provider/start` · `/callback` | Đăng nhập OIDC (`google`, `oidc`). `start?return=/đường-dẫn&consent=<phiên bản>`; lỗi quay về `?auth_error=cancelled\|failed\|expired\|unverified\|domain\|banned\|unknown`. Trình duyệt đang là khách thì callback biến khách thành tài khoản thật, giữ nguyên tiến độ |
 | POST | `/me/consent` | Ghi nhận đồng ý thông báo quyền riêng tư `{ version }` |
+| POST | `/me/recovery-code` | Mã khôi phục mới cho khách (mã cũ hết hiệu lực); hiện một lần trong bảng Hồ sơ |
+| GET | `/departments` | Danh sách phòng ban (cần đăng nhập) |
+| GET | `/users/:id` | Thẻ hồ sơ của đồng nghiệp: tên, khách hay không, avatar, phòng ban, chức danh — không có email (cần đăng nhập) |
 | POST | `/auth/refresh` · `/auth/logout` | Làm mới token · đăng xuất |
-| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên (chỉ khách — tài khoản thật lấy tên từ IdP), avatar (chuỗi `v1…` hợp lệ theo `@campus/shared/avatar`), tuỳ chọn riêng tư; yêu cầu xoá dữ liệu. PATCH trả access token mới vì tên và avatar nằm trong token |
+| GET / PATCH / DELETE | `/me` | Hồ sơ; sửa tên (chỉ khách — tài khoản thật lấy tên từ IdP), avatar (chuỗi `v1…` hợp lệ theo `@campus/shared/avatar`), `departmentId`, `title` (≤ 40 ký tự), `hidePresence`; yêu cầu xoá dữ liệu. PATCH trả access token mới vì tên và avatar nằm trong token |
 
 ### Thế giới
 
@@ -144,7 +147,7 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 
 | Token | Dạng | Thời hạn | Lưu ở đâu |
 |---|---|---|---|
-| Access | JWT ký bất đối xứng (ES256/EdDSA); claim: `sub`, `role`, `name`, `guest`, `avatar`, `sid` | 15 phút | Bộ nhớ của trang |
+| Access | JWT ký bất đối xứng (ES256/EdDSA); claim: `sub`, `role`, `name`, `guest`, `avatar`, `hidden`, `sid` | 15 phút | Bộ nhớ của trang |
 | Refresh | Chuỗi ngẫu nhiên, DB chỉ lưu hash | 30 ngày, **xoay vòng mỗi lần dùng**; phát hiện dùng lại → thu hồi cả chuỗi phiên | Cookie `HttpOnly; Secure; SameSite=Lax`, phạm vi `/api/v1/auth` |
 
 - API giữ khoá riêng để ký. Realtime chỉ có **khoá công khai** — kiểm tra được token nhưng không phát hành được.

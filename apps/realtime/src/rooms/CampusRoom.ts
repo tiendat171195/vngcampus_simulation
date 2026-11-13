@@ -83,6 +83,8 @@ interface Tracking {
   hidden: boolean;
   /** What the online directory last showed for this player, to write only on change. */
   listed: string;
+  /** The person asked to stay out of the online list (P3.4). */
+  unlisted: boolean;
 }
 
 /** Channel-wide pub/sub topic announcing that a user has just joined somewhere. */
@@ -194,7 +196,13 @@ export class CampusRoom extends Room<{
       }
     }
     if (guest && this.config.devGuestAuth)
-      return { userId: `guest:${guest.id}`, name: guest.name, guest: true, avatar: '' };
+      return {
+        userId: `guest:${guest.id}`,
+        name: guest.name,
+        guest: true,
+        avatar: '',
+        hidden: false,
+      };
     throw new ServerError(401, 'Cần đăng nhập.');
   }
 
@@ -231,6 +239,7 @@ export class CampusRoom extends Room<{
       lastActivity: now,
       hidden: false,
       listed: '',
+      unlisted: identity.hidden,
     });
 
     await this.updateListing();
@@ -343,6 +352,7 @@ export class CampusRoom extends Room<{
     player.name = identity.name;
     player.tag = identity.guest ? 'Khách' : '';
     player.avatar = identity.avatar;
+    tracking.unlisted = identity.hidden;
     await this.updateDirectory(client.sessionId);
   }
 
@@ -458,6 +468,12 @@ export class CampusRoom extends Room<{
     const tracking = this.tracking.get(sessionId);
     const player = this.state.players.get(sessionId);
     if (!tracking || !player) return;
+    if (tracking.unlisted) {
+      if (tracking.listed === '') return;
+      tracking.listed = '';
+      await this.unlist(player.userId, sessionId);
+      return;
+    }
     const { x, y, z } = tracking.accepted;
     const floor = floorAt(campusIndex, y);
     const place = areasAt(campusIndex, [x, z], floor).find((area) => !area.tags.includes('base'));

@@ -8,6 +8,8 @@ export interface Identity {
   guest: boolean;
   /** Avatar string, '' until the person makes one. Checked here: tokens are signed by the API. */
   avatar: string;
+  /** Asked to be kept out of the online list (still seen in the world). */
+  hidden: boolean;
 }
 
 export type TokenVerifier = (token: string) => Promise<Identity>;
@@ -29,6 +31,12 @@ export function createTokenVerifier(keys: JWTVerifyGetKey | URL): TokenVerifier 
     }
     const avatar =
       typeof payload.avatar === 'string' && isAvatar(payload.avatar) ? payload.avatar : '';
-    return { userId: payload.sub, name: payload.name, guest: payload.guest === true, avatar };
+    return {
+      userId: payload.sub,
+      name: payload.name,
+      guest: payload.guest === true,
+      avatar,
+      hidden: payload.hidden === true,
+    };
   };
 }
