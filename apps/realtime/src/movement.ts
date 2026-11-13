@@ -57,20 +57,25 @@ export function checkMove(
   return { ok: true };
 }
 
-/** Token bucket: `rate` messages per second on average, bursts up to `rate`. */
+/**
+ * Token bucket: `rate` messages per second on average, bursts of up to `burst` (by default the
+ * rate itself, and never less than one message).
+ */
 export class RateLimiter {
   private tokens: number;
   private last: number;
   private readonly rate: number;
+  private readonly burst: number;
 
-  constructor(rate: number, now: number) {
+  constructor(rate: number, now: number, burst = Math.max(1, rate)) {
     this.rate = rate;
-    this.tokens = rate;
+    this.burst = burst;
+    this.tokens = burst;
     this.last = now;
   }
 
   take(now: number): boolean {
-    this.tokens = Math.min(this.rate, this.tokens + ((now - this.last) / 1000) * this.rate);
+    this.tokens = Math.min(this.burst, this.tokens + ((now - this.last) / 1000) * this.rate);
     this.last = now;
     if (this.tokens < 1) return false;
     this.tokens -= 1;

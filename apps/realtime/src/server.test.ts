@@ -6,6 +6,7 @@ import {
   CLOSE,
   type CorrectMessage,
   decodePosition,
+  EMOTES,
   encodePosition,
   healthResponseSchema,
   MSG,
@@ -250,5 +251,76 @@ describe('sessions', () => {
   it('exposes health in the shared shape', async () => {
     const response = await colyseus.http.get('/health');
     expect(healthResponseSchema.parse(response.data).service).toBe('realtime');
+  });
+});
+
+describe('emotes and seats', () => {
+  it('shows an emote to everyone and counts repeats, but not a flood', async () => {
+    const a = await join();
+    const b = await join();
+    a.send(MSG.emote, { id: EMOTES.wave.id });
+    await settle(250);
+    const seen = b.state.players.get(a.sessionId);
+    expect(seen?.emote).toBe(EMOTES.wave.id);
+    const first = seen?.emoteSeq ?? 0;
+    // Too soon after the wave: ignored.
+    a.send(MSG.emote, { id: EMOTES.bow.id });
+    await settle(250);
+    expect(b.state.players.get(a.sessionId)?.emote).toBe(EMOTES.wave.id);
+    // Two seconds later one more gets through, but only one of a burst; unknown ids never do.
+    await settle(1900);
+    a.send(MSG.emote, { id: 99 });
+    for (let i = 0; i < 5; i++) a.send(MSG.emote, { id: EMOTES.clap.id });
+    await settle(250);
+    expect(b.state.players.get(a.sessionId)?.emoteSeq).toBe(first + 1);
+    expect(b.state.players.get(a.sessionId)?.emote).toBe(EMOTES.clap.id);
+  });
+
+  it('seats one person per seat, close enough, and frees it when they walk off', async () => {
+    const seat = campusIndex.pois.get('poi.seat.koi_01');
+    if (!seat) throw new Error('no seat');
+    // Start right at the seat (development spawn), so it is within reach.
+    const nearby = seat.id;
+    const a = await join(guest('Ngồi'), { spawn: nearby });
+    const b = await join(guest('Đứng'), { spawn: nearby });
+    const far = await join(guest('Xa'));
+
+    const notice = far.waitForMessage(MSG.notice) as Promise<{ text: string }>;
+    far.send(MSG.seatTake, { seatId: seat.id });
+    expect((await notice).text).toContain('Lại gần');
+
+    a.send(MSG.seatTake, { seatId: seat.id });
+    await settle(250);
+    expect(me(a)?.seatId).toBe(seat.id);
+    expect(b.state.seats.get(seat.id)).toBe(a.sessionId);
+
+    const taken = b.waitForMessage(MSG.notice) as Promise<{ text: string }>;
+    b.send(MSG.seatTake, { seatId: seat.id });
+    expect((await taken).text).toContain('đã có người');
+
+    // Walking a few metres away stands them up.
+    const start = me(a);
+    if (!start) throw new Error('no player');
+    let z = decodePosition(start.z);
+    const x = decodePosition(start.x);
+    for (let seq = 1; seq <= 8; seq++) {
+      z -= 0.45;
+      move(a, seq, x, 0, z);
+      await settle(110);
+    }
+    await settle(200);
+    expect(me(a)?.seatId).toBe('');
+    expect(b.state.seats.has(seat.id)).toBe(false);
+  });
+
+  it('frees the seat when its occupant leaves', async () => {
+    const a = await join(guest(), { spawn: 'poi.seat.koi_01' });
+    const b = await join();
+    a.send(MSG.seatTake, { seatId: 'poi.seat.koi_01' });
+    await settle(250);
+    expect(b.state.seats.size).toBe(1);
+    await a.leave();
+    await settle(250);
+    expect(b.state.seats.size).toBe(0);
   });
 });

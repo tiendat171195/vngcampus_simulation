@@ -5,6 +5,7 @@ import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
 import { loadGuest } from './game/net/identity';
 import { net } from './game/net/net';
+import { ActionBar, NoticeToast } from './ui/ActionBar';
 import { AreaToast } from './ui/AreaToast';
 import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
@@ -58,6 +59,10 @@ export default function GameScreen() {
         [...net.remotes.values()].map((remote) => ({
           name: remote.name,
           status: remote.status,
+          anim: remote.anim,
+          emote: remote.emote,
+          emoteSeq: remote.emoteSeq,
+          seated: [...net.seats.values()].includes(remote.sessionId),
           ...remote.motion.latest,
         })),
     };
@@ -69,9 +74,11 @@ export default function GameScreen() {
       {playing && following && <InputLayer />}
       {playing && <MiniMap />}
       {playing && <AreaToast />}
+      {playing && <NoticeToast />}
+      {playing && following && <ActionBar />}
       {playing && following && showHints && (
         <p className="hint">
-          WASD để đi · Shift để chạy · Space để nhảy · kéo chuột để xoay · lăn để zoom
+          WASD đi · Shift chạy · Space nhảy · 1–6 biểu cảm · E tương tác · kéo chuột xoay · lăn zoom
         </p>
       )}
       {playing && <ConnectionBanner onRetry={connect} />}

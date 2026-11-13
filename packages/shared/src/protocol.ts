@@ -15,7 +15,64 @@ export const MSG = {
   pong: 'pong',
   /** Server → client: a move was rejected; jump back to `{ x, y, z }` (metres). */
   correct: 'correct',
+  /** Client → server: `{ id }`, an EMOTES id. Everyone sees it through `emote`/`emoteSeq`. */
+  emote: 'emote',
+  /** Client → server: `{ seatId }`. Granted through `seatId` in the player's state. */
+  seatTake: 'seat:take',
+  /** Client → server: `{}`; standing up. Moving away from the seat also frees it. */
+  seatLeave: 'seat:leave',
+  /** Client → server: `{ text }`. Server → client: ChatMessage, only to people nearby. */
+  chat: 'chat',
+  /** Client → server: `{ on }`, when the tab is hidden or shown again. */
+  afk: 'afk',
+  /** Server → client: `{ text }`, a short message for the player (a seat was taken…). */
+  notice: 'notice',
 } as const;
+
+/** Emotes, by wire id. Never renumber; add new ones at the end. */
+export const EMOTES = {
+  wave: { id: 1, label: 'Vẫy tay', seconds: 2.4 },
+  clap: { id: 2, label: 'Vỗ tay', seconds: 2.4 },
+  bow: { id: 3, label: 'Cúi chào', seconds: 1.8 },
+  cheer: { id: 4, label: 'Reo mừng', seconds: 2.4 },
+  dance: { id: 5, label: 'Nhảy', seconds: 6 },
+  think: { id: 6, label: 'Suy nghĩ', seconds: 3 },
+} as const;
+export type EmoteName = keyof typeof EMOTES;
+export const EMOTE_BY_ID: ReadonlyMap<number, EmoteName> = new Map(
+  (Object.keys(EMOTES) as EmoteName[]).map((name) => [EMOTES[name].id, name]),
+);
+
+export const emoteSchema = z.object({
+  id: z.number().int().min(1).max(Object.keys(EMOTES).length),
+});
+export const seatTakeSchema = z.object({ seatId: z.string().max(80) });
+
+export const CHAT = {
+  /** Messages reach people within this distance of the sender. */
+  radius: 12,
+  maxLength: 200,
+  /** At most this many messages per window. */
+  burst: 5,
+  windowMs: 10_000,
+} as const;
+
+export const chatSchema = z.object({ text: z.string().max(CHAT.maxLength * 2) });
+
+export interface ChatMessage {
+  /** Session id of the sender, to place the bubble over the right head. */
+  from: string;
+  name: string;
+  text: string;
+  /** Room clock. */
+  ts: number;
+}
+
+export interface NoticeMessage {
+  text: string;
+}
+
+export const afkSchema = z.object({ on: z.boolean() });
 
 const int16 = z.number().int().min(-32768).max(32767);
 

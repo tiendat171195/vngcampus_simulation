@@ -65,6 +65,15 @@ describe('RateLimiter', () => {
   });
 });
 
+describe('RateLimiter with a slow rate', () => {
+  it('still lets the first message through and then one per period', () => {
+    const limiter = new RateLimiter(0.5, 0);
+    expect(limiter.take(0)).toBe(true);
+    expect(limiter.take(100)).toBe(false);
+    expect(limiter.take(2100)).toBe(true);
+  });
+});
+
 describe('WindowCounter', () => {
   it('forgets events older than the window', () => {
     const counter = new WindowCounter(10_000);

@@ -36,6 +36,8 @@ export const RoomState = schema(
     /** Milliseconds since the room was created, stamped on every patch; clients interpolate on it. */
     time: t.uint32().default(0),
     players: t.map(PlayerState),
+    /** Seat POI id → session id of whoever sits there. Seats are few on purpose. */
+    seats: t.map('string'),
   },
   'RoomState',
 );

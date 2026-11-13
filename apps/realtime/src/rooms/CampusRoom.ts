@@ -1,19 +1,22 @@
-import { type Poi, poisOfSet } from '@campus/map-data';
+import { distance, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import {
   CHANNEL,
   CLOSE,
   type CorrectMessage,
   decodePosition,
+  emoteSchema,
   encodePosition,
   encodeYaw,
   joinOptionsSchema,
   MSG,
   moveSchema,
   NET,
+  type NoticeMessage,
   PLAYER_STATUS,
   type PongMessage,
   pingSchema,
+  seatTakeSchema,
 } from '@campus/shared';
 import {
   type AuthContext,
@@ -56,6 +59,7 @@ interface Tracking {
   lastSeq: number;
   rate: RateLimiter;
   violations: WindowCounter;
+  emotes: RateLimiter;
 }
 
 /** Channel-wide pub/sub topic announcing that a user has just joined somewhere. */
@@ -64,6 +68,11 @@ const MOVE_RATE = 15;
 const VIOLATION_WINDOW_MS = 10_000;
 const VIOLATION_FLAG = 5;
 const PING_RATE = 2;
+/** One emote every two seconds on average. */
+const EMOTE_RATE = 0.5;
+/** How close one must stand to sit down, and how far a seated player may drift before standing. */
+const SEAT_REACH = 2.5;
+const SEAT_LEASH = 1.5;
 
 const LIMITS: WorldLimits = {
   min: campusMap.meta.bounds.min,
@@ -112,6 +121,9 @@ export class CampusRoom extends Room<{
     await this.presence.subscribe(SESSION_TOPIC, this.onSessionStart);
 
     this.onMessage(MSG.move, (client, payload) => this.handleMove(client, payload));
+    this.onMessage(MSG.emote, (client, payload) => this.handleEmote(client, payload));
+    this.onMessage(MSG.seatTake, (client, payload) => this.handleSeatTake(client, payload));
+    this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
     const pings = new Map<string, RateLimiter>();
     this.onMessage(MSG.ping, (client, payload) => {
       const limiter = pings.get(client.sessionId) ?? new RateLimiter(PING_RATE, this.now());
@@ -154,6 +166,7 @@ export class CampusRoom extends Room<{
       lastSeq: -1,
       rate: new RateLimiter(MOVE_RATE, now),
       violations: new WindowCounter(VIOLATION_WINDOW_MS),
+      emotes: new RateLimiter(EMOTE_RATE, now),
     });
 
     await this.updateListing();
@@ -180,6 +193,7 @@ export class CampusRoom extends Room<{
   }
 
   override async onLeave(client: Client): Promise<void> {
+    this.releaseSeat(client.sessionId);
     this.state.players.delete(client.sessionId);
     this.tracking.delete(client.sessionId);
     await this.updateListing();
@@ -220,12 +234,57 @@ export class CampusRoom extends Room<{
     }
 
     tracking.accepted = { ...next, at: now };
+    if (player.seatId) {
+      const seat = campusIndex.pois.get(player.seatId);
+      if (!seat || distance(seat.position, [next.x, next.z]) > SEAT_LEASH)
+        this.releaseSeat(client.sessionId);
+    }
     player.x = xi;
     player.y = yi;
     player.z = zi;
     player.yaw = yaw;
     player.anim = anim;
     if (player.status === PLAYER_STATUS.reconnecting) player.status = PLAYER_STATUS.active;
+  }
+
+  private handleEmote(client: Client, payload: unknown): void {
+    const tracking = this.tracking.get(client.sessionId);
+    const player = this.state.players.get(client.sessionId);
+    const parsed = emoteSchema.safeParse(payload);
+    if (!tracking || !player || !parsed.success || !tracking.emotes.take(this.now())) return;
+    player.emote = parsed.data.id;
+    // The sequence number lets clients replay the same emote twice in a row.
+    player.emoteSeq = (player.emoteSeq + 1) % 65536;
+  }
+
+  private handleSeatTake(client: Client, payload: unknown): void {
+    const tracking = this.tracking.get(client.sessionId);
+    const player = this.state.players.get(client.sessionId);
+    const parsed = seatTakeSchema.safeParse(payload);
+    if (!tracking || !player || !parsed.success) return;
+    const seat = campusIndex.pois.get(parsed.data.seatId);
+    const notice = (text: string) => client.send(MSG.notice, { text } satisfies NoticeMessage);
+    if (seat?.kind !== 'seat') return;
+    const { x, y, z } = tracking.accepted;
+    if (floorAt(campusIndex, y) !== seat.floor || distance(seat.position, [x, z]) > SEAT_REACH) {
+      notice('Lại gần hơn để ngồi.');
+      return;
+    }
+    const holder = this.state.seats.get(seat.id);
+    if (holder && holder !== client.sessionId) {
+      notice('Ghế này đã có người ngồi.');
+      return;
+    }
+    this.releaseSeat(client.sessionId);
+    this.state.seats.set(seat.id, client.sessionId);
+    player.seatId = seat.id;
+  }
+
+  private releaseSeat(sessionId: string): void {
+    const player = this.state.players.get(sessionId);
+    if (!player?.seatId) return;
+    if (this.state.seats.get(player.seatId) === sessionId) this.state.seats.delete(player.seatId);
+    player.seatId = '';
   }
 
   private chooseSpawn(requested: string | undefined): Poi {

@@ -3,6 +3,10 @@ import type { Browser, BrowserContextOptions, Page } from '@playwright/test';
 export interface Remote {
   name: string;
   status: number;
+  anim: number;
+  emote: number;
+  emoteSeq: number;
+  seated: boolean;
   x: number;
   y: number;
   z: number;
@@ -16,6 +20,8 @@ export async function enterAs(
   name: string,
   options: BrowserContextOptions = {},
   id?: string,
+  /** Extra query parameters, starting with `&`. */
+  query = '',
 ) {
   const context = await browser.newContext(options);
   const guestId = id ?? `e2e-${Date.now().toString(36)}-${(counter++).toString(36)}`;
@@ -25,7 +31,7 @@ export async function enterAs(
     [guestId, name] as const,
   );
   const page = await context.newPage();
-  await page.goto('/?enter&debug');
+  await page.goto(`/?enter&debug${query}`);
   await page.getByTestId('channel-badge').waitFor();
   return { context, page, guestId };
 }

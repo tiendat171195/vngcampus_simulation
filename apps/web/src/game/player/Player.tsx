@@ -1,6 +1,6 @@
-import { areasAt, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
+import { areasAt, distance, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
-import { ANIM, type AnimId, MOVEMENT } from '@campus/shared';
+import { ANIM, type AnimId, EMOTE_BY_ID, EMOTES, MOVEMENT } from '@campus/shared';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import { DoubleSide, type PerspectiveCamera, Ray, Vector3 } from 'three';
@@ -18,6 +18,9 @@ const STEP = 1 / 60;
 const MAX_STEPS_PER_FRAME = 5;
 const TURN_RATE = 12;
 const DOWN = new Vector3(0, -1, 0);
+/** A free seat is offered when the player stands this close to it. */
+const PROMPT_REACH = 1.6;
+const SEATS: readonly Poi[] = [...campusIndex.pois.values()].filter((poi) => poi.kind === 'seat');
 
 /** Shortest signed difference between two angles. */
 const angleDelta = (from: number, to: number) =>
@@ -42,6 +45,12 @@ export function Player() {
     /** Area seen on the last report; it becomes the location once seen twice in a row. */
     pendingArea: '',
     shownArea: '',
+    /** Emote being performed: which one, a counter that restarts it, and when it ends (ms). */
+    emote: { id: 0, seq: 0, until: 0 },
+    /** Seat granted by the server, '' when standing. */
+    seatId: '',
+    promptIn: 0,
+    promptSeat: '',
   });
 
   useEffect(() => () => avatar.dispose(), [avatar]);
@@ -75,6 +84,20 @@ export function Player() {
       rig.heading = yaw;
       rig.snap();
     };
+    net.onSeat = (seatId) => {
+      s.seatId = seatId;
+      const seat = seatId ? campusIndex.pois.get(seatId) : undefined;
+      if (!seat) return;
+      // Settle onto the seat, facing the way it faces.
+      motor.teleport(
+        seat.position[0],
+        campusIndex.floors.get(seat.floor)?.y ?? 0,
+        seat.position[1],
+      );
+      s.previous.copy(motor.position);
+      s.yaw = ((seat.yawDeg ?? 0) * Math.PI) / 180;
+      s.emote.until = 0;
+    };
     net.onCorrect = (x, y, z) => {
       motor.teleport(x, y, z);
       s.previous.copy(motor.position);
@@ -82,6 +105,7 @@ export function Player() {
     return () => {
       net.onSpawn = null;
       net.onCorrect = null;
+      net.onSeat = null;
     };
   }, [motor, rig]);
 
@@ -106,6 +130,39 @@ export function Player() {
       intent.jump = input.jump;
     }
     input.jump = false;
+    const now = performance.now();
+    const wantsToMove = Math.hypot(intent.x, intent.z) > 0.1 || intent.jump;
+
+    // Sitting: any movement stands up; until then the body stays on the seat.
+    if (s.seatId) {
+      if (wantsToMove) {
+        net.leaveSeat();
+        s.seatId = '';
+      } else {
+        intent.x = 0;
+        intent.z = 0;
+      }
+    }
+
+    // Emotes: start on request when standing still on the ground, stop as soon as the player moves.
+    const requested = input.emote;
+    input.emote = 0;
+    if (wantsToMove) s.emote.until = 0;
+    const emoteName = EMOTE_BY_ID.get(requested);
+    if (emoteName && !wantsToMove && motor.grounded && !s.seatId) {
+      s.emote = {
+        id: requested,
+        seq: s.emote.seq + 1,
+        until: now + EMOTES[emoteName].seconds * 1000,
+      };
+      net.sendEmote(requested);
+    }
+
+    // Interaction: sit on the free seat the prompt points at.
+    if (input.interact) {
+      input.interact = false;
+      if (s.promptSeat && !s.seatId) net.takeSeat(s.promptSeat);
+    }
 
     s.accumulator += dt;
     let steps = 0;
@@ -127,7 +184,9 @@ export function Player() {
     }
 
     let anim: AnimId = ANIM.idle;
-    if (!motor.grounded) anim = motor.velocity.y > 0 ? ANIM.jump : ANIM.fall;
+    if (s.seatId) anim = ANIM.sit;
+    else if (now < s.emote.until && motor.grounded) anim = ANIM.emote;
+    else if (!motor.grounded) anim = motor.velocity.y > 0 ? ANIM.jump : ANIM.fall;
     else if (motor.speed > (MOVEMENT.walkSpeed + MOVEMENT.runSpeed) / 2) anim = ANIM.run;
     else if (motor.speed > 0.3) anim = ANIM.walk;
 
@@ -141,7 +200,31 @@ export function Player() {
 
     avatar.object.position.copy(s.rendered);
     avatar.object.rotation.y = s.yaw;
-    avatar.update(dt, { anim, speed: motor.speed });
+    avatar.update(dt, { anim, speed: motor.speed, emote: s.emote.id, emoteSeq: s.emote.seq });
+
+    // Offer the nearest free seat within reach.
+    s.promptIn -= dt;
+    if (s.promptIn <= 0) {
+      s.promptIn = 0.15;
+      let best = '';
+      let bestDistance = PROMPT_REACH;
+      if (!s.seatId && motor.grounded) {
+        const floor = floorAt(campusIndex, motor.position.y);
+        for (const seat of SEATS) {
+          if (seat.floor !== floor) continue;
+          const d = distance(seat.position, [motor.position.x, motor.position.z]);
+          const holder = net.seats.get(seat.id);
+          if (d < bestDistance && (!holder || holder === '')) {
+            best = seat.id;
+            bestDistance = d;
+          }
+        }
+      }
+      if (best !== s.promptSeat) {
+        s.promptSeat = best;
+        useSession.getState().setPrompt(best ? { seatId: best, label: 'Ngồi xuống' } : null);
+      }
+    }
 
     if (motor.grounded) {
       avatar.setHeightAboveGround(0);

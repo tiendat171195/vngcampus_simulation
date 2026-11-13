@@ -9,6 +9,10 @@ export const input = {
   stick: { active: false, x: 0, y: 0 },
   /** Set when jump is pressed; the game loop clears it once consumed. */
   jump: false,
+  /** EMOTES id requested this frame, 0 for none; consumed by the game loop. */
+  emote: 0,
+  /** Set when the interact key or button is pressed; consumed by the game loop. */
+  interact: false,
   /** Camera drag since the last frame, in pixels. */
   lookX: 0,
   lookY: 0,

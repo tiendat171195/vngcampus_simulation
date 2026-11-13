@@ -1,4 +1,4 @@
-import { ANIM, type AnimId, MOVEMENT } from '@campus/shared';
+import { ANIM, type AnimId, EMOTE_BY_ID, MOVEMENT } from '@campus/shared';
 import {
   Bone,
   BufferAttribute,
@@ -159,7 +159,8 @@ interface Pose {
   headYaw: number;
   armL: number;
   armR: number;
-  spread: number;
+  spreadL: number;
+  spreadR: number;
   elbowL: number;
   elbowR: number;
   legL: number;
@@ -174,7 +175,8 @@ const POSE_KEYS: (keyof Pose)[] = [
   'headYaw',
   'armL',
   'armR',
-  'spread',
+  'spreadL',
+  'spreadR',
   'elbowL',
   'elbowR',
   'legL',
@@ -189,7 +191,8 @@ const emptyPose = (): Pose => ({
   headYaw: 0,
   armL: 0,
   armR: 0,
-  spread: 0,
+  spreadL: 0,
+  spreadR: 0,
   elbowL: 0,
   elbowR: 0,
   legL: 0,
@@ -199,8 +202,8 @@ const emptyPose = (): Pose => ({
 });
 
 /** The poses that get cross-faded. Walking and running are one continuous "move" pose. */
-type Mode = 'idle' | 'move' | 'jump' | 'fall' | 'sit';
-const MODES: Mode[] = ['idle', 'move', 'jump', 'fall', 'sit'];
+type Mode = 'idle' | 'move' | 'jump' | 'fall' | 'sit' | 'emote';
+const MODES: Mode[] = ['idle', 'move', 'jump', 'fall', 'sit', 'emote'];
 
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -208,6 +211,10 @@ export interface AvatarMotion {
   anim: AnimId;
   /** Horizontal speed in m/s; sets the pace and reach of the stride. */
   speed: number;
+  /** EMOTES id played while `anim` is ANIM.emote. */
+  emote?: number;
+  /** Changes every time an emote starts, so the same emote twice restarts it. */
+  emoteSeq?: number;
 }
 
 export class Avatar {
@@ -217,14 +224,24 @@ export class Avatar {
   private readonly mesh: SkinnedMesh;
   private readonly shadow: Mesh;
   private readonly bones = {} as Record<BoneName, Bone>;
-  private readonly weights: Record<Mode, number> = { idle: 1, move: 0, jump: 0, fall: 0, sit: 0 };
+  private readonly weights: Record<Mode, number> = {
+    idle: 1,
+    move: 0,
+    jump: 0,
+    fall: 0,
+    sit: 0,
+    emote: 0,
+  };
   private readonly poses: Record<Mode, Pose> = {
     idle: emptyPose(),
     move: emptyPose(),
     jump: emptyPose(),
     fall: emptyPose(),
     sit: emptyPose(),
+    emote: emptyPose(),
   };
+  private emoteKey = '';
+  private emoteClock = 0;
   private readonly blended = emptyPose();
   private stride = 0;
   private clock = 0;
@@ -296,16 +313,24 @@ export class Avatar {
   /** Advances the animation by `dt` seconds. */
   update(dt: number, motion: AvatarMotion): void {
     this.clock += dt;
+    const emoteKey = `${motion.emote ?? 0}:${motion.emoteSeq ?? 0}`;
+    if (emoteKey !== this.emoteKey) {
+      this.emoteKey = emoteKey;
+      this.emoteClock = 0;
+    }
+    this.emoteClock += dt;
     const mode: Mode =
-      motion.anim === ANIM.sit
-        ? 'sit'
-        : motion.anim === ANIM.jump
-          ? 'jump'
-          : motion.anim === ANIM.fall
-            ? 'fall'
-            : motion.anim === ANIM.walk || motion.anim === ANIM.run
-              ? 'move'
-              : 'idle';
+      motion.anim === ANIM.emote && motion.emote
+        ? 'emote'
+        : motion.anim === ANIM.sit
+          ? 'sit'
+          : motion.anim === ANIM.jump
+            ? 'jump'
+            : motion.anim === ANIM.fall
+              ? 'fall'
+              : motion.anim === ANIM.walk || motion.anim === ANIM.run
+                ? 'move'
+                : 'idle';
 
     const airborne = mode === 'jump' || mode === 'fall';
     if (this.wasAirborne && !airborne) this.landing = 1;
@@ -333,6 +358,7 @@ export class Avatar {
     this.poseJump(this.poses.jump);
     this.poseFall(this.poses.fall);
     this.poseSit(this.poses.sit);
+    this.poseEmote(this.poses.emote, motion.emote ?? 0);
 
     for (const key of POSE_KEYS) {
       let value = 0;
@@ -349,7 +375,7 @@ export class Avatar {
     pose.twist = 0;
     pose.headYaw = Math.sin(t * 0.45) * 0.14;
     pose.armL = pose.armR = Math.sin(t * 1.1) * 0.03;
-    pose.spread = 0.07;
+    pose.spreadL = pose.spreadR = 0.07;
     pose.elbowL = pose.elbowR = 0.12;
     pose.legL = pose.legR = 0;
     pose.kneeL = pose.kneeR = 0;
@@ -372,7 +398,7 @@ export class Avatar {
     pose.kneeR = Math.max(0, -lift) * kneeBend;
     pose.armL = -swing * armSwing;
     pose.armR = swing * armSwing;
-    pose.spread = 0.05;
+    pose.spreadL = pose.spreadR = 0.05;
     pose.elbowL = pose.elbowR = mix(0.25, 1.3, run);
   }
 
@@ -381,7 +407,8 @@ export class Avatar {
       lean: -0.05,
       armL: 2.3,
       armR: 2.3,
-      spread: 0.2,
+      spreadL: 0.2,
+      spreadR: 0.2,
       elbowL: 0.3,
       elbowR: 0.3,
       legL: 0.55,
@@ -396,7 +423,8 @@ export class Avatar {
       lean: 0.1,
       armL: 0.4,
       armR: 0.4,
-      spread: 1.1,
+      spreadL: 1.1,
+      spreadR: 1.1,
       elbowL: 0.3,
       elbowR: 0.3,
       legL: 0.25,
@@ -411,7 +439,8 @@ export class Avatar {
       hipsY: -0.16,
       armL: 0.55,
       armR: 0.55,
-      spread: 0.05,
+      spreadL: 0.05,
+      spreadR: 0.05,
       elbowL: 0.9,
       elbowR: 0.9,
       legL: 1.5,
@@ -422,6 +451,70 @@ export class Avatar {
     });
   }
 
+  private poseEmote(pose: Pose, id: number): void {
+    const t = this.emoteClock;
+    Object.assign(pose, emptyPose());
+    pose.spreadL = pose.spreadR = 0.07;
+    pose.elbowL = pose.elbowR = 0.12;
+    switch (EMOTE_BY_ID.get(id)) {
+      case 'wave':
+        pose.armR = 2.65;
+        pose.spreadR = 0.2 + 0.3 * Math.sin(t * 11);
+        pose.elbowR = 0.35 + 0.25 * Math.sin(t * 11 + 1);
+        pose.headYaw = -0.15;
+        break;
+      case 'clap': {
+        const beat = Math.abs(Math.sin(t * 8));
+        pose.armL = pose.armR = 1.25;
+        pose.spreadL = pose.spreadR = 0.05 + 0.32 * beat;
+        pose.elbowL = pose.elbowR = 0.55;
+        break;
+      }
+      case 'bow': {
+        // Down quickly, hold, back up.
+        const k = t < 0.45 ? t / 0.45 : t < 1.1 ? 1 : Math.max(0, 1 - (t - 1.1) / 0.5);
+        pose.lean = 0.8 * k * k * (3 - 2 * k);
+        pose.armL = pose.armR = -0.1 * k;
+        break;
+      }
+      case 'cheer': {
+        const bounce = Math.abs(Math.sin(t * 7));
+        pose.armL = pose.armR = 2.85;
+        pose.spreadL = pose.spreadR = 0.35;
+        pose.hipsY = 0.05 * bounce;
+        pose.kneeL = pose.kneeR = 0.25 * (1 - bounce);
+        pose.legL = pose.legR = 0.1 * (1 - bounce);
+        break;
+      }
+      case 'dance': {
+        const beat = t * 6;
+        pose.hipsY = -0.05 * Math.abs(Math.sin(beat));
+        pose.twist = 0.35 * Math.sin(beat / 2);
+        pose.armL = 1.2 + 0.9 * Math.sin(beat);
+        pose.armR = 1.2 + 0.9 * Math.sin(beat + Math.PI);
+        pose.spreadL = pose.spreadR = 0.4;
+        pose.elbowL = pose.elbowR = 1;
+        pose.kneeL = 0.5 * Math.max(0, Math.sin(beat));
+        pose.kneeR = 0.5 * Math.max(0, -Math.sin(beat));
+        pose.legL = pose.kneeL * 0.6;
+        pose.legR = pose.kneeR * 0.6;
+        pose.headYaw = 0.25 * Math.sin(beat / 2);
+        break;
+      }
+      case 'think':
+        pose.armR = 1.75;
+        pose.elbowR = 2.3;
+        pose.spreadR = 0.15;
+        pose.armL = 0.55;
+        pose.elbowL = 1.4;
+        pose.headYaw = 0.2;
+        pose.lean = -0.04;
+        break;
+      default:
+        break;
+    }
+  }
+
   private apply(pose: Pose): void {
     const b = this.bones;
     // Landing: a short dip that eases out.
@@ -430,8 +523,8 @@ export class Avatar {
     b.spine.rotation.set(pose.lean, pose.twist, 0);
     b.head.rotation.set(-pose.lean * 0.6, pose.headYaw - pose.twist * 0.7, 0);
     // Limbs hang along -Y: a negative rotation about X swings them forwards (+Z).
-    b.armL.rotation.set(-pose.armL, 0, pose.spread);
-    b.armR.rotation.set(-pose.armR, 0, -pose.spread);
+    b.armL.rotation.set(-pose.armL, 0, pose.spreadL);
+    b.armR.rotation.set(-pose.armR, 0, -pose.spreadR);
     b.forearmL.rotation.x = -pose.elbowL;
     b.forearmR.rotation.x = -pose.elbowR;
     b.legL.rotation.x = -pose.legL - dip * 3;

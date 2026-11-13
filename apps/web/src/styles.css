@@ -590,3 +590,103 @@ body {
   white-space: nowrap;
   pointer-events: none;
 }
+
+/* ---------- actions ---------- */
+
+.action-bar {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: calc(52px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.emotes {
+  display: flex;
+  gap: 6px;
+}
+
+.emotes button,
+.emote-toggle {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 50%;
+  background: rgb(16 20 24 / 60%);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.emote-toggle {
+  display: none;
+}
+
+.action-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #f28c28;
+  color: #1a1206;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.action-prompt kbd {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 18%);
+  font: inherit;
+  font-size: 12px;
+}
+
+@media (pointer: coarse) {
+  .action-bar {
+    bottom: calc(126px + env(safe-area-inset-bottom));
+    right: calc(28px + env(safe-area-inset-right));
+  }
+
+  .emote-toggle {
+    display: block;
+  }
+
+  .emotes {
+    display: none;
+    flex-direction: column;
+  }
+
+  .emotes[data-open="true"] {
+    display: flex;
+  }
+
+  .action-prompt kbd {
+    display: none;
+  }
+}
+
+.notice-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgb(16 20 24 / 82%);
+  color: #fff;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.notice-toast[data-visible="true"] {
+  opacity: 1;
+}

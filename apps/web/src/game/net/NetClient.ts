@@ -10,6 +10,7 @@ import {
   encodeYaw,
   MSG,
   NET,
+  type NoticeMessage,
   type PongMessage,
 } from '@campus/shared';
 import { Client, CloseCode, type Room } from '@colyseus/sdk';
@@ -26,6 +27,9 @@ interface WirePlayer {
   z: number;
   yaw: number;
   anim: number;
+  emote: number;
+  emoteSeq: number;
+  seatId: string;
 }
 interface WireState {
   channel: number;
@@ -34,6 +38,7 @@ interface WireState {
     forEach(callback: (player: WirePlayer, sessionId: string) => void): void;
     get(key: string): WirePlayer | undefined;
   };
+  seats: { forEach(callback: (sessionId: string, seatId: string) => void): void };
 }
 
 export interface RemotePlayer {
@@ -42,6 +47,8 @@ export interface RemotePlayer {
   name: string;
   status: number;
   anim: number;
+  emote: number;
+  emoteSeq: number;
   motion: Interpolator;
 }
 
@@ -65,8 +72,14 @@ const WARMUP_PINGS = 3;
 export class NetClient {
   readonly remotes = new Map<string, RemotePlayer>();
   readonly clock = new ClockSync();
+  /** Seat POI id → session id, as the server last reported. */
+  readonly seats = new Map<string, string>();
+  /** The seat the server says we occupy, or ''. */
+  seatId = '';
   /** Called once, with the position the server chose for us, right after joining. */
   onSpawn: ((transform: Omit<Transform, 'anim'>) => void) | null = null;
+  /** Called when the server grants or takes away our seat ('' when standing). */
+  onSeat: ((seatId: string) => void) | null = null;
   /** Called when the server rejects a move; jump back to this position. */
   onCorrect: ((x: number, y: number, z: number) => void) | null = null;
 
@@ -133,6 +146,18 @@ export class NetClient {
     room.send(MSG.move, [this.seq, xi, yi, zi, yaw, transform.anim]);
   }
 
+  sendEmote(id: number): void {
+    if (this.status === 'online') this.room?.send(MSG.emote, { id });
+  }
+
+  takeSeat(seatId: string): void {
+    if (this.status === 'online') this.room?.send(MSG.seatTake, { seatId });
+  }
+
+  leaveSeat(): void {
+    if (this.status === 'online' && this.seatId) this.room?.send(MSG.seatLeave, {});
+  }
+
   /** Room time at which remote players should be drawn. */
   renderTime(localNow: number): number {
     return this.clock.serverNow(localNow) - NET.interpolationDelayMs;
@@ -159,6 +184,9 @@ export class NetClient {
       this.lastSent = '';
       this.onCorrect?.(message.x, message.y, message.z);
     });
+    room.onMessage(MSG.notice, (message: NoticeMessage) =>
+      useSession.getState().showNotice(message.text),
+    );
     room.onDrop(() => this.setStatus('reconnecting'));
     room.onReconnect(() => this.setStatus('online'));
     room.onLeave((code) => {
@@ -178,6 +206,10 @@ export class NetClient {
 
     state.players.forEach((player, sessionId) => {
       if (sessionId === this.sessionId) {
+        if (player.seatId !== this.seatId) {
+          this.seatId = player.seatId;
+          this.onSeat?.(player.seatId);
+        }
         if (!this.spawned) {
           this.spawned = true;
           this.onSpawn?.({
@@ -198,6 +230,8 @@ export class NetClient {
           name: player.name,
           status: 0,
           anim: 0,
+          emote: 0,
+          emoteSeq: 0,
           motion: new Interpolator(),
         };
         this.remotes.set(sessionId, remote);
@@ -205,6 +239,8 @@ export class NetClient {
       remote.name = player.name;
       remote.status = player.status;
       remote.anim = player.anim;
+      remote.emote = player.emote;
+      remote.emoteSeq = player.emoteSeq;
       remote.motion.push({
         t: state.time,
         x: decodePosition(player.x),
@@ -216,6 +252,10 @@ export class NetClient {
 
     for (const sessionId of this.remotes.keys())
       if (!seen.has(sessionId)) this.remotes.delete(sessionId);
+    this.seats.clear();
+    state.seats.forEach((sessionId, seatId) => {
+      this.seats.set(seatId, sessionId);
+    });
 
     const { net, setNet } = useSession.getState();
     const players = this.remotes.size + 1;

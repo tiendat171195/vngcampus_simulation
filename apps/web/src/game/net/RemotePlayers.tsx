@@ -173,6 +173,8 @@ export function RemotePlayers() {
           avatar.update(view.animAccumulator, {
             anim,
             speed: anim === ANIM.walk || anim === ANIM.run ? view.speed : 0,
+            emote: remote.emote,
+            emoteSeq: remote.emoteSeq,
           });
           view.animAccumulator = 0;
         }

@@ -1,3 +1,4 @@
+import { EMOTE_BY_ID } from '@campus/shared';
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef } from 'react';
 import { input, releaseAll } from '../game/core/input';
 
@@ -40,7 +41,18 @@ export function InputLayer() {
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (isTyping(event.target) || !GAME_KEYS.has(event.code)) return;
+      if (isTyping(event.target)) return;
+      const digit = /^Digit([1-9])$/.exec(event.code);
+      if (digit && !event.repeat) {
+        const id = Number(digit[1]);
+        if (EMOTE_BY_ID.has(id)) input.emote = id;
+        return;
+      }
+      if (event.code === 'KeyE' && !event.repeat) {
+        input.interact = true;
+        return;
+      }
+      if (!GAME_KEYS.has(event.code)) return;
       event.preventDefault();
       if (event.code === 'Space' && !event.repeat) input.jump = true;
       input.keys.add(event.code);

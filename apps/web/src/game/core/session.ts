@@ -27,6 +27,12 @@ interface SessionState {
   location: PlayerLocation | null;
   /** Effective quality, after auto adjustment. */
   quality: { level: QualityLevel; dpr: number };
+  /** What the player can do right here, offered as a button / the E key. */
+  prompt: { seatId: string; label: string } | null;
+  /** A short message from the game, shown for a moment. `id` changes with every message. */
+  notice: { text: string; id: number } | null;
+  setPrompt(prompt: { seatId: string; label: string } | null): void;
+  showNotice(text: string): void;
   /** Name the player typed on the splash screen. */
   displayName: string;
   net: NetSummary;
@@ -44,6 +50,10 @@ export const useSession = create<SessionState>((set, get) => ({
   worldReadyMs: null,
   location: null,
   quality: { level: 'medium', dpr: 1 },
+  prompt: null,
+  notice: null,
+  setPrompt: (prompt) => set({ prompt }),
+  showNotice: (text) => set((state) => ({ notice: { text, id: (state.notice?.id ?? 0) + 1 } })),
   displayName: '',
   net: { status: 'idle', channel: null, players: 0 },
   setPhase: (phase) => set({ phase }),
