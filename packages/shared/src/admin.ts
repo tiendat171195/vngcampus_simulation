@@ -77,3 +77,39 @@ export interface AuditEntryDto {
   diff: unknown;
   createdAt: string;
 }
+
+/** Where a mission is in its life (docs/06 §6), from its publish status and the clock. */
+export type MissionState = 'draft' | 'scheduled' | 'running' | 'ended' | 'archived';
+
+export interface AdminMissionSummary {
+  id: string;
+  kind: string;
+  title: { vi: string; en?: string };
+  publishStatus: 'draft' | 'published' | 'archived';
+  state: MissionState;
+  startsAt: string;
+  endsAt: string;
+  dailyDate: string | null;
+  autoFilled: boolean;
+  version: number;
+}
+
+export interface AdminMissionDto extends AdminMissionSummary {
+  /** The MissionDefinition as stored. */
+  definition: unknown;
+}
+
+export interface PublishCheckDto {
+  errors: string[];
+  warnings: string[];
+}
+
+export interface AdminQuestionDto {
+  id: string;
+  text: { vi: string; en?: string };
+  choices: Array<{ vi: string; en?: string }>;
+  correctIndex: number;
+  explanation?: { vi: string; en?: string };
+  tags: string[];
+  active: boolean;
+}

@@ -232,3 +232,7 @@ export const quizQuestionSchema = z
     message: 'Không có lựa chọn này.',
   });
 export type QuizQuestion = z.infer<typeof quizQuestionSchema>;
+
+/** Points a reward list gives (before golden hours). */
+export const sumRewardsPoints = (rewards: readonly Reward[]) =>
+  rewards.reduce((total, reward) => total + (reward.type === 'points' ? reward.amount : 0), 0);
