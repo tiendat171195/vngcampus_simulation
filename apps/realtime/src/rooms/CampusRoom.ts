@@ -40,6 +40,7 @@ import type { Identity, TokenVerifier } from '../auth';
 import { countMessage, recordPatch } from '../metrics';
 import { RoomMissionBinding } from '../missions/binding';
 import type { MissionRuntime } from '../missions/runtime';
+import type { SanctionWatcher } from '../moderation';
 import {
   type Accepted,
   checkMove,
@@ -61,6 +62,8 @@ export interface CampusRoomOptions {
   verifyToken?: TokenVerifier;
   /** The missions running in this process; without it the room has none. */
   missions?: MissionRuntime;
+  /** Mutes and bans; without it nobody is ever muted. */
+  sanctions?: SanctionWatcher;
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
@@ -129,7 +132,9 @@ export class CampusRoom extends Room<{
   override state = new RoomState();
   override patchRate = 1000 / NET.serverPatchHz;
 
-  private config!: Required<Omit<CampusRoomOptions, 'verifyToken' | 'missions'>>;
+  private config!: Required<Omit<CampusRoomOptions, 'verifyToken' | 'missions' | 'sanctions'>>;
+  private sanctions: SanctionWatcher | null = null;
+  private stopWatchingBans: (() => void) | null = null;
   private missions: RoomMissionBinding | null = null;
   private verifyToken: TokenVerifier | undefined;
   private readonly createdAt = Date.now();
@@ -158,6 +163,16 @@ export class CampusRoom extends Room<{
       idleKickSeconds: options.idleKickSeconds ?? 30 * 60,
     };
     this.verifyToken = options.verifyToken;
+    this.sanctions = options.sanctions ?? null;
+    // A ban takes the person out of the campus within seconds (docs/08 §6).
+    this.stopWatchingBans =
+      this.sanctions?.onBans((banned) => {
+        for (const client of this.clients) {
+          const player = this.state.players.get(client.sessionId);
+          if (player && banned.has(player.userId))
+            client.leave(CLOSE.kicked, 'Tài khoản đã bị khoá.');
+        }
+      }) ?? null;
     if (options.missions)
       this.missions = new RoomMissionBinding(options.missions, {
         send: (sessionId, type, payload) =>
@@ -218,11 +233,15 @@ export class CampusRoom extends Room<{
     if (!parsed.success) throw new ServerError(400, 'Thông tin vào phòng không hợp lệ.');
     const { token, guest } = parsed.data;
     if (token && this.verifyToken) {
+      let identity: Identity;
       try {
-        return await this.verifyToken(token);
+        identity = await this.verifyToken(token);
       } catch {
         throw new ServerError(401, 'Phiên đăng nhập đã hết hạn.');
       }
+      if (this.sanctions?.isBanned(identity.userId))
+        throw new ServerError(403, 'Tài khoản đã bị khoá.');
+      return identity;
     }
     if (guest && this.config.devGuestAuth)
       return {
@@ -309,6 +328,7 @@ export class CampusRoom extends Room<{
   override async onDispose(): Promise<void> {
     clearInterval(this.housekeeping);
     this.missions?.dispose();
+    this.stopWatchingBans?.();
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
@@ -424,6 +444,11 @@ export class CampusRoom extends Room<{
     if (!tracking || !player || !parsed.success) return;
     const text = normaliseChat(parsed.data.text, CHAT.maxLength);
     if (!text) return;
+    const muted = this.sanctions?.muteNotice(player.userId);
+    if (muted) {
+      client.send(MSG.notice, { text: muted } satisfies NoticeMessage);
+      return;
+    }
     if (!tracking.chat.take(this.now())) {
       client.send(MSG.notice, {
         text: 'Bạn đang gửi hơi nhanh, chờ một chút nhé.',

@@ -1,4 +1,4 @@
-import { finalizeEndedMissions, snapshotPeriodBoards } from '@campus/core';
+import { finalizeEndedMissions, settleExpiredSanctions, snapshotPeriodBoards } from '@campus/core';
 import type { Db } from '@campus/db';
 
 /**
@@ -18,6 +18,8 @@ export function startJobs(db: Db, log: (message: string) => void, intervalMs = 6
             (result.communityReached ? ', community goal reached' : ''),
         );
       for (const key of await snapshotPeriodBoards(db)) log(`leaderboard ${key} kept`);
+      const lifted = await settleExpiredSanctions(db);
+      if (lifted > 0) log(`${lifted} sanctions ran out`);
     } catch (error) {
       log(`jobs failed: ${String(error)}`);
     } finally {

@@ -1,3 +1,4 @@
+export * from './admin';
 export * from './anim';
 export * from './api';
 export * from './avatar';

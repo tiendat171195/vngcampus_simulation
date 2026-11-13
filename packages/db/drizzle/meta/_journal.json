@@ -29,6 +29,13 @@
       "when": 1794588091468,
       "tag": "0003_leaderboards",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794589133917,
+      "tag": "0004_admin",
+      "breakpoints": true
     }
   ]
 }

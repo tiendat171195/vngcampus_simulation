@@ -24,11 +24,15 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { createTokenVerifier } from './auth';
 import { MissionRuntime } from './missions/runtime';
 import { memorySource } from './missions/source';
+import { type ActiveSanction, SanctionWatcher } from './moderation';
 import type { CampusRoom } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
 import { createServer } from './server';
 
 let colyseus: ColyseusTestServer;
+/** Sanctions in force, as the database would report them. */
+const inForce: ActiveSanction[] = [];
+const watcher = new SanctionWatcher(async () => inForce);
 /** A running mission with one objective: check in at the main gate, where players appear. */
 const gateMission = {
   id: '0190f0c2-0000-7000-8000-0000000000ff',
@@ -90,6 +94,7 @@ beforeAll(async () => {
   colyseus = await boot(
     createServer({
       missions,
+      sanctions: watcher,
       devGuestAuth: true,
       verifyToken: createTokenVerifier(jwks),
       softCap: 2,
@@ -595,5 +600,44 @@ describe('missions in the room', () => {
     room.send(MSG.interact, { id: 'o9:poi.nowhere' });
     await settle(200);
     expect(notices).toEqual(['Vật này không còn ở đây.']);
+  });
+});
+
+describe('sanctions', () => {
+  it('stop a muted person from chatting, with the reason', async () => {
+    const sub = '0190f0c2-0000-7000-8000-000000000006';
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+      open: true,
+      token: await signToken({ sub, name: 'Bị Khoá Chat' }),
+    });
+    const notices: string[] = [];
+    const chats: string[] = [];
+    room.onMessage(MSG.notice, (message: { text: string }) => notices.push(message.text));
+    room.onMessage(MSG.chat, (message: { text: string }) => chats.push(message.text));
+    inForce.push({ userId: sub, type: 'mute', endsAt: new Date(Date.now() + 3_600_000) });
+    await watcher.refresh();
+    room.send(MSG.chat, { text: 'xin chào' });
+    await settle(200);
+    expect(chats).toEqual([]);
+    expect(notices[0]).toMatch(/^Bạn đang bị tạm khoá chat đến /);
+    inForce.length = 0;
+    await watcher.refresh();
+  });
+
+  it('show a banned person out within a refresh, and keep them out', async () => {
+    const sub = '0190f0c2-0000-7000-8000-000000000007';
+    const token = await signToken({ sub, name: 'Bị Khoá' });
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, { open: true, token });
+    let code = 0;
+    room.onLeave((closed) => {
+      code = closed;
+    });
+    inForce.push({ userId: sub, type: 'ban', endsAt: null });
+    await watcher.refresh();
+    await settle(300);
+    expect(code).toBe(CLOSE.kicked);
+    await expect(colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token })).rejects.toThrow();
+    inForce.length = 0;
+    await watcher.refresh();
   });
 });

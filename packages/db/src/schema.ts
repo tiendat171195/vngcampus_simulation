@@ -247,3 +247,45 @@ export const leaderboardSnapshots = pgTable(
   },
   (table) => [primaryKey({ columns: [table.board, table.period, table.rank] })],
 );
+
+// ---------- operations (docs/07 §2.4) ----------
+
+export const SANCTION_TYPES = ['mute', 'ban'] as const;
+
+/** Mutes and bans; in force from `startsAt` until `endsAt` (null: until lifted). */
+export const sanctions = pgTable(
+  'sanctions',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type', { enum: SANCTION_TYPES }).notNull(),
+    reason: text('reason').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull().defaultNow(),
+    endsAt: timestamp('ends_at', { withTimezone: true }),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    revokedBy: uuid('revoked_by').references(() => users.id, { onDelete: 'set null' }),
+    ...timestamps,
+  },
+  (table) => [
+    index('sanctions_user').on(table.userId),
+    index('sanctions_active').on(table.revokedAt, table.endsAt),
+  ],
+);
+
+/** Every staff action: who did what to what, and what changed (docs/08 §2). */
+export const auditLogs = pgTable(
+  'audit_logs',
+  {
+    id: uuid('id').primaryKey(),
+    actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    diff: jsonb('diff').notNull().default(sql`'{}'::jsonb`),
+    ...timestamps,
+  },
+  (table) => [index('audit_logs_actor').on(table.actorId, table.createdAt)],
+);

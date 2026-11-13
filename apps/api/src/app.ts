@@ -6,6 +6,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastif
 import type { AccessClaims, KeyRing } from './auth/keys';
 import type { OidcProvider } from './auth/oidc';
 import { ApiError, sendError } from './errors';
+import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
 import { directoryRoutes } from './routes/directory';
 import { meRoutes } from './routes/me';
@@ -74,6 +75,7 @@ export async function buildApp(
       await meRoutes(v1, deps);
       await directoryRoutes(v1, deps);
       await progressRoutes(v1, deps);
+      await adminRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },
     { prefix: '/api/v1' },
