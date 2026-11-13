@@ -62,7 +62,7 @@ flowchart LR
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P1.1 | Map-data v0 | Kiểu + zod schema của `CampusMap`. Script nhập `docs/reference/osm-campus.geojson` → `campus.json` v0: khối nhà, đường, sông, hồ bơi, các khu vực và POI giả định (cổng, sảnh, Atrium, canteen, hồ Koi, ghế, điểm xuất hiện, `spawnSet`). Hàm hình học + unit test. `renderFloorSvg()` và một trang debug xem bản đồ 2D từng tầng | M | Chưa làm |
+| P1.1 | Map-data v0 | Kiểu + zod schema của `CampusMap`. Script nhập `docs/reference/osm-campus.geojson` → `campus.json` v0: khối nhà, đường, sông, hồ bơi, các khu vực và POI giả định (cổng, sảnh, Atrium, canteen, hồ Koi, ghế, điểm xuất hiện, `spawnSet`). Hàm hình học + unit test. `renderFloorSvg()` và một trang debug xem bản đồ 2D từng tầng | M | Xong |
 | P1.2 | Dựng thế giới | Bộ dựng thủ tục từ map-data: nền tô màu theo khu, đường, khối nhà có sàn từng tầng + khoảng thông tầng + dốc/cầu thang, mặt nước, cây/ghế/đèn bằng instancing, bảng tên khu. Ánh sáng, bầu trời, sương. Lưới va chạm (BVH) | M | Chưa làm |
 | P1.3 | Nhân vật và điều khiển | Nhân vật mẫu có xương (CC0) với đứng/đi/chạy/nhảy. `CharacterMotor` (capsule + BVH). Camera góc nhìn thứ ba chống xuyên tường. Bàn phím + chuột; joystick cảm ứng + kéo xoay + chụm zoom. Máy trạng thái animation | M | Chưa làm |
 | P1.4 | Vỏ ứng dụng | Màn hình chào, các bước tải, mức chất lượng + tự điều chỉnh DPR, cài đặt, minimap, thông báo tên khu khi bước vào, lớp phủ debug, sinh avatar giả để đo hiệu năng đám đông | M | Chưa làm |

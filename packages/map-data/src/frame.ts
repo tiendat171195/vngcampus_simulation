@@ -6,7 +6,9 @@
  */
 
 /** Position on a floor, in metres: [x, z]. */
-export type Vec2 = readonly [x: number, z: number];
+export type Vec2 = [x: number, z: number];
+/** A position that a function only reads; accepts both plain and `as const` tuples. */
+export type ReadonlyVec2 = readonly [x: number, z: number];
 
 export const CAMPUS_FRAME = {
   origin: { lat: 10.7585017, lon: 106.7459539 },
@@ -34,7 +36,7 @@ export function latLonToLocal(lat: number, lon: number): Vec2 {
 }
 
 /** Inverse of {@link latLonToLocal}. */
-export function localToLatLon([x, z]: Vec2): { lat: number; lon: number } {
+export function localToLatLon([x, z]: ReadonlyVec2): { lat: number; lon: number } {
   const east = x * sinB + z * cosB;
   const north = x * cosB - z * sinB;
   return {

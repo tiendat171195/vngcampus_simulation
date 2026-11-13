@@ -50,30 +50,33 @@ Nhận xét: campus nằm trên một dải đất rộng khoảng 160 m giữa 
 
 ## 3. Phân khu
 
-Mã khu (`area.*`) là khoá ổn định; nhiệm vụ và server tham chiếu tới chúng.
+Mã khu (`area.*`) là khoá ổn định; nhiệm vụ và server tham chiếu tới chúng. Bảng dưới là **bản đồ v0** đang có trong `packages/map-data/src/campus.json`. Footprint hai block, hồ bơi, đường nội bộ và bờ sông lấy từ OpenStreetMap; những gì gắn nhãn `placeholder` là vị trí giả định, sẽ chỉnh ở P6.2.
 
-| Nhóm | Khu | Tầng | MVP? | Ghi chú |
+| Nhóm | Khu | Tầng | Nguồn | Ghi chú |
 |---|---|---|---|---|
-| Ngoài trời | `area.gate_main` cổng chính + cửa kiểm soát | F1 | ✔ | Điểm xuất hiện đầu ngày, điểm danh |
-| | `area.loop_road` đường nội bộ | F1 | ✔ | Tuyến chạy checkpoint |
-| | `area.parking` bãi xe | F1 | ✔ (đơn giản) | Vị trí chờ xác minh |
-| | `area.pool` hồ bơi + bể sục | F1 | ✔ | Vị trí đã có từ OSM |
-| | `area.riverside` dải cảnh quan ven sông | F1 | ✔ | Ghế ngồi, điểm chụp ảnh |
-| | `area.highlands` quầy cà phê ngoài trời | F1 | ✔ | Vị trí đã có từ OSM |
-| | `area.river` sông Sài Gòn | — | ✔ (phông nền) | Không đi vào được |
-| Tầng trệt | `area.lobby` sảnh lễ tân | F1 | ✔ | NPC lễ tân |
-| | `area.atrium` Atrium / giếng trời | F1 (thông tầng) | ✔ | Sân khấu sự kiện, điểm tụ tập |
-| | `area.canteen` canteen | F1* | ✔ | Nhiều ghế |
-| | `area.koi` hồ cá Koi + `area.coffee_main` | F1* | ✔ | Ghế có hạn — khan hiếm vui vẻ |
-| | `area.gym`, `area.store`, `area.cinema`, `area.kids` | F1* | V1 | |
-| Tầng trên | `area.office.f2.*`, `area.office.f3.*` khu làm việc mở | F2, F3 | Giản lược | Bàn ghế sinh theo quy tắc, kệ cây xanh |
-| | `area.meeting.<thành_phố>` phòng họp | F2, F3 | V1 | Bangkok, Jakarta… |
+| Ngoài trời | `area.site` khuôn viên (bên trong hàng rào) | F1 | Suy ra từ đường và bờ sông | Vùng đi được ngoài trời; ra ngoài là hết bản đồ |
+| | `area.gate_main` cổng chính | F1 | Giả định | Đặt giữa mặt đường Tân Thuận, đối diện cửa bắc của block chính. Điểm xuất hiện đầu ngày |
+| | `area.parking` bãi xe | F1 | Giả định | Phía tây block 2 |
+| | `area.forecourt` sân đón khách | F1 | OSM (khoảng lõm giữa hai block) | Có đường xe vào từ phía sông |
+| | `area.pool` hồ bơi · `area.pool_deck` khu hồ bơi | F1 | OSM | Hồ là mặt nước, không đi vào được |
+| | `area.riverside` công viên ven sông | F1 | Suy ra | Lối dạo, ghế, điểm chụp ảnh |
+| | `area.cafe_terrace` sân cà phê ngoài trời | F1 | OSM (ki-ốt cà phê) | Dùng tên chung, chưa dùng tên thương hiệu |
+| | `area.river` sông Sài Gòn | F1 | OSM | Phông nền, không đi vào được |
+| Tầng trệt | `area.main.f1`, `area.block2.f1` | F1 | OSM | Toàn bộ mặt sàn của mỗi block |
+| | `area.lobby` sảnh lễ tân | F1 | Giả định | Cạnh cửa tây, nhìn ra sân đón khách |
+| | `area.atrium` Atrium | F1 (thông tầng) | Giả định | Giữa block chính, 36 × 28 m, có hai cầu thang lớn |
+| | `area.canteen` canteen | F1 | Giả định | Góc đông bắc, cạnh hồ bơi |
+| | `area.koi` khu hồ Koi · `area.koi_pond` · `area.coffee_main` | F1 | Giả định | Phía nam Atrium; chỉ 8 ghế quanh hồ |
+| | `area.gym` phòng gym | F1 | Giả định | Trong block 2 |
+| Tầng trên | `area.office.f2.main`, `area.office.f2.block2`, `area.office.f3.*` | F2, F3 | OSM | Văn phòng mở quanh khoảng thông tầng |
 
-\* Tầng và vị trí chờ xác minh.
+Chưa có trong v0 (thêm khi có tư liệu): cửa hàng tiện lợi, phòng chiếu phim, khu vui chơi trẻ em, các phòng họp đặt tên theo thành phố.
+
+Xem bản đồ từng tầng, kèm toạ độ dưới con trỏ: chạy `pnpm dev` rồi mở `http://localhost:5173/debug/map`.
 
 ## 4. Định dạng map-data
 
-Một file dữ liệu có phiên bản trong `packages/map-data`, là nguồn duy nhất về địa lý.
+Một tài liệu JSON có phiên bản, là nguồn duy nhất về địa lý. Kiểu và zod schema nằm ở `packages/map-data/src/schema.ts`; phần dưới là bản rút gọn.
 
 ```ts
 type Vec2 = [x: number, z: number];            // mét, hệ toạ độ campus
@@ -90,11 +93,11 @@ interface CampusMap {
   floors: Array<{ id: FloorId; y: number; height: number; label: LocalizedText }>;
   areas: Area[];                   // khu vực có tên
   structures: Structure[];         // khối nhà
-  paths: Path[];                   // đường, lối đi, đường chạy
-  connectors: Connector[];         // cầu thang, dốc, thang máy
+  paths: Path[];                   // đường, lối đi
+  connectors: Connector[];         // cầu thang, dốc
   pois: Poi[];                     // điểm có ý nghĩa
-  spawnSets: Record<string, string[]>;   // tên bộ → danh sách POI, dùng để rải vật phẩm
-  props: PropGroup[];              // cây, ghế, đèn… (instancing)
+  spawnSets: Record<string, string[]>;   // tên bộ → danh sách POI (điểm xuất hiện, điểm rải vật phẩm, lộ trình)
+  props: PropGroup[];              // cây, đèn, xe, cụm bàn… (instancing)
 }
 
 interface Area {
@@ -104,46 +107,60 @@ interface Area {
   polygon: Vec2[];
   kind: 'outdoor' | 'indoor' | 'water' | 'restricted';
   walkable: boolean;
-  tags?: string[];                 // 'landmark' | 'event' | 'placeholder' …
+  tags: string[];                  // 'base' | 'landmark' | 'event' | 'green' | 'placeholder'
 }
 
 interface Structure {
-  id: string;
+  id: string;                      // 'structure.main'
+  name: LocalizedText;
   footprint: Vec2[];
-  holes?: Vec2[][];                // khoảng thông tầng (giếng trời)
-  floors: FloorId[];
+  floors: FloorId[];               // các tầng có sàn, từ thấp lên; mái nằm trên tầng cuối
+  voids: Array<{ id: string; polygon: Vec2[]; floors: FloorId[] }>;      // lỗ trên sàn (Atrium); có 'ROOF' = giếng trời
+  openings: Array<{ id: string; floor: FloorId; at: Vec2; width: number }>;  // cửa: `at` nằm trên một cạnh footprint
+  height?: number;                 // nhà một tầng thấp hơn chiều cao tầng chuẩn
   style: string;                   // khoá style khi dựng greybox
   model?: string;                  // khoá GLB thay thế khi đã có art
 }
 
-interface Path { id: string; kind: 'road' | 'walkway' | 'track'; floor: FloorId; points: Vec2[]; width: number }
+interface Path { id: string; kind: 'road' | 'walkway' | 'track'; floor: FloorId; points: Vec2[]; width: number; closed: boolean }
 
-interface Connector {
+interface Connector {              // một vế thang thẳng: mặt dốc từ lower.at lên upper.at
   id: string;
-  kind: 'stairs' | 'ramp' | 'elevator';
-  from: { floor: FloorId; polygon: Vec2[] };
-  to: { floor: FloorId; polygon: Vec2[] };
+  kind: 'stairs' | 'ramp';
+  structure: string;
+  lower: { floor: FloorId; at: Vec2 };
+  upper: { floor: FloorId; at: Vec2 };
+  width: number;                   // bộ dựng tự khoét dải này khỏi sàn tầng trên để có khoảng thông đầu
 }
 
 interface Poi {
   id: string;                      // 'poi.seat.koi_03'
-  kind: 'spawn' | 'checkpoint' | 'seat' | 'npc_spot' | 'kiosk_spot' | 'photo_spot' | 'item_spot' | 'sign';
+  kind: 'spawn' | 'checkpoint' | 'seat' | 'npc_spot' | 'kiosk_spot' | 'photo_spot' | 'item_spot';
   name?: LocalizedText;
   floor: FloorId;
   position: Vec2;
   y?: number;                      // mặc định = cao độ tầng
-  yawDeg?: number;
+  yawDeg?: number;                 // 0° nhìn về +Z (sông), 90° nhìn về +X
   radius?: number;
-  meta?: Record<string, unknown>;
+  meta?: Record<string, unknown>;  // ghế: { furniture: 'bench' | 'chair' | 'stool' | 'lounger' | 'sofa' | 'step' }
 }
 
 interface PropGroup {
-  model: string;                   // 'tree_a', 'bench', 'desk_cluster'
-  instances: Array<{ p: Vec2; floor: FloorId; y?: number; yaw?: number; s?: number }>;
+  model: string;                   // 'tree_a', 'lamp', 'desk_cluster'…
+  instances: Array<{ p: Vec2; floor: FloorId; yawDeg?: number; s?: number }>;
 }
 ```
 
-Gói này cũng cung cấp các hàm hình học thuần (chạy được ở browser và Node): `findArea(point, floor)`, `isInside(areaId, point)`, `floorAt(y)`, `nearestPoi(kind, point)`, `distance2D`, và `renderFloorSvg(floor, options)` — hàm cuối dùng cho cả **minimap trong game** lẫn **bản đồ chọn vị trí trong admin**.
+**Hai lối vào của gói:**
+
+| Import | Có gì |
+|---|---|
+| `@campus/map-data` | Thư viện dùng cho mọi bản đồ: kiểu, schema, hình học (`pointInPolygon`, `nearestEdge`, `stripPolygon`…), truy vấn (`createMapIndex`, `floorAt`, `findArea`, `areasAt`, `isWalkable`, `nearestPoi`, `poisOfSet`), và `renderFloorSvg()` / `createFloorProjection()` |
+| `@campus/map-data/campus` | Dữ liệu campus: `campusMap` và `campusIndex` |
+
+`isWalkable(point, floor)` trả lời câu hỏi "ở đây có sàn để đứng không" — dùng khi đặt vật phẩm, ghế, điểm nhiệm vụ. Nó không biết tới tường (tường không nằm trong dữ liệu bản đồ).
+
+**Cách sinh bản đồ v0:** `pnpm map:build` chạy `tools/map-tools`, đọc `docs/reference/osm-campus.geojson`, ghép với bố cục giả định viết trong `campus-v0.ts`, kiểm tra từng điểm đặt có nằm trên sàn không, rồi ghi `campus.json`. Không sửa tay `campus.json`: có test so file đã commit với kết quả của bộ sinh. Từ P6.2, khi hiệu chỉnh theo tư liệu thật, cách soạn bản đồ sẽ được xem lại.
 
 **Ai dùng map-data:**
 

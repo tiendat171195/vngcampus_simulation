@@ -16,6 +16,7 @@
     "format": "biome check --write .",
     "smoke": "node scripts/smoke.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm smoke",
+    "map:build": "pnpm --filter @campus/map-tools build:campus",
     "infra:up": "docker compose -f infra/compose.dev.yaml up -d --wait",
     "infra:down": "docker compose -f infra/compose.dev.yaml down"
   },

@@ -6,7 +6,13 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/*.md", "!docs/reference", "!pnpm-lock.yaml"]
+    "includes": [
+      "**",
+      "!**/*.md",
+      "!docs/reference",
+      "!pnpm-lock.yaml",
+      "!packages/map-data/src/campus.json"
+    ]
   },
   "formatter": {
     "indentStyle": "space",

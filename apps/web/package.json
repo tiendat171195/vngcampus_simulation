@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@campus/map-data": "workspace:*",
     "@campus/shared": "workspace:*",
     "@colyseus/sdk": "^0.18.10",
     "@react-three/fiber": "^9.8.2",

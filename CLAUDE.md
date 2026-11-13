@@ -32,6 +32,7 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 - Versions used by more than one package live in the `catalog:` of `pnpm-workspace.yaml`.
 - The browser only calls its own origin: `/api` (REST) and `/rt` (realtime). Vite proxies both in development.
 - Biome does not format Markdown; keep doc tables compact.
+- `packages/map-data/src/campus.json` is generated: edit `tools/map-tools/src/campus-v0.ts` and run `pnpm map:build`. A test fails if the committed file is stale. Library code comes from `@campus/map-data`, the campus itself from `@campus/map-data/campus`. `http://localhost:5173/debug/map` shows each floor with coordinates under the cursor.
 
 ## Rules that are easy to get wrong
 

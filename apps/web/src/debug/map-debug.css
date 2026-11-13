@@ -1,0 +1,104 @@
+body:has(.map-debug) {
+  overflow: auto;
+  background: #f4f5f1;
+  color: #23272b;
+  color-scheme: light;
+}
+
+.map-debug {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  min-height: 100%;
+  font-size: 14px;
+}
+
+.map-debug header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.map-debug h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.map-debug .muted {
+  color: #6b7480;
+  margin: 0;
+}
+
+.map-debug .tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.map-debug .tabs button {
+  padding: 6px 12px;
+  border: 1px solid #c3c9cf;
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.map-debug .tabs button[aria-selected="true"] {
+  background: #23272b;
+  border-color: #23272b;
+  color: #fff;
+}
+
+.map-debug .canvas {
+  overflow: auto;
+  border: 1px solid #c3c9cf;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.map-debug .canvas img {
+  display: block;
+  max-width: none;
+  cursor: crosshair;
+}
+
+.map-debug footer {
+  display: grid;
+  gap: 10px;
+}
+
+.map-debug dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-debug dt {
+  color: #6b7480;
+}
+
+.map-debug dd {
+  margin: 0;
+}
+
+.map-debug .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-debug .swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
