@@ -1,3 +1,4 @@
+import { isAvatar } from '@campus/shared';
 import { createRemoteJWKSet, type JWTVerifyGetKey, jwtVerify } from 'jose';
 
 export interface Identity {
@@ -5,6 +6,8 @@ export interface Identity {
   name: string;
   /** Guests are labelled so nobody mistakes one for a colleague (docs/09 §6). */
   guest: boolean;
+  /** Avatar string, '' until the person makes one. Checked here: tokens are signed by the API. */
+  avatar: string;
 }
 
 export type TokenVerifier = (token: string) => Promise<Identity>;
@@ -24,6 +27,8 @@ export function createTokenVerifier(keys: JWTVerifyGetKey | URL): TokenVerifier 
     if (typeof payload.sub !== 'string' || typeof payload.name !== 'string') {
       throw new Error('token lacks subject or name');
     }
-    return { userId: payload.sub, name: payload.name, guest: payload.guest === true };
+    const avatar =
+      typeof payload.avatar === 'string' && isAvatar(payload.avatar) ? payload.avatar : '';
+    return { userId: payload.sub, name: payload.name, guest: payload.guest === true, avatar };
   };
 }

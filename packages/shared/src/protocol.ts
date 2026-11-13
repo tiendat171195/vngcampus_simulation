@@ -27,6 +27,11 @@ export const MSG = {
   afk: 'afk',
   /** Server → client: `{ text }`, a short message for the player (a seat was taken…). */
   notice: 'notice',
+  /**
+   * Client → server: `{ token }`, a fresh access token after the profile changed (name,
+   * avatar). The server reads the new profile from it, so nobody can dress up as someone else.
+   */
+  profile: 'profile',
 } as const;
 
 /** Emotes, by wire id. Never renumber; add new ones at the end. */
@@ -73,6 +78,8 @@ export interface NoticeMessage {
 }
 
 export const afkSchema = z.object({ on: z.boolean() });
+
+export const profileSchema = z.object({ token: z.string().min(20).max(4096) });
 
 const int16 = z.number().int().min(-32768).max(32767);
 

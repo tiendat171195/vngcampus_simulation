@@ -1,6 +1,8 @@
 import { authIdentities, users } from '@campus/db';
 import {
+  AVATAR_MAX_LENGTH,
   displayNameSchema,
+  isAvatar,
   PRIVACY_NOTICE_VERSION,
   type SessionResponse,
   type UserDto,
@@ -16,7 +18,12 @@ import { ApiError } from '../errors';
 import { claimsOf, requireUser } from './guard';
 import { claimsFor, toUserDto } from './users';
 
-const patchBody = z.object({ displayName: displayNameSchema.optional() }).strict();
+const patchBody = z
+  .object({
+    displayName: displayNameSchema.optional(),
+    avatar: z.string().max(AVATAR_MAX_LENGTH).refine(isAvatar, 'Avatar không hợp lệ.').optional(),
+  })
+  .strict();
 const consentBody = z.object({ version: z.literal(PRIVACY_NOTICE_VERSION) }).strict();
 
 export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<void> {
@@ -35,7 +42,7 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
     async (request): Promise<UserDto> => toUserDto(await load(claimsOf(request).sub)),
   );
 
-  /** Changes the profile; returns a fresh access token because the name travels in it. */
+  /** Changes the profile; returns a fresh access token because name and avatar travel in it. */
   app.patch('/me', guard, async (request): Promise<SessionResponse> => {
     const claims = claimsOf(request);
     const parsed = patchBody.safeParse(request.body ?? {});
@@ -60,6 +67,8 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
         .set({ displayName: parsed.data.displayName })
         .where(eq(users.id, claims.sub));
     }
+    if (parsed.data.avatar !== undefined)
+      await db.update(users).set({ avatar: parsed.data.avatar }).where(eq(users.id, claims.sub));
     const user = await load(claims.sub);
     return {
       accessToken: await keys.sign(claimsFor(user, claims.sid)),

@@ -1,5 +1,7 @@
 import {
   type AnimId,
+  type AvatarConfig,
+  avatarFor,
   CAMPUS_ROOM,
   type ChatMessage,
   CLOSE,
@@ -23,6 +25,8 @@ interface WirePlayer {
   name: string;
   /** "Khách" for guests, '' otherwise. */
   tag: string;
+  /** Avatar string; '' until the person makes one. */
+  avatar: string;
   status: number;
   x: number;
   y: number;
@@ -48,6 +52,9 @@ export interface RemotePlayer {
   userId: string;
   name: string;
   tag: string;
+  /** The avatar string as received, and what it means (a seeded one when empty). */
+  avatar: string;
+  look: AvatarConfig;
   status: number;
   anim: number;
   emote: number;
@@ -290,6 +297,8 @@ export class NetClient {
           userId: player.userId,
           name: player.name,
           tag: player.tag,
+          avatar: player.avatar,
+          look: avatarFor(player.avatar, player.userId),
           status: 0,
           anim: 0,
           emote: 0,
@@ -300,6 +309,10 @@ export class NetClient {
       }
       remote.name = player.name;
       remote.tag = player.tag;
+      if (remote.avatar !== player.avatar) {
+        remote.avatar = player.avatar;
+        remote.look = avatarFor(player.avatar, player.userId);
+      }
       remote.status = player.status;
       remote.anim = player.anim;
       remote.emote = player.emote;

@@ -1,8 +1,19 @@
-import { ANIM, type AnimId, EMOTE_BY_ID, MOVEMENT } from '@campus/shared';
+import {
+  ANIM,
+  type AnimId,
+  type AvatarConfig,
+  CLOTH_COLOURS,
+  DEFAULT_AVATAR,
+  EMOTE_BY_ID,
+  formatAvatar,
+  HAIR_COLOURS,
+  MOVEMENT,
+  SKIN_TONES,
+} from '@campus/shared';
 import {
   Bone,
   BufferAttribute,
-  BufferGeometry,
+  type BufferGeometry,
   CircleGeometry,
   Color,
   Group,
@@ -15,34 +26,24 @@ import {
 import { MeshBatch, type Vec3 } from '../world/MeshBatch';
 
 /**
- * Placeholder avatar: a blocky figure built in code, rigidly skinned to a small skeleton and
- * animated procedurally. One draw call per avatar; every avatar shares the same vertex and
- * skinning buffers and only owns its colours.
+ * The avatar: a low-poly figure assembled in code from parts chosen by an AvatarConfig (body
+ * build, hair, top, bottom, shoes, accessory, colours; docs/03 §7), rigidly skinned to one small
+ * skeleton and animated procedurally. The parts are merged into a single skinned mesh coloured
+ * per vertex, so each avatar is one draw call; avatars that look the same share one geometry.
  *
  * The model stands on y = 0 and faces +Z; its left side is +X.
  */
 
-export interface AvatarLook {
-  skin: string;
-  hair: string;
-  top: string;
-  bottom: string;
-  shoes: string;
-}
-
-export const DEFAULT_LOOK: AvatarLook = {
-  skin: '#f1c7a0',
-  hair: '#3a2a22',
-  top: '#3d7fd9',
-  bottom: '#2f3a4a',
-  shoes: '#f4f4f4',
-};
-
-type Slot = keyof AvatarLook | 'lanyard' | 'badge' | 'eyes';
-const FIXED_COLOURS: Record<'lanyard' | 'badge' | 'eyes', string> = {
+/** Colours that are the same on everyone: the staff lanyard and badge are the game's mark. */
+const FIXED = {
   lanyard: '#f28c28',
   badge: '#ffffff',
   eyes: '#26201c',
+  sole: '#f4f4f4',
+  darkSole: '#2a211b',
+  shirt: '#f4f4f4',
+  frame: '#22262b',
+  lens: '#15181c',
 };
 
 const BONE_NAMES = [
@@ -77,52 +78,102 @@ const JOINTS: Record<BoneName, { parent: BoneName | null; at: Vec3 }> = {
   shinR: { parent: 'legR', at: [-0.11, 0.38, 0] },
 };
 
-interface Template {
-  position: BufferAttribute;
-  skinIndex: BufferAttribute;
-  skinWeight: BufferAttribute;
-  index: BufferAttribute;
-  /** Which colour slot each vertex takes. */
-  slots: Slot[];
-}
-
-let template: Template | undefined;
-
-function buildTemplate(): Template {
+/** Builds the merged geometry of one avatar, with vertex colours and rigid skinning. */
+export function buildAvatarGeometry(config: AvatarConfig): BufferGeometry {
   const batch = new MeshBatch();
   const bones: number[] = [];
-  const slots: Slot[] = [];
-  const part = (bone: BoneName, slot: Slot, centre: Vec3, size: Vec3) => {
+  const part = (bone: BoneName, colour: string | Color, centre: Vec3, size: Vec3) => {
     const before = batch.vertexCount;
-    batch.box(centre, size, '#ffffff');
-    for (let i = before; i < batch.vertexCount; i++) {
-      bones.push(BONE_NAMES.indexOf(bone));
-      slots.push(slot);
-    }
+    batch.box(centre, size, colour);
+    for (let i = before; i < batch.vertexCount; i++) bones.push(BONE_NAMES.indexOf(bone));
   };
+  const pick = (palette: readonly string[], index: number) =>
+    palette[index] ?? palette[0] ?? '#888';
+  const shade = (hex: string, factor: number) => new Color(hex).multiplyScalar(factor);
 
-  part('hips', 'bottom', [0, 0.69, 0], [0.36, 0.14, 0.24]);
-  part('spine', 'top', [0, 0.97, 0], [0.42, 0.46, 0.26]);
-  part('spine', 'lanyard', [0, 1.03, 0.134], [0.05, 0.28, 0.012]);
-  part('spine', 'badge', [0, 0.86, 0.138], [0.1, 0.13, 0.012]);
-  part('head', 'skin', [0, 1.43, 0], [0.44, 0.42, 0.42]);
-  part('head', 'hair', [0, 1.61, -0.02], [0.47, 0.14, 0.46]);
-  part('head', 'hair', [0, 1.48, -0.2], [0.47, 0.32, 0.08]);
+  const skin = pick(SKIN_TONES, config.skin);
+  const hair = pick(HAIR_COLOURS, config.hairColour);
+  const top = pick(CLOTH_COLOURS, config.topColour);
+  const bottom = pick(CLOTH_COLOURS, config.bottomColour);
+  const shoes = pick(CLOTH_COLOURS, config.shoesColour);
+  // Build: slim, regular, sturdy. Joints stay put; only the volumes change.
+  const w = [0.88, 1, 1.14][config.body] ?? 1;
+  const d = [0.92, 1, 1.12][config.body] ?? 1;
+  const limb = [0.92, 1, 1.1][config.body] ?? 1;
+
+  // Torso and top.
+  let front = 0.13 * d;
+  const longSleeves = config.top !== 0;
+  if (config.top === 2) {
+    // Hoodie: roomier, with a hood at the back and a front pocket.
+    front = 0.14 * d;
+    part('spine', top, [0, 0.96, 0], [0.44 * w, 0.48, 0.28 * d]);
+    part('spine', shade(top, 0.82), [0, 1.2, -0.1 * d], [0.36 * w, 0.12, 0.12]);
+    part('spine', shade(top, 0.82), [0, 0.84, front + 0.005], [0.24 * w, 0.1, 0.01]);
+  } else if (config.top === 3) {
+    // Jacket, open over a white shirt.
+    front = 0.135 * d;
+    part('spine', top, [0, 0.95, 0], [0.43 * w, 0.5, 0.27 * d]);
+    part('spine', FIXED.shirt, [0, 1.0, front + 0.004], [0.12 * w, 0.4, 0.008]);
+  } else {
+    part('spine', top, [0, 0.97, 0], [0.42 * w, 0.46, 0.26 * d]);
+    if (config.top === 1) {
+      // Shirt: collar and a button placket.
+      part('spine', FIXED.shirt, [0, 1.19, 0], [0.3 * w, 0.05, 0.22 * d]);
+      part('spine', shade(top, 0.8), [0, 0.97, front + 0.004], [0.02, 0.4, 0.008]);
+    }
+  }
+  part('spine', FIXED.lanyard, [0, 1.03, front + 0.008], [0.05, 0.28, 0.012]);
+  part('spine', FIXED.badge, [0, 0.86, front + 0.012], [0.1, 0.13, 0.012]);
+
+  // Head.
+  part('head', skin, [0, 1.43, 0], [0.44, 0.42, 0.42]);
+  for (const side of [1, -1])
+    part('head', FIXED.eyes, [side * 0.1, 1.44, 0.212], [0.05, 0.07, 0.01]);
+  buildHair(part, config.hair, hair);
+  buildAccessory(part, config.accessory, top, shade);
+
+  // Arms.
   for (const side of [1, -1]) {
     const arm = side === 1 ? 'armL' : 'armR';
     const forearm = side === 1 ? 'forearmL' : 'forearmR';
-    const leg = side === 1 ? 'legL' : 'legR';
-    const shin = side === 1 ? 'shinL' : 'shinR';
-    part('head', 'eyes', [side * 0.1, 1.44, 0.212], [0.05, 0.07, 0.01]);
-    part(arm, 'top', [side * 0.27, 1.01, 0], [0.12, 0.28, 0.13]);
-    part(forearm, 'skin', [side * 0.27, 0.76, 0], [0.11, 0.24, 0.12]);
-    part(forearm, 'skin', [side * 0.27, 0.6, 0], [0.115, 0.1, 0.125]);
-    part(leg, 'bottom', [side * 0.11, 0.55, 0], [0.17, 0.36, 0.2]);
-    part(shin, 'bottom', [side * 0.11, 0.24, 0], [0.16, 0.3, 0.19]);
-    part(shin, 'shoes', [side * 0.11, 0.05, 0.03], [0.17, 0.1, 0.28]);
+    part(arm, top, [side * 0.27, 1.01, 0], [0.12 * limb, 0.28, 0.13]);
+    part(forearm, longSleeves ? top : skin, [side * 0.27, 0.76, 0], [0.11 * limb, 0.24, 0.12]);
+    part(forearm, skin, [side * 0.27, 0.6, 0], [0.115, 0.1, 0.125]);
   }
 
-  const geometry = batch.toGeometry({ colours: false });
+  // Hips, legs and bottom.
+  part('hips', bottom, [0, 0.69, 0], [0.36 * w, 0.14, 0.24 * d]);
+  if (config.bottom === 2) part('hips', bottom, [0, 0.55, 0], [0.42 * w, 0.32, 0.3 * d]);
+  for (const side of [1, -1]) {
+    const leg = side === 1 ? 'legL' : 'legR';
+    const shin = side === 1 ? 'shinL' : 'shinR';
+    const x = side * 0.11;
+    if (config.bottom === 0) {
+      part(leg, bottom, [x, 0.55, 0], [0.17 * limb, 0.36, 0.2]);
+      part(shin, bottom, [x, 0.24, 0], [0.16 * limb, 0.3, 0.19]);
+    } else if (config.bottom === 1) {
+      part(leg, bottom, [x, 0.6, 0], [0.175 * limb, 0.26, 0.205]);
+      part(leg, skin, [x, 0.44, 0], [0.15 * limb, 0.14, 0.18]);
+      part(shin, skin, [x, 0.24, 0], [0.14 * limb, 0.3, 0.17]);
+    } else {
+      part(leg, skin, [x, 0.5, 0], [0.14 * limb, 0.3, 0.17]);
+      part(shin, skin, [x, 0.24, 0], [0.14 * limb, 0.3, 0.17]);
+    }
+    // Shoes.
+    if (config.shoes === 1) {
+      part(shin, shoes, [x, 0.052, 0.035], [0.16, 0.08, 0.27]);
+      part(shin, FIXED.darkSole, [x, 0.012, 0.035], [0.165, 0.024, 0.275]);
+    } else if (config.shoes === 2) {
+      part(shin, shoes, [x, 0.115, 0.02], [0.18, 0.2, 0.27]);
+      part(shin, FIXED.darkSole, [x, 0.012, 0.02], [0.185, 0.024, 0.275]);
+    } else {
+      part(shin, shoes, [x, 0.065, 0.03], [0.17, 0.09, 0.28]);
+      part(shin, FIXED.sole, [x, 0.015, 0.03], [0.175, 0.03, 0.285]);
+    }
+  }
+
+  const geometry = batch.toGeometry();
   const count = batch.vertexCount;
   const skinIndex = new Uint16Array(count * 4);
   const skinWeight = new Float32Array(count * 4);
@@ -130,14 +181,141 @@ function buildTemplate(): Template {
     skinIndex[i * 4] = bones[i] as number;
     skinWeight[i * 4] = 1;
   }
-  return {
-    position: geometry.getAttribute('position') as BufferAttribute,
-    index: geometry.getIndex() as BufferAttribute,
-    skinIndex: new BufferAttribute(skinIndex, 4),
-    skinWeight: new BufferAttribute(skinWeight, 4),
-    slots,
-  };
+  geometry.setAttribute('skinIndex', new BufferAttribute(skinIndex, 4));
+  geometry.setAttribute('skinWeight', new BufferAttribute(skinWeight, 4));
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  return geometry;
 }
+
+type Part = (bone: BoneName, colour: string | Color, centre: Vec3, size: Vec3) => void;
+
+/** The head is 0.44 × 0.42 × 0.42 m around (0, 1.43, 0). */
+function buildHair(part: Part, style: number, colour: string): void {
+  const cap = () => part('head', colour, [0, 1.61, -0.02], [0.47, 0.14, 0.46]);
+  const back = (height = 0.32, y = 1.48) =>
+    part('head', colour, [0, y, -0.2], [0.47, height, 0.08]);
+  switch (style) {
+    case 0: // none
+      return;
+    case 2: // buzz cut
+      part('head', colour, [0, 1.615, -0.01], [0.455, 0.07, 0.44]);
+      part('head', colour, [0, 1.5, -0.205], [0.455, 0.24, 0.04]);
+      for (const side of [1, -1])
+        part('head', colour, [side * 0.222, 1.52, -0.04], [0.02, 0.16, 0.3]);
+      return;
+    case 3: // side part
+      cap();
+      back();
+      part('head', colour, [0.07, 1.585, 0.215], [0.3, 0.09, 0.05]);
+      return;
+    case 4: // long
+      cap();
+      back(0.62, 1.33);
+      for (const side of [1, -1])
+        part('head', colour, [side * 0.235, 1.42, -0.03], [0.035, 0.38, 0.36]);
+      return;
+    case 5: // bun
+      cap();
+      back();
+      part('head', colour, [0, 1.72, -0.12], [0.17, 0.15, 0.17]);
+      return;
+    case 6: // ponytail
+      cap();
+      back();
+      part('head', colour, [0, 1.5, -0.25], [0.08, 0.08, 0.06]);
+      part('head', colour, [0, 1.36, -0.27], [0.1, 0.26, 0.08]);
+      return;
+    case 7: // bob
+      cap();
+      back(0.44, 1.42);
+      for (const side of [1, -1])
+        part('head', colour, [side * 0.235, 1.44, 0.02], [0.035, 0.36, 0.4]);
+      part('head', colour, [0, 1.59, 0.215], [0.44, 0.08, 0.04]);
+      return;
+    case 8: // curly
+      back();
+      for (const sx of [1, -1])
+        for (const sz of [1, -1])
+          part('head', colour, [sx * 0.12, 1.66, sz * 0.1 - 0.02], [0.24, 0.16, 0.24]);
+      part('head', colour, [0, 1.69, -0.02], [0.2, 0.12, 0.2]);
+      return;
+    default: // short
+      cap();
+      back();
+  }
+}
+
+function buildAccessory(
+  part: Part,
+  accessory: number,
+  colour: string,
+  shade: (hex: string, factor: number) => Color,
+): void {
+  const temples = () => {
+    for (const side of [1, -1])
+      part('head', FIXED.frame, [side * 0.225, 1.47, 0.1], [0.012, 0.02, 0.22]);
+    part('head', FIXED.frame, [0, 1.47, 0.218], [0.05, 0.02, 0.012]);
+  };
+  switch (accessory) {
+    case 1: // glasses: frames around the eyes
+      for (const side of [1, -1]) {
+        const x = side * 0.1;
+        part('head', FIXED.frame, [x, 1.485, 0.218], [0.13, 0.025, 0.012]);
+        part('head', FIXED.frame, [x, 1.395, 0.218], [0.13, 0.02, 0.012]);
+        part('head', FIXED.frame, [x + side * 0.065, 1.44, 0.218], [0.02, 0.09, 0.012]);
+        part('head', FIXED.frame, [x - side * 0.065, 1.44, 0.218], [0.02, 0.09, 0.012]);
+      }
+      temples();
+      return;
+    case 2: // sunglasses
+      for (const side of [1, -1])
+        part('head', FIXED.lens, [side * 0.1, 1.445, 0.219], [0.14, 0.1, 0.012]);
+      temples();
+      return;
+    case 3: // cap
+      part('head', colour, [0, 1.665, -0.01], [0.49, 0.12, 0.48]);
+      part('head', shade(colour, 0.85), [0, 1.625, 0.29], [0.42, 0.03, 0.18]);
+      return;
+    case 4: // beanie
+      part('head', colour, [0, 1.675, -0.01], [0.49, 0.17, 0.48]);
+      part('head', shade(colour, 0.8), [0, 1.6, -0.01], [0.5, 0.06, 0.49]);
+      part('head', shade(colour, 0.8), [0, 1.77, -0.01], [0.09, 0.05, 0.09]);
+      return;
+    case 5: // headphones
+      part('head', FIXED.frame, [0, 1.675, 0], [0.5, 0.04, 0.07]);
+      for (const side of [1, -1]) {
+        part('head', FIXED.frame, [side * 0.245, 1.6, 0], [0.03, 0.14, 0.06]);
+        part('head', colour, [side * 0.25, 1.45, 0], [0.06, 0.16, 0.15]);
+      }
+      return;
+  }
+}
+
+/** Avatars that look alike share one geometry; it is freed when the last one goes. */
+const geometries = new Map<string, { geometry: BufferGeometry; users: number }>();
+
+function acquireGeometry(key: string, config: AvatarConfig): BufferGeometry {
+  let entry = geometries.get(key);
+  if (!entry) {
+    entry = { geometry: buildAvatarGeometry(config), users: 0 };
+    geometries.set(key, entry);
+  }
+  entry.users++;
+  return entry.geometry;
+}
+
+function releaseGeometry(key: string): void {
+  const entry = geometries.get(key);
+  if (!entry) return;
+  entry.users--;
+  if (entry.users > 0) return;
+  entry.geometry.dispose();
+  geometries.delete(key);
+}
+
+/** How many distinct avatar geometries are alive (for tests and the debug panel). */
+export const liveAvatarGeometries = () => geometries.size;
 
 const bodyMaterial = new MeshLambertMaterial({ vertexColors: true, flatShading: true });
 const shadowGeometry = new CircleGeometry(0.42, 20).rotateX(-Math.PI / 2);
@@ -222,6 +400,8 @@ export class Avatar {
   readonly object = new Group();
 
   private readonly mesh: SkinnedMesh;
+  /** Key of the shared geometry in use. */
+  private key: string;
   private readonly shadow: Mesh;
   private readonly bones = {} as Record<BoneName, Bone>;
   private readonly weights: Record<Mode, number> = {
@@ -248,22 +428,9 @@ export class Avatar {
   private landing = 0;
   private wasAirborne = false;
 
-  constructor(look: AvatarLook = DEFAULT_LOOK) {
-    template ??= buildTemplate();
-
-    const geometry = new BufferGeometry();
-    geometry.setAttribute('position', template.position);
-    geometry.setAttribute('skinIndex', template.skinIndex);
-    geometry.setAttribute('skinWeight', template.skinWeight);
-    geometry.setIndex(template.index);
-    geometry.setAttribute(
-      'color',
-      new BufferAttribute(new Float32Array(template.slots.length * 3), 3),
-    );
-    geometry.computeBoundingSphere();
-    geometry.computeBoundingBox();
-
-    this.mesh = new SkinnedMesh(geometry, bodyMaterial);
+  constructor(config: AvatarConfig = DEFAULT_AVATAR) {
+    this.key = formatAvatar(config);
+    this.mesh = new SkinnedMesh(acquireGeometry(this.key, config), bodyMaterial);
     this.mesh.name = 'avatar';
     for (const name of BONE_NAMES) {
       const bone = new Bone();
@@ -281,22 +448,27 @@ export class Avatar {
     this.shadow.name = 'avatar-shadow';
     this.shadow.position.y = 0.02;
     this.object.add(this.mesh, this.shadow);
-    this.setLook(look);
   }
 
-  setLook(look: AvatarLook): void {
-    if (!template) return;
-    const colours = this.mesh.geometry.getAttribute('color') as BufferAttribute;
-    const colour = new Color();
-    template.slots.forEach((slot, i) => {
-      colour.set(
-        slot in look
-          ? look[slot as keyof AvatarLook]
-          : FIXED_COLOURS[slot as keyof typeof FIXED_COLOURS],
-      );
-      colours.setXYZ(i, colour.r, colour.g, colour.b);
-    });
-    colours.needsUpdate = true;
+  /** The avatar string currently shown. */
+  get avatar(): string {
+    return this.key;
+  }
+
+  /** Dresses the avatar differently; the skeleton and the animation carry on. */
+  setAvatar(config: AvatarConfig): void {
+    const key = formatAvatar(config);
+    if (key === this.key) return;
+    const previous = this.key;
+    this.key = key;
+    this.mesh.geometry = acquireGeometry(key, config);
+    releaseGeometry(previous);
+  }
+
+  /** Triangles drawn for this avatar. */
+  get triangles(): number {
+    const index = this.mesh.geometry.getIndex();
+    return (index ? index.count : this.mesh.geometry.getAttribute('position').count) / 3;
   }
 
   /** How far below the feet the ground is (0 when standing on it); moves and fades the shadow. */
@@ -535,13 +707,8 @@ export class Avatar {
 
   dispose(): void {
     this.object.removeFromParent();
-    const geometry = this.mesh.geometry;
-    // Shared buffers stay alive for other avatars; only this avatar's colours are released.
-    geometry.deleteAttribute('position');
-    geometry.deleteAttribute('skinIndex');
-    geometry.deleteAttribute('skinWeight');
-    geometry.setIndex(null);
-    geometry.dispose();
+    // The geometry may still be drawn by others who look the same.
+    releaseGeometry(this.key);
     this.mesh.skeleton.dispose();
   }
 }

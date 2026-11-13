@@ -1,12 +1,11 @@
 import { distance, floorAt, type Poi } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
-import { ANIM, type AnimId, MOVEMENT } from '@campus/shared';
+import { ANIM, type AnimId, avatarFromSeed, MOVEMENT } from '@campus/shared';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { DoubleSide, Group, Ray, Vector3 } from 'three';
 import type { MeshBVH } from 'three-mesh-bvh';
 import { Avatar } from '../avatars/Avatar';
-import { randomLook } from '../avatars/looks';
 import { QUALITY_PRESETS } from '../core/quality';
 import { useSession } from '../core/session';
 import { useDebugStore } from '../debug/debugStore';
@@ -81,7 +80,7 @@ export function BotCrowd() {
         campusIndex.floors.get(spot.floor)?.y ?? 0,
         spot.position[1],
       );
-      const avatar = new Avatar(randomLook());
+      const avatar = new Avatar(avatarFromSeed(String(Math.random())));
       return {
         avatar,
         motor,

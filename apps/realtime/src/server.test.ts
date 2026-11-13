@@ -27,7 +27,7 @@ import { createServer } from './server';
 let colyseus: ColyseusTestServer;
 /** Signs tokens the way the API does, with a key only this test knows. */
 let signToken: (
-  claims: { sub: string; name: string; guest?: boolean },
+  claims: { sub: string; name: string; guest?: boolean; avatar?: string },
   issuer?: string,
 ) => Promise<string>;
 let nextId = 0;
@@ -42,7 +42,13 @@ beforeAll(async () => {
     keys: [{ ...(await exportJWK(publicKey)), kid: 'test', alg: 'ES256' }],
   });
   signToken = (claims, issuer = 'campus-api') =>
-    new SignJWT({ name: claims.name, role: 'player', guest: claims.guest ?? false, sid: 's' })
+    new SignJWT({
+      name: claims.name,
+      role: 'player',
+      guest: claims.guest ?? false,
+      avatar: claims.avatar ?? '',
+      sid: 's',
+    })
       .setProtectedHeader({ alg: 'ES256', kid: 'test' })
       .setSubject(claims.sub)
       .setIssuer(issuer)
@@ -463,6 +469,35 @@ describe('access tokens', () => {
     const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, { open: true, token });
     await settle(150);
     expect(me(room)).toMatchObject({ name: 'Vãng Lai', tag: 'Khách' });
+  });
+
+  it('changes name and avatar mid-visit, only with a token for the same person', async () => {
+    const sub = '0190f0c2-0000-7000-8000-000000000003';
+    const first = 'v1.b1.s1.h1-1.t0-0.p0-8.f0-5.a0';
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+      open: true,
+      token: await signToken({ sub, name: 'Thay Đồ', guest: true, avatar: first }),
+    });
+    await settle(150);
+    expect(me(room)).toMatchObject({ avatar: first, tag: 'Khách' });
+
+    const second = 'v1.b2.s5.h8-3.t2-7.p1-2.f2-9.a5';
+    room.send(MSG.profile, {
+      token: await signToken({ sub, name: 'Đã Thay Đồ', avatar: second }),
+    });
+    await settle(200);
+    expect(me(room)).toMatchObject({ name: 'Đã Thay Đồ', avatar: second, tag: '' });
+
+    // Someone else's token, or an avatar the codec does not know, changes nothing.
+    room.send(MSG.profile, {
+      token: await signToken({ sub: 'other', name: 'Kẻ Khác', avatar: first }),
+    });
+    room.send(MSG.profile, {
+      token: await signToken({ sub, name: 'Đã Thay Đồ', avatar: '<b>' }),
+    });
+    await settle(200);
+    expect(me(room)).toMatchObject({ name: 'Đã Thay Đồ' });
+    expect(me(room)?.avatar).not.toBe(first);
   });
 
   it('turns away forged or foreign tokens', async () => {

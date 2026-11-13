@@ -20,5 +20,6 @@ export const claimsFor = (user: UserRow, sid: string) => ({
   name: user.displayName,
   role: user.role,
   guest: user.isGuest,
+  avatar: user.avatar,
   sid,
 });

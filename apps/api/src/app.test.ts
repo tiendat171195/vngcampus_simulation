@@ -185,6 +185,33 @@ describe('profile', () => {
     });
     expect(invalid.statusCode).toBe(400);
   });
+
+  it('saves an avatar and puts it in the new token; refuses anything that is not one', async () => {
+    const { body } = await signUp('Áo Mới');
+    const auth = { authorization: `Bearer ${body.accessToken}` };
+    expect(body.user.avatar).toBe('');
+    const avatar = 'v1.b2.s3.h4-5.t1-c.p2-4.f1-1.a3';
+    const saved = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/me',
+      headers: auth,
+      payload: { avatar },
+    });
+    expect(saved.statusCode).toBe(200);
+    const session = saved.json() as SessionResponse;
+    expect(session.user.avatar).toBe(avatar);
+    expect((await deps.keys.verify(session.accessToken)).avatar).toBe(avatar);
+
+    for (const bad of ['v1.b9.s3.h4-5.t1-c.p2-4.f1-1.a3', '<img>', 'x'.repeat(40)]) {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/api/v1/me',
+        headers: auth,
+        payload: { avatar: bad },
+      });
+      expect(response.statusCode, bad).toBe(400);
+    }
+  });
 });
 
 describe('sessions', () => {

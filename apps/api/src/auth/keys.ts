@@ -23,6 +23,8 @@ export interface AccessClaims {
   role: string;
   /** Guests are labelled as such to others (docs/09 §6, impersonation). */
   guest: boolean;
+  /** Avatar string ('' until made), so the realtime server can dress the player. */
+  avatar: string;
   /** Session id, to tie a token to the session that issued it. */
   sid: string;
 }
@@ -62,7 +64,13 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
   return {
     jwks: { keys: [jwk] },
     sign: (claims) =>
-      new SignJWT({ name: claims.name, role: claims.role, guest: claims.guest, sid: claims.sid })
+      new SignJWT({
+        name: claims.name,
+        role: claims.role,
+        guest: claims.guest,
+        avatar: claims.avatar,
+        sid: claims.sid,
+      })
         .setProtectedHeader({ alg: ALGORITHM, kid })
         .setSubject(claims.sub)
         .setIssuer(ISSUER)
@@ -77,6 +85,7 @@ export async function createKeyRing(privateKeyPem?: string): Promise<KeyRing> {
         name: String(payload.name ?? ''),
         role: String(payload.role ?? 'player'),
         guest: payload.guest === true,
+        avatar: typeof payload.avatar === 'string' ? payload.avatar : '',
         sid: String(payload.sid ?? ''),
       };
     },

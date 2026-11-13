@@ -22,6 +22,7 @@ import {
   PLAYER_STATUS,
   type PongMessage,
   pingSchema,
+  profileSchema,
   seatTakeSchema,
 } from '@campus/shared';
 import {
@@ -75,6 +76,7 @@ interface Tracking {
   violations: WindowCounter;
   emotes: RateLimiter;
   chat: RateLimiter;
+  profile: RateLimiter;
   /** Room clock of the last deliberate input. */
   lastActivity: number;
   /** The tab is hidden, as reported by the client. */
@@ -93,6 +95,8 @@ const VIOLATION_FLAG = 5;
 const PING_RATE = 2;
 /** One emote every two seconds on average. */
 const EMOTE_RATE = 0.5;
+/** Profile changes per second, per player (saving an avatar a few times in a row is fine). */
+const PROFILE_RATE = 0.2;
 /** How close one must stand to sit down, and how far a seated player may drift before standing. */
 const SEAT_REACH = 2.5;
 const SEAT_LEASH = 1.5;
@@ -154,6 +158,7 @@ export class CampusRoom extends Room<{
     this.onMessage(MSG.seatTake, (client, payload) => this.handleSeatTake(client, payload));
     this.onMessage(MSG.seatLeave, (client) => this.releaseSeat(client.sessionId));
     this.onMessage(MSG.chat, (client, payload) => this.handleChat(client, payload));
+    this.onMessage(MSG.profile, (client, payload) => void this.handleProfile(client, payload));
     this.onMessage(MSG.afk, (client, payload) => {
       const tracking = this.tracking.get(client.sessionId);
       const parsed = afkSchema.safeParse(payload);
@@ -189,7 +194,7 @@ export class CampusRoom extends Room<{
       }
     }
     if (guest && this.config.devGuestAuth)
-      return { userId: `guest:${guest.id}`, name: guest.name, guest: true };
+      return { userId: `guest:${guest.id}`, name: guest.name, guest: true, avatar: '' };
     throw new ServerError(401, 'Cần đăng nhập.');
   }
 
@@ -207,6 +212,7 @@ export class CampusRoom extends Room<{
     player.userId = identity.userId;
     player.name = identity.name;
     player.tag = identity.guest ? 'Khách' : '';
+    player.avatar = identity.avatar;
     player.x = encodePosition(spawn.x);
     player.y = encodePosition(y);
     player.z = encodePosition(spawn.z);
@@ -221,6 +227,7 @@ export class CampusRoom extends Room<{
       violations: new WindowCounter(VIOLATION_WINDOW_MS),
       emotes: new RateLimiter(EMOTE_RATE, now),
       chat: new RateLimiter(CHAT.burst / (CHAT.windowMs / 1000), now, CHAT.burst),
+      profile: new RateLimiter(PROFILE_RATE, now, 3),
       lastActivity: now,
       hidden: false,
       listed: '',
@@ -317,6 +324,26 @@ export class CampusRoom extends Room<{
     player.yaw = yaw;
     player.anim = anim;
     if (player.status === PLAYER_STATUS.reconnecting) player.status = PLAYER_STATUS.active;
+  }
+
+  /** A new name or avatar, proven by a fresh access token for the same person. */
+  private async handleProfile(client: Client, payload: unknown): Promise<void> {
+    const tracking = this.tracking.get(client.sessionId);
+    const parsed = profileSchema.safeParse(payload);
+    if (!tracking || !parsed.success || !this.verifyToken) return;
+    if (!tracking.profile.take(this.now())) return;
+    let identity: Identity;
+    try {
+      identity = await this.verifyToken(parsed.data.token);
+    } catch {
+      return;
+    }
+    const player = this.state.players.get(client.sessionId);
+    if (!player || identity.userId !== player.userId) return;
+    player.name = identity.name;
+    player.tag = identity.guest ? 'Khách' : '';
+    player.avatar = identity.avatar;
+    await this.updateDirectory(client.sessionId);
   }
 
   private handleEmote(client: Client, payload: unknown): void {

@@ -1,4 +1,11 @@
-import { ANIM, type AnimId, MOVEMENT, PLAYER_STATUS } from '@campus/shared';
+import {
+  ANIM,
+  type AnimId,
+  type AvatarConfig,
+  CLOTH_COLOURS,
+  MOVEMENT,
+  PLAYER_STATUS,
+} from '@campus/shared';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import {
@@ -12,7 +19,6 @@ import {
   Vector3,
 } from 'three';
 import { Avatar } from '../avatars/Avatar';
-import { lookFromSeed } from '../avatars/looks';
 import { QUALITY_PRESETS, type QualityLevel } from '../core/quality';
 import { useSession } from '../core/session';
 import { createLabelSprite } from '../world/labels';
@@ -30,6 +36,8 @@ const HEAD_HEIGHT = 2.05;
 
 interface View {
   avatar: Avatar | null;
+  /** The look the avatar was last dressed in. */
+  look: AvatarConfig | null;
   tag: Sprite | null;
   tagText: string;
   bubble: BubbleView;
@@ -116,6 +124,7 @@ export function RemotePlayers() {
       if (!view) {
         view = {
           avatar: null,
+          look: null,
           tag: null,
           tagText: '',
           bubble: new BubbleView(),
@@ -158,10 +167,16 @@ export function RemotePlayers() {
 
       if (detailed) {
         if (!view.avatar) {
-          view.avatar = new Avatar(lookFromSeed(remote.userId));
+          view.avatar = new Avatar(remote.look);
+          view.look = remote.look;
           group.add(view.avatar.object);
         }
         const avatar = view.avatar;
+        // `look` is replaced, not mutated, when the person changes their avatar.
+        if (view.look !== remote.look) {
+          view.look = remote.look;
+          avatar.setAvatar(remote.look);
+        }
         avatar.object.visible = true;
         avatar.object.position.set(sample.x, sample.y, sample.z);
         avatar.object.rotation.y = sample.yaw;
@@ -190,7 +205,10 @@ export function RemotePlayers() {
           scratch.position.set(sample.x, sample.y, sample.z);
           scratch.matrix.compose(scratch.position, scratch.rotation, scratch.scale);
           impostors.setMatrixAt(impostorCount, scratch.matrix);
-          impostors.setColorAt(impostorCount, scratch.colour.set(lookFromSeed(remote.userId).top));
+          impostors.setColorAt(
+            impostorCount,
+            scratch.colour.set(CLOTH_COLOURS[remote.look.topColour] ?? '#888888'),
+          );
           impostorCount++;
         }
       }
