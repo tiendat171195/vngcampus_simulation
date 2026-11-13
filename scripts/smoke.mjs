@@ -2,6 +2,7 @@
 // Run after `pnpm build`. Catches what unit tests cannot: a bundle that fails to start, for
 // example because an npm dependency used by a bundled workspace package is missing from the app.
 import { spawn } from 'node:child_process';
+import { generateKeyPairSync } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -10,7 +11,13 @@ const services = [
   {
     name: 'api',
     entry: 'apps/api/dist/index.mjs',
-    env: { API_PORT: '3901' },
+    // Production refuses to start without a signing key; a throwaway one is enough here.
+    env: {
+      API_PORT: '3901',
+      JWT_PRIVATE_KEY: generateKeyPairSync('ec', { namedCurve: 'P-256' })
+        .privateKey.export({ type: 'pkcs8', format: 'pem' })
+        .toString(),
+    },
     url: 'http://127.0.0.1:3901/api/health',
   },
   {

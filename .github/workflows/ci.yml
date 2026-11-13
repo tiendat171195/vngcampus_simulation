@@ -21,6 +21,19 @@ jobs:
       matrix:
         # 22 is the minimum supported runtime, 24 is the production target.
         node: [22, 24]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: campus
+          POSTGRES_PASSWORD: campus
+          POSTGRES_DB: campus_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U campus -d campus_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://campus:campus@localhost:5432/campus_test
     steps:
       - uses: actions/checkout@v7
 
@@ -56,6 +69,19 @@ jobs:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: campus
+          POSTGRES_PASSWORD: campus
+          POSTGRES_DB: campus_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U campus -d campus_e2e"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://campus:campus@localhost:5432/campus_e2e
     steps:
       - uses: actions/checkout@v7
 

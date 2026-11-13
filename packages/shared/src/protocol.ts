@@ -111,18 +111,23 @@ export interface CorrectMessage {
  * Identity for development before real sign-in exists (P3). The id is random and kept by the
  * browser; the name is whatever the player typed. Accepted only when the server enables it.
  */
+/** A display name: 1–24 characters after trimming, no angle brackets. */
+export const displayNameSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(24)
+  .refine((name) => !/[<>]/.test(name), 'name must not contain < or >');
+
 export const devGuestSchema = z.object({
   id: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/),
-  name: z
-    .string()
-    .trim()
-    .min(1)
-    .max(24)
-    .refine((name) => !/[<>]/.test(name), 'name must not contain < or >'),
+  name: displayNameSchema,
 });
 export type DevGuest = z.infer<typeof devGuestSchema>;
 
 export const joinOptionsSchema = z.object({
+  /** Access token from the API (docs/07 §5.1). */
+  token: z.string().max(4096).optional(),
   guest: devGuestSchema.optional(),
   /** Development only: start at this POI instead of the gate. */
   spawn: z.string().max(80).optional(),

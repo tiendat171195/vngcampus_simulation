@@ -27,7 +27,14 @@ export default defineConfig({
   webServer: [
     {
       command: 'node ../../apps/api/dist/index.mjs',
-      env: { NODE_ENV: 'test', API_PORT: String(PORTS.api), LOG_LEVEL: 'warn' },
+      env: {
+        NODE_ENV: 'test',
+        API_PORT: String(PORTS.api),
+        LOG_LEVEL: 'warn',
+        // A database of its own; the API applies migrations when it starts outside production.
+        DATABASE_URL:
+          process.env.E2E_DATABASE_URL ?? 'postgres://campus:campus@127.0.0.1:5432/campus_e2e',
+      },
       url: `http://127.0.0.1:${PORTS.api}/api/health`,
       reuseExistingServer: false,
     },

@@ -13,6 +13,8 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # Also creates the databases for integration and end-to-end tests.
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/10-test-databases.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U campus -d campus"]
       interval: 5s
