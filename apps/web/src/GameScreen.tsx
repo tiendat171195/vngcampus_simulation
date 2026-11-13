@@ -6,7 +6,7 @@ import { GameCanvas } from './game/GameCanvas';
 import { loadGuest } from './game/net/identity';
 import { net } from './game/net/net';
 import { AreaToast } from './ui/AreaToast';
-import { ChannelBadge, ConnectionBanner } from './ui/ConnectionBanner';
+import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
 import { MiniMap } from './ui/MiniMap';
 import { Toolbar } from './ui/Toolbar';
@@ -74,7 +74,6 @@ export default function GameScreen() {
           WASD để đi · Shift để chạy · Space để nhảy · kéo chuột để xoay · lăn để zoom
         </p>
       )}
-      {playing && <ChannelBadge />}
       {playing && <ConnectionBanner onRetry={connect} />}
       {playing && <Toolbar />}
     </>

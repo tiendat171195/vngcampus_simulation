@@ -140,6 +140,10 @@ export class NetClient {
 
   private attach(room: Room<unknown, WireState>): void {
     this.room = room;
+    // The SDK only retries for rooms joined at least 5 s ago and waits up to 5 s between tries;
+    // a phone that loses signal right after joining should still come back, and quickly.
+    room.reconnection.minUptime = 1000;
+    room.reconnection.maxDelay = 3000;
     this.sessionId = room.sessionId;
     this.spawned = false;
     this.lastSent = '';

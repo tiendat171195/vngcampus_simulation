@@ -12,6 +12,7 @@ coverage/
 # test output
 playwright-report/
 test-results/
+blob-report/
 
 # editors / OS
 .DS_Store

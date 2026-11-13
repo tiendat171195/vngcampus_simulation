@@ -166,6 +166,7 @@ sequenceDiagram
 ```
 
 - **Một người, một phiên:** vào từ tab/thiết bị thứ hai thì phiên cũ bị đóng với mã `4101`.
+- **Rời trang:** trình duyệt đóng kết nối với mã 1001 → server xoá người chơi ngay, không giữ chỗ.
 - **Rớt mạng:** server giữ chỗ 30 giây, avatar chuyển trạng thái "tạm mất kết nối". Client tự kết nối lại với độ trễ tăng dần và làm mới token trước.
 - **Vị trí cuối:** lưu vào Redis khi rời (hết hạn sau 24 giờ). Vào lại trong ngày thì đứng ở chỗ cũ; lần đầu của ngày mới thì xuất hiện ở cổng.
 - **Deploy:** tiến trình cũ nhận tín hiệu tắt → báo client (`4001`) → client tự vào lại một tiến trình mới và gửi lại vị trí hiện tại. Người chơi thấy "đang kết nối lại" vài giây.

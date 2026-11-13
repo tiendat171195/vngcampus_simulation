@@ -87,6 +87,19 @@ describe('joining', () => {
     expect(position?.status).toBe(PLAYER_STATUS.active);
   });
 
+  it('spreads newcomers over the gate instead of stacking them', async () => {
+    const a = await join();
+    const b = await join();
+    const pa = me(a);
+    const pb = me(b);
+    if (!pa || !pb) throw new Error('no players');
+    const gap = Math.hypot(
+      decodePosition(pa.x) - decodePosition(pb.x),
+      decodePosition(pa.z) - decodePosition(pb.z),
+    );
+    expect(gap).toBeGreaterThan(5);
+  });
+
   it('honours a requested spawn point in development', async () => {
     const a = await join(guest(), { spawn: 'poi.checkpoint.atrium' });
     const position = me(a);
@@ -222,6 +235,15 @@ describe('sessions', () => {
     await settle(300);
     expect(b.state.players.get(a.sessionId)?.status).toBe(PLAYER_STATUS.reconnecting);
     await settle(1300);
+    expect(b.state.players.has(a.sessionId)).toBe(false);
+  });
+
+  it('frees the seat at once when the browser leaves the page', async () => {
+    const a = await join();
+    const b = await join();
+    const dropped = serverRoom(a).clients.find((client) => client.sessionId === a.sessionId);
+    dropped?.leave(1001);
+    await settle(300);
     expect(b.state.players.has(a.sessionId)).toBe(false);
   });
 

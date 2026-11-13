@@ -15,7 +15,14 @@ import {
   type PongMessage,
   pingSchema,
 } from '@campus/shared';
-import { type AuthContext, type Client, matchMaker, Room, ServerError } from '@colyseus/core';
+import {
+  type AuthContext,
+  type Client,
+  CloseCode,
+  matchMaker,
+  Room,
+  ServerError,
+} from '@colyseus/core';
 import {
   type Accepted,
   checkMove,
@@ -80,7 +87,6 @@ export class CampusRoom extends Room<{
   private config!: Required<CampusRoomOptions>;
   private readonly createdAt = Date.now();
   private readonly tracking = new Map<string, Tracking>();
-  private spawnCursor = 0;
   private readonly onSessionStart = (message: { userId: string; sessionId: string }) => {
     for (const client of this.clients) {
       if (client.auth?.userId === message.userId && client.sessionId !== message.sessionId) {
@@ -156,8 +162,9 @@ export class CampusRoom extends Room<{
   }
 
   override async onDrop(client: Client, code?: number): Promise<void> {
-    // Closed on purpose by the server (replaced, kicked, idle): no seat is held.
-    if (code !== undefined && code >= 4100) return;
+    // Closed on purpose by the server (replaced, kicked, idle), or by the browser leaving the page
+    // (1001, "going away"): no seat is held.
+    if (code !== undefined && (code >= 4100 || code === CloseCode.GOING_AWAY)) return;
     const player = this.state.players.get(client.sessionId);
     if (player) player.status = PLAYER_STATUS.reconnecting;
     try {
@@ -227,11 +234,27 @@ export class CampusRoom extends Room<{
     const wanted =
       requested && this.config.devGuestAuth ? campusIndex.pois.get(requested) : undefined;
     if (wanted) return wanted;
+    // The free spot furthest from everyone already standing at the gate, so people do not appear
+    // inside each other.
     const gate = poisOfSet(campusIndex, 'players_gate');
-    const spawn = gate[this.spawnCursor % gate.length];
-    this.spawnCursor++;
-    if (!spawn) throw new ServerError(500, 'Bản đồ không có điểm xuất hiện.');
-    return spawn;
+    const occupied = [...this.state.players.values()].map(
+      (player) => [decodePosition(player.x), decodePosition(player.z)] as const,
+    );
+    let best: Poi | undefined;
+    let bestClearance = Number.NEGATIVE_INFINITY;
+    for (const poi of gate) {
+      const clearance = occupied.reduce(
+        (nearest, [x, z]) =>
+          Math.min(nearest, Math.hypot(poi.position[0] - x, poi.position[1] - z)),
+        Number.POSITIVE_INFINITY,
+      );
+      if (clearance > bestClearance + 1e-6) {
+        best = poi;
+        bestClearance = clearance;
+      }
+    }
+    if (!best) throw new ServerError(500, 'Bản đồ không có điểm xuất hiện.');
+    return best;
   }
 
   private async updateListing(): Promise<void> {

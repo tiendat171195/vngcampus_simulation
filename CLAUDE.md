@@ -21,6 +21,7 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 - `pnpm dev` runs web (5173), admin (5174), api (3001) and realtime (2567) together.
 - `pnpm check` runs lint → typecheck → test → build → smoke, the same chain as CI. Run it before every commit; `pnpm format` fixes formatting.
 - One package: `pnpm --filter @campus/realtime test`.
+- `pnpm e2e` runs the Playwright suite in `tests/e2e` against the production builds (run `pnpm build` first). It is not part of `pnpm check`; CI runs it as a separate job. `@playwright/test` is pinned to the version of the preinstalled browsers.
 - UI changes are verified by running `pnpm dev` and driving the page in a browser, not by tests alone.
 - Cloud sessions render WebGL in software (about 10 FPS at 1400×800), so frame rates measured there mean nothing. Check draw calls and triangle counts instead, and say that real-device FPS is unmeasured.
 

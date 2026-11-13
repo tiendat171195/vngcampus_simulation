@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DebugPanel } from '../game/debug/DebugPanel';
+import { ChannelBadge } from './ConnectionBanner';
 import { SettingsPanel } from './SettingsPanel';
 
 type Open = 'settings' | 'debug' | null;
@@ -29,6 +30,7 @@ export function Toolbar() {
           Debug
         </button>
       </div>
+      <ChannelBadge />
       <SettingsPanel hidden={open !== 'settings'} />
       <DebugPanel hidden={open !== 'debug'} />
     </div>

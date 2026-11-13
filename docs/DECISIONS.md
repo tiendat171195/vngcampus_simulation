@@ -15,6 +15,20 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Lớp mạng phía client và test e2e
+
+- Gói việc: P2.2
+- Quyết định:
+  - **Điểm xuất hiện** là điểm ở cổng xa người đang đứng nhất (trước là xoay vòng, hai người vào liền nhau đứng chồng lên nhau).
+  - **Rời trang = rời phòng ngay:** trình duyệt đóng WebSocket với mã 1001 khi đóng/rời trang; server không giữ chỗ 30 giây cho mã này. Rớt mạng thật (1006) vẫn được giữ chỗ.
+  - **Kết nối lại:** SDK chỉ tự thử lại khi đã ở trong phòng ≥ 5 giây và chờ tối đa 5 giây giữa các lần; hạ xuống 1 giây và 3 giây. Không gửi `move` khi đang kết nối lại, để không dồn các gói cũ.
+  - **Người ở xa** vẽ bằng một `InstancedMesh` hình nộm hai khối (một draw call cho tất cả); avatar đầy đủ chỉ cho người gần nhất: 24 / 48 / 96 người theo mức Thấp / Trung bình / Cao. Thẻ tên cho 12 người gần nhất trong 24 m.
+  - **Ngoại hình tạm** suy ra từ userId (băm), nên mọi người thấy cùng một dáng cho cùng một người cho tới khi có avatar thật (P3.3).
+  - **Tên hiển thị** nhập ở màn hình chào, nhớ cùng id khách trong trình duyệt.
+  - **Test e2e** (`tests/e2e`, Playwright) chạy trên bản build: API, realtime và `vite preview`. `@playwright/test` ghim ở 1.63.0 cho khớp trình duyệt cài sẵn trong môi trường phát triển; CI tự cài Chromium. `?debug` mở `window.campus.remotes()` chỉ để test đọc.
+- Khác plan ở đâu: không đổi thiết kế tổng thể; các chi tiết trên bổ sung cho `05-multiplayer.md` §5–§6.
+- Hệ quả: CI có thêm job e2e (~1 phút test + cài Chromium).
+
 ## 2026-11-13 — Phòng realtime: danh tính dev, xếp kênh bằng metadata, đồng hồ phòng
 
 - Gói việc: P2.1
