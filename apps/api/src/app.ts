@@ -8,6 +8,7 @@ import type { OidcProvider } from './auth/oidc';
 import { ApiError, sendError } from './errors';
 import { adminRoutes } from './routes/admin';
 import { adminMissionRoutes } from './routes/adminMissions';
+import { adminOpsRoutes } from './routes/adminOps';
 import { authRoutes } from './routes/auth';
 import { directoryRoutes } from './routes/directory';
 import { meRoutes } from './routes/me';
@@ -78,6 +79,7 @@ export async function buildApp(
       await progressRoutes(v1, deps);
       await adminRoutes(v1, deps);
       await adminMissionRoutes(v1, deps);
+      await adminOpsRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },
     { prefix: '/api/v1' },

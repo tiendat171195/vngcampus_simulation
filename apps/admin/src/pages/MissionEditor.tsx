@@ -5,6 +5,8 @@ import {
   EMOTES,
   type MissionDefinitionInput,
   type PublishCheckDto,
+  type TemplateDetailDto,
+  type TemplateDto,
 } from '@campus/shared';
 import { useEffect, useMemo, useState } from 'react';
 import { ApiFailure, api, gameUrl } from '../api';
@@ -223,9 +225,25 @@ function toDefinition(draft: Draft): MissionDefinitionInput {
   };
 }
 
+/** A template moved to the chosen day, keeping its hours (docs/08 §4 step 1). */
+function fromTemplate(definition: unknown, date: string): Draft {
+  const draft = fromDefinition(definition);
+  const days = Math.round((Date.parse(date) - Date.parse(draft.date)) / 86_400_000);
+  const shift = (local: string) => {
+    const moved = new Date(Date.parse(`${local.slice(0, 10)}T00:00:00Z`) + days * 86_400_000);
+    return `${moved.toISOString().slice(0, 10)}${local.slice(10)}`;
+  };
+  return { ...draft, date, start: shift(draft.start), end: shift(draft.end) };
+}
+
 /** The editor (docs/08 §4): general fields, objectives with a map, rewards, live checks. */
 export function MissionEditorPage({ id, go }: { id: string | null; go: (path: string) => void }) {
-  const initialDate = new URLSearchParams(window.location.search).get('date') ?? today();
+  const query = new URLSearchParams(window.location.search);
+  const initialDate = query.get('date') ?? today();
+  const templates = useLoad(
+    () => (id ? Promise.resolve([]) : api<TemplateDto[]>('GET', '/admin/templates')),
+    [id],
+  );
   const loaded = useLoad(
     () => (id ? api<AdminMissionDto>('GET', `/admin/missions/${id}`) : Promise.resolve(null)),
     [id],
@@ -241,6 +259,22 @@ export function MissionEditorPage({ id, go }: { id: string | null; go: (path: st
     setMission(loaded.data);
     setDraft(fromDefinition(loaded.data.definition));
   }, [loaded.data]);
+
+  const applyTemplate = (templateId: string) => {
+    if (!templateId) {
+      setDraft(blankDraft(initialDate));
+      return;
+    }
+    api<TemplateDetailDto>('GET', `/admin/templates/${templateId}`).then(
+      (template) => setDraft(fromTemplate(template.definition, initialDate)),
+      (failure: Error) => setMessage({ text: failure.message, error: true }),
+    );
+  };
+  // `/missions/new?template=…` from the templates page.
+  useEffect(() => {
+    const templateId = query.get('template');
+    if (!id && templateId) applyTemplate(templateId);
+  }, []);
 
   const definition = useMemo(() => (draft ? toDefinition(draft) : null), [draft]);
   // Checks run on the server as you type (docs/08 §4.3).
@@ -304,6 +338,24 @@ export function MissionEditorPage({ id, go }: { id: string | null; go: (path: st
       </div>
       {state === 'running' && (
         <p className="note">Nhiệm vụ đang chạy: chỉ sửa được chữ và tăng thưởng.</p>
+      )}
+      {!id && (templates.data?.length ?? 0) > 0 && (
+        <label className="from-template">
+          Bắt đầu từ mẫu
+          <select
+            data-testid="template-select"
+            defaultValue={query.get('template') ?? ''}
+            onChange={(e) => applyTemplate(e.target.value)}
+          >
+            <option value="">— Trống —</option>
+            {templates.data?.map((template) => (
+              <option key={template.id} value={template.id} disabled={template.broken}>
+                {template.name}
+                {template.broken ? ' (cần sửa)' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
 
       <div className="panel grid2">
@@ -849,6 +901,22 @@ export function MissionEditorPage({ id, go }: { id: string | null; go: (path: st
             }
           >
             Nhân bản
+          </button>
+        )}
+        {id && (
+          <button
+            type="button"
+            onClick={() => {
+              const name = window.prompt('Tên mẫu', draft.title);
+              if (!name) return;
+              setMessage(null);
+              api('POST', '/admin/templates', { name, missionId: id }).then(
+                () => setMessage({ text: `Đã lưu thành mẫu "${name}".`, error: false }),
+                (failure: Error) => setMessage({ text: failure.message, error: true }),
+              );
+            }}
+          >
+            Lưu làm mẫu
           </button>
         )}
         {id && (

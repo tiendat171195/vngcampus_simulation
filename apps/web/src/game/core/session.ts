@@ -1,3 +1,4 @@
+import type { OpsMessage } from '@campus/shared';
 import { create } from 'zustand';
 import type { QualityLevel } from './quality';
 
@@ -11,6 +12,8 @@ export interface NetSummary {
   channel: number | null;
   /** People in this channel, including the player. */
   players: number;
+  /** Why the server turned us away or showed us out (maintenance, a ban), when it said. */
+  reason?: string | null;
 }
 
 export interface ChatLine {
@@ -65,6 +68,9 @@ interface SessionState {
   profileCard: { userId: string; name: string; guest: boolean } | null;
   setProfileCard(card: { userId: string; name: string; guest: boolean } | null): void;
   net: NetSummary;
+  /** Kill switches, maintenance and announcements, as the server last said (docs/08 §5). */
+  ops: OpsMessage;
+  setOps(ops: OpsMessage): void;
   setPhase(phase: Phase): void;
   setDisplayName(name: string): void;
   setNet(patch: Partial<NetSummary>): void;
@@ -96,6 +102,8 @@ export const useSession = create<SessionState>((set, get) => ({
   profileCard: null,
   setProfileCard: (profileCard) => set({ profileCard }),
   net: { status: 'idle', channel: null, players: 0 },
+  ops: { chatEnabled: true, maintenance: null, announcements: [] },
+  setOps: (ops) => set({ ops }),
   setPhase: (phase) => set({ phase }),
   setDisplayName: (displayName) => set({ displayName }),
   setNet: (patch) => set((state) => ({ net: { ...state.net, ...patch } })),

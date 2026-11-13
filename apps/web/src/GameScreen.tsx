@@ -9,6 +9,7 @@ import { missionWorld, useMissions } from './game/missions/missionStore';
 import { net } from './game/net/net';
 import { currentUser, signIn } from './services/auth';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
+import { Announcements } from './ui/Announcements';
 import { AreaToast } from './ui/AreaToast';
 import { AvatarEditor } from './ui/AvatarEditor';
 import { ChatBox } from './ui/ChatBox';
@@ -107,6 +108,7 @@ export default function GameScreen() {
     if (!new URLSearchParams(window.location.search).has('debug')) return;
     (window as unknown as { campus: unknown }).campus = {
       user: () => currentUser(),
+      ops: () => useSession.getState().ops,
       missions: () => useMissions.getState().missions,
       entities: () => missionWorld.entities,
       remotes: () =>
@@ -147,6 +149,7 @@ export default function GameScreen() {
       {playing && modal === null && <MissionBanner />}
       {playing && <QuizDialog />}
       {playing && <MissionComplete />}
+      {playing && <Announcements />}
       {steering && tutorial && <Tutorial onFinish={endTutorial} />}
     </>
   );

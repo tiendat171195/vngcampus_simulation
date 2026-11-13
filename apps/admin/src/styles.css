@@ -112,6 +112,7 @@ td[data-status="muted"] {
 .tag {
   margin-left: 6px;
   padding: 1px 6px;
+  white-space: nowrap;
   border-radius: 999px;
   background: #eef1f5;
   color: var(--muted);
@@ -484,4 +485,29 @@ td[data-state="running"] {
   .calendar-day {
     min-height: 56px;
   }
+}
+
+/* ---------- operations ---------- */
+
+h2 {
+  margin: 24px 0 8px;
+  font-size: 16px;
+}
+
+.switches {
+  display: grid;
+  gap: 14px;
+}
+
+.switches .grow {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+}
+
+.from-template {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
 }

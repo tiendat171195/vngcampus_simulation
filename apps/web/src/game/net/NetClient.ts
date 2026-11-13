@@ -17,6 +17,7 @@ import {
   MSG,
   NET,
   type NoticeMessage,
+  type OpsMessage,
   type PongMessage,
   type QuizQuestionMessage,
   type QuizResultMessage,
@@ -156,7 +157,10 @@ export class NetClient {
       this.attach(room as unknown as Room<unknown, WireState>);
     } catch (error) {
       console.warn('[campus] could not join a channel', error);
-      this.setStatus('offline');
+      // Turned away on purpose (maintenance, a ban): say why instead of "no connection".
+      const code = (error as { code?: unknown }).code;
+      const reason = code === 403 || code === 503 ? (error as Error).message : null;
+      useSession.getState().setNet({ status: 'offline', reason });
     }
   }
 
@@ -286,6 +290,7 @@ export class NetClient {
     room.onMessage(MSG.notice, (message: NoticeMessage) =>
       useSession.getState().showNotice(message.text),
     );
+    room.onMessage(MSG.ops, (message: OpsMessage) => useSession.getState().setOps(message));
     room.onMessage(MSG.toast, (message: NoticeMessage) =>
       useSession.getState().showNotice(message.text),
     );
@@ -320,13 +325,15 @@ export class NetClient {
     });
     room.onDrop(() => this.setStatus('reconnecting'));
     room.onReconnect(() => this.setStatus('online'));
-    room.onLeave((code) => {
+    room.onLeave((code, reason) => {
       if (this.room !== room) return;
       this.room = null;
       this.remotes.clear();
-      this.setStatus(
-        code === CLOSE.replaced ? 'replaced' : code === CloseCode.CONSENTED ? 'idle' : 'offline',
-      );
+      useSession.getState().setNet({
+        status:
+          code === CLOSE.replaced ? 'replaced' : code === CloseCode.CONSENTED ? 'idle' : 'offline',
+        reason: code === CLOSE.kicked ? (reason ?? null) : null,
+      });
     });
   }
 
@@ -403,6 +410,6 @@ export class NetClient {
   }
 
   private setStatus(status: NetStatus): void {
-    useSession.getState().setNet({ status });
+    useSession.getState().setNet({ status, reason: null });
   }
 }

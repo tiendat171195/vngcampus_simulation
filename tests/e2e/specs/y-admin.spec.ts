@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test';
 import { enterAs } from './helpers';
+import { resetE2eOperations } from './mission-data';
 
 const ADMIN = 'http://localhost:4174';
 
@@ -55,7 +56,25 @@ test('an editor builds a mission on screen, places it on the map and publishes i
   await expect(page.getByRole('status')).toHaveText('Đã xuất bản.');
   await expect(editor.locator('.tag').first()).toHaveText('Đã lên lịch');
 
-  // It sits on the calendar on its day.
+  // Kept as a template, which starts the next mission with everything filled in.
+  const name = `Mẫu Atrium ${day}`;
+  page.once('dialog', (dialog) => void dialog.accept(name));
+  await page.getByRole('button', { name: 'Lưu làm mẫu' }).click();
+  await expect(page.getByRole('status')).toHaveText(`Đã lưu thành mẫu "${name}".`);
+  await page.goto(`${ADMIN}/templates`);
+  const row = page.getByTestId('templates').getByRole('row', { name: new RegExp(name) });
+  await row.getByRole('button', { name: 'Dùng mẫu' }).click();
+  await page.waitForURL(/\/missions\/new\?template=/);
+  await expect(editor.getByLabel('Tên nhiệm vụ')).toHaveValue('Hẹn ở Atrium');
+  await expect(page.getByTestId('objective-o1')).toContainText('Atrium ×');
+
+  // The template goes again, so runs do not pile them up.
+  await page.goto(`${ADMIN}/templates`);
+  page.once('dialog', (dialog) => void dialog.accept());
+  await row.getByRole('button', { name: 'Xoá' }).click();
+  await expect(row).toBeHidden();
+
+  // The mission sits on the calendar on its day.
   await page.goto(`${ADMIN}/missions`);
   await expect(page.getByTestId('missions')).toBeVisible();
   await context.close();
@@ -86,4 +105,65 @@ test('a mute from the admin stops chat in the game within seconds', async ({ bro
   });
   await context.close();
   await player.context.close();
+});
+
+test('announcements, the chat switch and maintenance reach the game within seconds', async ({
+  browser,
+}) => {
+  await resetE2eOperations();
+  const player = await enterAs(browser, `Người Nghe ${Date.now() % 100_000}`);
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const admin = await context.newPage();
+  admin.on('dialog', (dialog) => void dialog.accept());
+  const ok = admin.locator('p.ok');
+  try {
+    await signInAsAdmin(admin);
+
+    // A box everyone sees once, sent now.
+    await admin.goto(`${ADMIN}/announcements`);
+    const text = `Tiệc trà chiều nay ở Atrium (${Date.now() % 100_000})`;
+    await admin.getByLabel('Mức').selectOption('popup');
+    await admin.getByLabel('Nội dung').fill(text);
+    await admin.getByRole('button', { name: 'Phát ngay' }).click();
+    await expect(ok).toContainText('Đã phát');
+    const card = player.page.getByTestId('announce-card');
+    await expect(card).toContainText(text, { timeout: 12_000 });
+    await card.getByRole('button', { name: 'Đã hiểu' }).click();
+    await expect(card).toBeHidden();
+
+    // Chat off for everyone, then on again.
+    await admin.goto(`${ADMIN}/settings`);
+    await admin.getByRole('button', { name: 'Tắt chat' }).click();
+    await expect(ok).toHaveText('Đã tắt chat.');
+    await expect(player.page.locator('.chat-open')).toContainText('Chat đang tắt', {
+      timeout: 12_000,
+    });
+    await player.page.keyboard.press('Enter');
+    const field = player.page.getByLabel('Tin nhắn');
+    await expect(field).toHaveAttribute('placeholder', 'Chat đang tạm tắt trên toàn campus');
+    await expect(field).toBeDisabled();
+    await admin.getByRole('button', { name: 'Bật lại chat' }).click();
+    await expect(ok).toHaveText('Đã bật lại chat.');
+    await expect(field).toBeEnabled({ timeout: 12_000 });
+
+    // Maintenance: the people inside are told, newcomers are turned away with the message.
+    await admin.getByLabel('Lời nhắn bảo trì').fill('Bảo trì E2E, quay lại sau ít phút.');
+    await admin.getByRole('button', { name: 'Bật bảo trì' }).click();
+    await expect(ok).toHaveText('Đã bật bảo trì.');
+    await expect(player.page.locator('.announce-maintenance')).toContainText('Bảo trì E2E', {
+      timeout: 12_000,
+    });
+    const late = await enterAs(browser, 'Đến Muộn', {}, '', false, false);
+    await expect(late.page.locator('.connection-banner')).toContainText('Bảo trì E2E', {
+      timeout: 12_000,
+    });
+    await late.context.close();
+    await admin.getByRole('button', { name: 'Tắt bảo trì' }).click();
+    await expect(ok).toHaveText('Đã tắt bảo trì.');
+    await expect(player.page.locator('.announce-maintenance')).toBeHidden({ timeout: 12_000 });
+  } finally {
+    await resetE2eOperations();
+    await context.close();
+    await player.context.close();
+  }
 });

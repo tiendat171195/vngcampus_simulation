@@ -37,7 +37,7 @@ const quizQuery = z.object({
 });
 const importBody = z.object({ csv: z.string().min(1).max(500_000) });
 
-function parse<T>(schema: z.ZodType<T>, value: unknown): T {
+export function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   const parsed = schema.safeParse(value ?? {});
   if (!parsed.success)
     throw new ApiError(
@@ -49,7 +49,7 @@ function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   return parsed.data;
 }
 
-function definitionOf(input: unknown): MissionDefinition {
+export function definitionOf(input: unknown): MissionDefinition {
   const parsed = missionDefinitionSchema.safeParse(input);
   if (!parsed.success)
     throw new ApiError(

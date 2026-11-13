@@ -26,6 +26,8 @@ export async function enterAs(
   query = '',
   /** Go through the first-visit steps (avatar choice, tutorial) instead of skipping them. */
   firstVisit = false,
+  /** Wait until in a channel; off when the visitor is expected to be turned away. */
+  waitForChannel = true,
 ) {
   const context = await browser.newContext(options);
   await context.addInitScript(
@@ -40,18 +42,18 @@ export async function enterAs(
   );
   const page = await context.newPage();
   await page.goto(`/?debug${query}`);
-  await enterFromSplash(page);
+  await enterFromSplash(page, waitForChannel);
   return { context, page };
 }
 
 /** On the splash screen: agrees to the privacy notice if asked, then steps in. */
-export async function enterFromSplash(page: Page) {
+export async function enterFromSplash(page: Page, waitForChannel = true) {
   await page.locator('.splash[data-phase="ready"]').waitFor();
   await page.locator('.splash-card:not([data-account="checking"])').waitFor();
   const consent = page.locator('.splash-consent-box');
   if (await consent.isVisible()) await consent.check();
   await page.getByRole('button', { name: 'Vào campus' }).click();
-  await page.getByTestId('channel-badge').waitFor();
+  if (waitForChannel) await page.getByTestId('channel-badge').waitFor();
 }
 
 export const remotes = (page: Page) =>

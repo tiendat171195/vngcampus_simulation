@@ -135,12 +135,12 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 | Nhóm | Endpoint |
 |---|---|
 | Nhiệm vụ (đã làm, P5.2) | `GET /missions?from=&to=`; `GET` · `PUT` · `DELETE /missions/:id`; `POST /missions`; `POST /missions/validate`; `POST /missions/:id/publish` · `unpublish` · `end` · `duplicate`; `GET /missions/:id/stats` (P5.4) |
-| Mẫu, quiz | CRUD `/templates` (P5.3); `/quiz` (đã làm): `GET ?q=&tag=`, `PUT /quiz/:id`, `DELETE /quiz/:id` (tắt), `POST /quiz/import` `{ csv }` |
-| Thông báo | CRUD `/announcements`; `POST /announcements/:id/broadcast` |
+| Mẫu, quiz | `/templates` (đã làm, P5.3): `GET`, `GET /:id`, `POST` `{ name, tags?, active?, definition \| missionId }`, `PATCH /:id`, `DELETE /:id`; `POST /missions/autofill` (tự điền ngày mai ngay); `/quiz` (đã làm): `GET ?q=&tag=`, `PUT /quiz/:id`, `DELETE /quiz/:id` (tắt), `POST /quiz/import` `{ csv }` |
+| Thông báo (đã làm, P5.3) | `GET /announcements` (tuần qua và sắp phát); `POST /announcements` `{ level, text, startsAt?, minutes }` — không có `startsAt` là phát ngay; `POST /announcements/:id/cancel`. Mức `fullscreen` chỉ quản trị viên |
 | Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id` |
 | Kiểm duyệt | `GET /reports`; `POST /reports/:id/resolve` |
 | Số liệu | `GET /stats/overview` · `/stats/missions` |
-| Hệ thống | `GET` / `PUT /settings`; `GET /audit?all=1` (đã làm: của mình, hoặc của mọi người với quyền admin) |
+| Hệ thống | `GET` / `PUT /settings` (đã làm, P5.3: chỉ quản trị viên; `PUT` nhận một phần, kiểm bằng zod, ghi nhật ký những gì đổi); `GET /audit?all=1` (đã làm: của mình, hoặc của mọi người với quyền admin) |
 
 Mọi route admin đọc vai trò **từ DB ở mỗi request** (không tin claim `role` trong token), nên hạ quyền có hiệu lực ngay; khách và tài khoản bị khoá không bao giờ là nhân viên. Án phạt: khoá tài khoản thu hồi mọi phiên; realtime đọc án phạt đang có hiệu lực mỗi 5 giây — người bị cấm chat được báo đến lúc nào, người bị khoá bị đẩy ra và không vào lại được; job mỗi phút trả trạng thái khi án phạt hết hạn.
 
@@ -186,7 +186,7 @@ Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không
 |---|---|---|
 | `mission-finalize` | 1 phút sau `endsAt` của mỗi nhiệm vụ | Tính hạng, trao thưởng hạng và mục tiêu chung, chụp BXH, ghi `mission_stats` (idempotent). **Đã làm (P4.4)** trong tiến trình API, chạy mỗi phút (`apps/api/src/jobs.ts`) |
 | `leaderboard-snapshot` (đã làm) | Mỗi phút kiểm tra | Chụp BXH điểm của tuần/tháng vừa hết vào `leaderboard_snapshots`, một lần |
-| `daily-autofill` | 23:00 giờ VN | Ngày mai chưa có nhiệm vụ ngày → sinh từ kho mẫu, báo biên tập viên |
+| `daily-autofill` | 23:00 giờ VN | Ngày mai chưa có nhiệm vụ ngày → sinh từ kho mẫu. **Đã làm (P5.3)** trong cùng vòng job mỗi phút của API, chỉ làm việc từ 23:00; chèn nhiệm vụ đụng ràng buộc một-nhiệm-vụ-ngày nên nhiều tiến trình cùng chạy vẫn chỉ ra một. Biên tập viên thấy nhãn "tự điền" trên lịch và dòng trong nhật ký thao tác |
 | `dept-leaderboard` | Mỗi 10 phút | Tính lại BXH phòng ban |
 | `leaderboard-snapshot` | Cuối tuần, cuối tháng | Chụp BXH về Postgres |
 | `presence-sweep` | Mỗi phút | Dọn presence quá hạn |
@@ -198,9 +198,10 @@ Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không
 | Loại | Ví dụ | Nơi đặt |
 |---|---|---|
 | Bí mật, hạ tầng | Chuỗi kết nối DB/Redis, khoá ký JWT, client secret của IdP | Biến môi trường |
-| Vận hành | Ngưỡng mềm/cứng của kênh, bật/tắt chat cả kênh, `GUEST_MODE`, danh sách domain email | Bảng `settings` (sửa trong admin, có hiệu lực ngay qua pub/sub) |
-| Cờ tính năng | Cửa hàng, voice, loại objective mới | Bảng `settings`, gửi cho client qua `/world/bootstrap` |
-| Lịch làm việc | Ngày lễ, ngày không tính streak | Bảng `settings` |
+| Vận hành | Bật/tắt chat toàn campus, chế độ bảo trì, hạn mức thưởng, tự điền | Bảng `settings` (sửa trong admin; **đã làm, P5.3:** realtime đọc lại mỗi 5 giây — chưa cần Redis pub/sub khi chỉ có một tiến trình realtime) |
+| Vận hành, lúc triển khai | Ngưỡng mềm/cứng của kênh, `GUEST_MODE`, danh sách domain email, email quản trị | Biến môi trường (đổi các thứ này giữa chừng ảnh hưởng an ninh hoặc phòng đang mở; xem DECISIONS) |
+| Cờ tính năng | Cửa hàng, voice, loại objective mới | Bảng `settings`, gửi cho client qua `/world/bootstrap` — **chưa làm**: chưa có tính năng nào cần cờ (đều ở V1) |
+| Lịch làm việc | Ngày lễ, ngày không tính streak | Bảng `settings` (`holidays`, sửa ở trang Cấu hình) |
 
 ## 8. Sự kiện analytics
 

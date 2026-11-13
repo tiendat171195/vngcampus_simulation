@@ -8,6 +8,14 @@ const ACTIONS: Record<string, string> = {
   'sanction.mute': 'Cấm chat',
   'sanction.ban': 'Khoá tài khoản',
   'sanction.lift': 'Gỡ án phạt',
+  'settings.update': 'Đổi cấu hình',
+  'announcement.create': 'Tạo thông báo',
+  'announcement.cancel': 'Huỷ thông báo',
+  'template.create': 'Tạo mẫu',
+  'template.update': 'Sửa mẫu',
+  'template.delete': 'Xoá mẫu',
+  'mission.autofill': 'Tự điền nhiệm vụ',
+  'mission.autofill.request': 'Yêu cầu tự điền',
 };
 
 /** Who did what and when (docs/08 §2): one's own entries, or everyone's for admins. */

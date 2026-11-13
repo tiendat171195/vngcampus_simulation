@@ -216,7 +216,7 @@ DB chỉ lưu `publish_status` (`draft` / `published` / `archived`); "đang ch�
 | Bắt đầu | Realtime phát hiện (tối đa trễ 15 giây), sinh entity, hiện biểu ngữ cho người đang online |
 | Kết thúc | Ngừng nhận tiến độ, gỡ entity. Job chốt chạy sau 1 phút: tính hạng, trao thưởng hạng, lưu ảnh chụp BXH và số liệu tổng kết |
 | Sửa nhiệm vụ đang chạy | Chỉ được sửa chữ (tiêu đề, gợi ý) và tăng thưởng. Sửa cấu trúc → kết thúc sớm rồi nhân bản |
-| Ngày trống | Lúc 23:00, job kiểm tra ngày mai; nếu chưa có nhiệm vụ ngày thì lấy một template từ kho xoay vòng (không lặp trong N ngày), đánh dấu "tự điền", báo cho biên tập viên |
+| Ngày trống | Lúc 23:00, job kiểm tra ngày mai; nếu chưa có nhiệm vụ ngày thì lấy một template từ kho xoay vòng (không lặp trong N ngày), đánh dấu "tự điền", báo cho biên tập viên. **Đã làm (P5.3):** mẫu lâu chưa dùng nhất, phải qua kiểm tra xuất bản; "báo" = nhãn trên lịch + nhật ký thao tác |
 | Xem thử | Người có quyền biên tập mở game với `?preview=<missionId>`: chỉ người đó thấy entity của bản nháp; tiến độ không tính vào BXH |
 | Onboarding | Một nhiệm vụ `onboarding` thường trực dạy đi lại, emote, tương tác — dùng chính engine này |
 

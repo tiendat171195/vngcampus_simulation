@@ -50,6 +50,11 @@ export const MSG = {
   quizResult: 'quiz:result',
   /** Server → client: `{ text }`, something worth telling everyone in the channel. */
   toast: 'toast',
+  /**
+   * Server → client: kill switches, maintenance and announcements on air (OpsMessage), on join
+   * and whenever they change.
+   */
+  ops: 'ops',
 } as const;
 
 /** Emotes, by wire id. Never renumber; add new ones at the end. */

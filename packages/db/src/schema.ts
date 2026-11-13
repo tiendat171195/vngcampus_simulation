@@ -289,3 +289,35 @@ export const auditLogs = pgTable(
   },
   (table) => [index('audit_logs_actor').on(table.actorId, table.createdAt)],
 );
+
+/** Missions kept to reuse, and to fill empty days (docs/08 §4.5). */
+export const missionTemplates = pgTable('mission_templates', {
+  id: uuid('id').primaryKey(),
+  name: text('name').notNull(),
+  /** A MissionDefinition; its dates are replaced when it is used. */
+  definition: jsonb('definition').notNull(),
+  tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
+  /** Offered to the empty-day filler. */
+  active: boolean('active').notNull().default(true),
+  lastUsedOn: date('last_used_on'),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  ...timestamps,
+});
+
+export const ANNOUNCEMENT_LEVELS = ['ticker', 'popup', 'fullscreen'] as const;
+
+/** Messages from the team to everyone in the campus, now or at a set time (docs/08 §5). */
+export const announcements = pgTable(
+  'announcements',
+  {
+    id: uuid('id').primaryKey(),
+    level: text('level', { enum: ANNOUNCEMENT_LEVELS }).notNull(),
+    text: jsonb('text').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [index('announcements_window').on(table.startsAt, table.endsAt)],
+);

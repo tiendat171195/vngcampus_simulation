@@ -1,6 +1,14 @@
-import { createDb, migrateDatabase, missions, quizQuestions, uuidv7 } from '@campus/db';
+import {
+  announcements,
+  createDb,
+  migrateDatabase,
+  missions,
+  quizQuestions,
+  settings,
+  uuidv7,
+} from '@campus/db';
 import { missionDefinitionSchema } from '@campus/shared';
-import { eq } from 'drizzle-orm';
+import { eq, inArray, isNull } from 'drizzle-orm';
 
 /** The e2e database, the same one the API and realtime servers of the suite use. */
 const url = process.env.E2E_DATABASE_URL ?? 'postgres://campus:campus@127.0.0.1:5432/campus_e2e';
@@ -104,6 +112,24 @@ export async function archiveE2eMission(id: string): Promise<void> {
   const { db, close } = createDb(url, { maxConnections: 1 });
   try {
     await db.update(missions).set({ publishStatus: 'archived' }).where(eq(missions.id, id));
+  } finally {
+    await close();
+  }
+}
+
+/**
+ * Chat on, no maintenance, nothing on air: the e2e database outlives a run, and a switch left on
+ * by a failed run would break every later test.
+ */
+export async function resetE2eOperations(): Promise<void> {
+  const { db, close } = createDb(url, { maxConnections: 1 });
+  try {
+    await migrateDatabase(db);
+    await db.delete(settings).where(inArray(settings.key, ['chatEnabled', 'maintenance']));
+    await db
+      .update(announcements)
+      .set({ cancelledAt: new Date() })
+      .where(isNull(announcements.cancelledAt));
   } finally {
     await close();
   }

@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong phase P1–P4 (mốc M2 "gặp nhau", M3 "có danh tính", M4 "nhiệm vụ đầu tiên"): nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản: khách (tên tự đặt) hoặc tài khoản công ty qua Google/OIDC, giới hạn theo domain email; khách liên kết lên tài khoản công ty mà không mất gì; có thông báo quyền riêng tư và ghi nhận đồng ý. Tự chọn avatar (dáng, tóc, áo, quần/váy, giày, phụ kiện, màu) với bản xem trước 3D; mọi người thấy ngay. Hồ sơ có phòng ban, chức danh, tuỳ chọn ẩn khỏi danh sách online; chạm vào đồng nghiệp để xem thẻ hồ sơ; lần đầu vào có hướng dẫn 3 bước. Nhiệm vụ hằng ngày (P4): ghé điểm, nhặt vật phẩm, quiz ở kiosk, vẫy tay chào đồng nghiệp; điểm, cấp, streak theo ngày làm việc, bảng xếp hạng; nạp nhiệm vụ bằng file JSON (`pnpm missions:load`).
+**Trạng thái:** xong phase P1–P4 (mốc M2 "gặp nhau", M3 "có danh tính", M4 "nhiệm vụ đầu tiên"): nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Có tài khoản: khách (tên tự đặt) hoặc tài khoản công ty qua Google/OIDC, giới hạn theo domain email; khách liên kết lên tài khoản công ty mà không mất gì; có thông báo quyền riêng tư và ghi nhận đồng ý. Tự chọn avatar (dáng, tóc, áo, quần/váy, giày, phụ kiện, màu) với bản xem trước 3D; mọi người thấy ngay. Hồ sơ có phòng ban, chức danh, tuỳ chọn ẩn khỏi danh sách online; chạm vào đồng nghiệp để xem thẻ hồ sơ; lần đầu vào có hướng dẫn 3 bước. Nhiệm vụ hằng ngày (P4): ghé điểm, nhặt vật phẩm, quiz ở kiosk, vẫy tay chào đồng nghiệp; điểm, cấp, streak theo ngày làm việc, bảng xếp hạng; nạp nhiệm vụ bằng file JSON (`pnpm missions:load`). Trang quản trị (P5.1–P5.3): người dùng, vai trò, án phạt; soạn nhiệm vụ trên lịch với bản đồ chọn vị trí, kiểm tra tự động, xem thử trong game; ngân hàng quiz nhập từ CSV; kho mẫu và tự điền ngày trống lúc 23:00; thông báo phát ngay/hẹn giờ; công tắc tắt chat và chế độ bảo trì.
 
 ## Chạy thử
 
@@ -20,7 +20,7 @@ pnpm dev
 |---|---|---|
 | `web` — game | http://localhost:5173 | Nhân vật đi trong campus 3D. WASD/mũi tên, Shift chạy, Space nhảy, kéo chuột xoay, lăn zoom. Nút **Debug** góc phải: camera tự do, cắt lớp theo tầng, lưới va chạm |
 | `web` — bản đồ debug | http://localhost:5173/debug/map | Sơ đồ 2D từng tầng, toạ độ và khu vực dưới con trỏ |
-| `admin` | http://localhost:5174 | Trang quản trị: người dùng, vai trò, án phạt, nhật ký thao tác. Đăng nhập trong game bằng tài khoản công ty có trong `ADMIN_EMAILS` (thử với IdP giả lập) rồi mở trang này |
+| `admin` | http://localhost:5174 | Trang quản trị: nhiệm vụ, mẫu, quiz, thông báo, cấu hình và công tắc khẩn, người dùng, vai trò, án phạt, nhật ký thao tác. Đăng nhập trong game bằng tài khoản công ty có trong `ADMIN_EMAILS` (thử với IdP giả lập) rồi mở trang này |
 | `api` | http://localhost:3001/api/health | REST (Fastify) |
 | `realtime` | http://localhost:2567/health | Colyseus |
 

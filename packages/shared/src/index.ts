@@ -5,5 +5,6 @@ export * from './avatar';
 export * from './constants';
 export * from './health';
 export * from './missions';
+export * from './operations';
 export * from './protocol';
 export * from './wire';

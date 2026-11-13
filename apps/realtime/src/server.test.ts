@@ -14,6 +14,7 @@ import {
   MSG,
   missionDefinitionSchema,
   type OnlineEntry,
+  type OpsMessage,
   PLAYER_STATUS,
   type PongMessage,
 } from '@campus/shared';
@@ -25,6 +26,7 @@ import { createTokenVerifier } from './auth';
 import { MissionRuntime } from './missions/runtime';
 import { memorySource } from './missions/source';
 import { type ActiveSanction, SanctionWatcher } from './moderation';
+import { NO_OPS, OpsWatcher } from './operations';
 import type { CampusRoom } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
 import { createServer } from './server';
@@ -33,6 +35,9 @@ let colyseus: ColyseusTestServer;
 /** Sanctions in force, as the database would report them. */
 const inForce: ActiveSanction[] = [];
 const watcher = new SanctionWatcher(async () => inForce);
+/** Switches and announcements, as the database would report them. */
+let opsView: OpsMessage = NO_OPS;
+const ops = new OpsWatcher(async () => opsView);
 /** A running mission with one objective: check in at the main gate, where players appear. */
 const gateMission = {
   id: '0190f0c2-0000-7000-8000-0000000000ff',
@@ -60,7 +65,14 @@ const gateMission = {
 };
 /** Signs tokens the way the API does, with a key only this test knows. */
 let signToken: (
-  claims: { sub: string; name: string; guest?: boolean; avatar?: string; hidden?: boolean },
+  claims: {
+    sub: string;
+    name: string;
+    guest?: boolean;
+    avatar?: string;
+    hidden?: boolean;
+    role?: string;
+  },
   issuer?: string,
 ) => Promise<string>;
 let nextId = 0;
@@ -77,7 +89,7 @@ beforeAll(async () => {
   signToken = (claims, issuer = 'campus-api') =>
     new SignJWT({
       name: claims.name,
-      role: 'player',
+      role: claims.role ?? 'player',
       guest: claims.guest ?? false,
       avatar: claims.avatar ?? '',
       hidden: claims.hidden ?? false,
@@ -95,6 +107,7 @@ beforeAll(async () => {
     createServer({
       missions,
       sanctions: watcher,
+      ops,
       devGuestAuth: true,
       verifyToken: createTokenVerifier(jwks),
       softCap: 2,
@@ -639,5 +652,84 @@ describe('sanctions', () => {
     await expect(colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token })).rejects.toThrow();
     inForce.length = 0;
     await watcher.refresh();
+  });
+});
+
+describe('operations', () => {
+  const popup = {
+    id: '0190f0c2-0000-7000-8000-0000000000a1',
+    level: 'popup' as const,
+    text: { vi: 'Tiệc cuối năm lúc 17:00 ở sân thượng!' },
+    endsAt: new Date(Date.now() + 3_600_000).toISOString(),
+  };
+  afterEach(async () => {
+    opsView = NO_OPS;
+    await ops.refresh();
+  });
+
+  it('tells newcomers what is on air and everyone inside when it changes', async () => {
+    opsView = { ...NO_OPS, announcements: [popup] };
+    await ops.refresh();
+    const room = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+      open: true,
+      guest: guest(),
+    });
+    const received: OpsMessage[] = [];
+    room.onMessage(MSG.ops, (message: OpsMessage) => received.push(message));
+    await settle(200);
+    expect(received.at(-1)?.announcements).toEqual([popup]);
+    opsView = NO_OPS;
+    await ops.refresh();
+    await ops.refresh();
+    await settle(200);
+    expect(received.at(-1)).toEqual(NO_OPS);
+    expect(received).toHaveLength(2);
+  });
+
+  it('switches chat off for everyone, with a notice, and back on', async () => {
+    const room = await join();
+    const notices: string[] = [];
+    const chats: string[] = [];
+    room.onMessage(MSG.notice, (message: { text: string }) => notices.push(message.text));
+    room.onMessage(MSG.chat, (message: { text: string }) => chats.push(message.text));
+    opsView = { ...NO_OPS, chatEnabled: false };
+    await ops.refresh();
+    room.send(MSG.chat, { text: 'có ai không' });
+    await settle(200);
+    expect(chats).toEqual([]);
+    expect(notices).toEqual(['Chat đang tạm tắt trên toàn campus.']);
+    opsView = NO_OPS;
+    await ops.refresh();
+    room.send(MSG.chat, { text: 'có ai không' });
+    await settle(200);
+    expect(chats).toEqual(['có ai không']);
+  });
+
+  it('lets only staff in during maintenance and tells the people inside', async () => {
+    const inside = await join();
+    const received: OpsMessage[] = [];
+    inside.onMessage(MSG.ops, (message: OpsMessage) => received.push(message));
+    opsView = { ...NO_OPS, maintenance: 'Bảo trì 15 phút.' };
+    await ops.refresh();
+    await settle(200);
+    expect(received.at(-1)?.maintenance).toBe('Bảo trì 15 phút.');
+    expect(inside.connection.isOpen).toBe(true);
+
+    const refused = await join().catch((error: unknown) => error);
+    // The game shows the message when the code says it was on purpose.
+    expect(refused).toMatchObject({ code: 503, message: 'Bảo trì 15 phút.' });
+    const player = signToken({ sub: '0190f0c2-0000-7000-8000-000000000008', name: 'Người Chơi' });
+    await expect(
+      colyseus.sdk.joinOrCreate(CAMPUS_ROOM, { open: true, token: await player }),
+    ).rejects.toThrow('Bảo trì 15 phút.');
+    const staff = await colyseus.sdk.joinOrCreate<RoomState>(CAMPUS_ROOM, {
+      open: true,
+      token: await signToken({
+        sub: '0190f0c2-0000-7000-8000-000000000009',
+        name: 'Quản Trị',
+        role: 'admin',
+      }),
+    });
+    expect(staff.sessionId).toBeTruthy();
   });
 });

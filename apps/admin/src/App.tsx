@@ -2,10 +2,13 @@ import type { AdminMeDto, Permission } from '@campus/shared';
 import { useEffect, useState } from 'react';
 import { ApiFailure, api, gameUrl } from './api';
 import { usePath } from './hooks';
+import { AnnouncementsPage } from './pages/Announcements';
 import { AuditPage } from './pages/Audit';
 import { MissionEditorPage } from './pages/MissionEditor';
 import { MissionsPage } from './pages/Missions';
 import { OverviewPage } from './pages/Overview';
+import { SettingsPage } from './pages/Settings';
+import { TemplatesPage } from './pages/Templates';
 import { UserDetailPage, UsersPage } from './pages/Users';
 
 type Gate =
@@ -17,7 +20,10 @@ type Gate =
 const NAV: Array<{ path: string; label: string; needs: Permission }> = [
   { path: '/', label: 'Tổng quan', needs: 'dashboard' },
   { path: '/missions', label: 'Nhiệm vụ', needs: 'missions' },
+  { path: '/templates', label: 'Mẫu nhiệm vụ', needs: 'missions' },
+  { path: '/announcements', label: 'Thông báo', needs: 'announcements' },
   { path: '/users', label: 'Người dùng', needs: 'moderation' },
+  { path: '/settings', label: 'Cấu hình', needs: 'config' },
   { path: '/audit', label: 'Nhật ký thao tác', needs: 'dashboard' },
 ];
 
@@ -70,6 +76,11 @@ export function App() {
   else if (userId && me.permissions.includes('moderation'))
     page = <UserDetailPage id={userId} me={me} go={go} />;
   else if (path === '/users' && me.permissions.includes('moderation')) page = <UsersPage go={go} />;
+  else if (missions && path === '/templates') page = <TemplatesPage go={go} />;
+  else if (path === '/announcements' && me.permissions.includes('announcements'))
+    page = <AnnouncementsPage me={me} />;
+  else if (path === '/settings' && me.permissions.includes('config'))
+    page = <SettingsPage go={go} />;
   else if (path === '/audit') page = <AuditPage me={me} />;
 
   return (

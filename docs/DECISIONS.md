@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Mẫu, tự điền, thông báo và công tắc khẩn
+
+- Gói việc: P5.3
+- Bối cảnh: thiết kế đưa cấu hình và thông báo qua Redis pub/sub, có endpoint `broadcast` riêng, gửi thông báo và cờ tính năng qua `/world/bootstrap`, và để sức chứa kênh, chế độ khách, domain email trong bảng `settings`.
+- Quyết định: (1) Realtime đọc `settings` và thông báo đang phát **mỗi 5 giây từ Postgres** (như án phạt ở P5.1) và gửi một message `ops` gộp (chat bật/tắt, bảo trì, thông báo đang phát) khi vào phòng và khi có thay đổi; không có `announce` riêng. (2) Thông báo "phát ngay" là thông báo bắt đầu từ bây giờ — không cần endpoint `broadcast`; huỷ bằng `POST /announcements/:id/cancel`. Mức toàn màn hình chỉ quản trị viên. (3) Bảo trì không đẩy người đang chơi ra, chỉ báo; nhân viên vẫn vào được; người khác bị từ chối với mã 503 và đọc được lời nhắn. (4) Sức chứa kênh, `GUEST_MODE`, domain email và email quản trị **vẫn là biến môi trường**: đổi giữa chừng ảnh hưởng an ninh hoặc các phòng đang mở, và hiếm khi cần. (5) Cờ tính năng chưa làm vì chưa có tính năng nào cần (cửa hàng, voice đều V1); bảng `settings` thêm khoá mới được ngay. (6) Tự điền chạy trong vòng job mỗi phút của API, chỉ làm từ 23:00, chọn mẫu đang bật lâu chưa dùng nhất và còn qua kiểm tra xuất bản; "báo biên tập viên" là nhãn "tự điền" trên lịch và dòng nhật ký (cảnh báo dashboard ở P5.4). (7) Giá trị mặc định và schema cấu hình nằm ở `packages/shared` (`operationalSettingsSchema`, `DEFAULT_SETTINGS`); khoá thiếu hoặc hỏng thì lấy mặc định, hạn mức thưởng khi xuất bản đọc từ đây.
+- Khác plan ở đâu: đã sửa `05-multiplayer.md` §4 (message `ops`, mã từ chối), `07-backend-data.md` §5–§7, `08-admin-cms.md` §3, §4.5, §5, `06-missions.md` (ngày trống).
+- Hệ quả: khi có nhiều tiến trình realtime vẫn đúng (mỗi tiến trình tự đọc DB), chỉ tốn thêm vài truy vấn nhẹ mỗi 5 giây; chuyển sang Redis khi cần độ trễ dưới giây. Thông báo đóng rồi được nhớ theo máy (localStorage), không theo tài khoản.
+
 ## 2026-11-13 — Trình soạn nhiệm vụ
 
 - Gói việc: P5.2

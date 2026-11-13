@@ -31,7 +31,7 @@ Admin là một SPA riêng (`apps/admin`), dùng chung đăng nhập và REST AP
 | | Mẫu | Kho nhiệm vụ mẫu; bật/tắt cho tự điền |
 | | Ngân hàng quiz | Câu hỏi, đáp án, giải thích, tag; nhập hàng loạt từ CSV |
 | **Vận hành** | Thông báo | Soạn, hẹn giờ, phát ngay tới mọi kênh |
-| | Cấu hình | Sức chứa kênh, chat, chế độ khách, domain email, lịch ngày nghỉ, cờ tính năng |
+| | Cấu hình | Sức chứa kênh, chat, chế độ khách, domain email, lịch ngày nghỉ, cờ tính năng. **Đã làm (P5.3):** chat, bảo trì, hạn mức thưởng, ngày nghỉ, tự điền; sức chứa kênh, chế độ khách và domain email vẫn là biến môi trường |
 | | Công tắc khẩn | Tắt chat toàn hệ thống · chế độ bảo trì · kết thúc sớm nhiệm vụ lỗi |
 | **Cộng đồng** | Người dùng | Tìm kiếm, xem hồ sơ + chỉ số game, đổi vai trò, áp/gỡ án phạt |
 | | Báo cáo | Hàng đợi báo cáo kèm đoạn chat ngữ cảnh; xử lý: bỏ qua / nhắc / mute / ban |
@@ -86,12 +86,14 @@ Nút **Xem thử** mở game với `?preview=<missionId>`. Chỉ người đó t
 - Bất kỳ nhiệm vụ nào cũng lưu được thành mẫu.
 - Bật "tự điền ngày trống": lúc 23:00, nếu ngày mai chưa có nhiệm vụ ngày, hệ thống chọn một mẫu đang bật (xoay vòng, không lặp lại trong N ngày gần nhất) và lên lịch. Biên tập viên nhận thông báo và vẫn sửa được.
 - Mục đích: **không bao giờ có ngày không có nhiệm vụ**, kể cả khi admin bận.
+- **Đã làm (P5.3):** nút "Lưu làm mẫu" trong trình soạn; trang Mẫu (bật/tắt cho tự điền, dùng mẫu, xoá, nút "Tự điền ngày mai ngay"); trình soạn mới có ô "Bắt đầu từ mẫu" (giữ khung giờ, đặt vào ngày đang chọn). Job chọn mẫu đang bật **lâu chưa dùng nhất**, bỏ mẫu không qua kiểm tra xuất bản (ví dụ thiếu câu hỏi), giữ giờ của mẫu và xuất bản luôn. Thay cho "thông báo biên tập viên": nhãn "tự điền" trên lịch + nhật ký thao tác; cảnh báo trên dashboard thuộc P5.4.
 
 ## 5. Vận hành trực tiếp
 
 - **Thông báo:** ba mức — dòng chạy nhẹ, hộp nổi, toàn màn hình (chỉ dùng cho bảo trì). Phát ngay hoặc hẹn giờ.
 - **Cấu hình có hiệu lực ngay** (đi qua Redis pub/sub), không cần khởi động lại.
 - **Công tắc khẩn:** tắt chat toàn hệ thống; chế độ bảo trì (người mới không vào được, người đang chơi nhận thông báo); kết thúc sớm một nhiệm vụ đang lỗi. Mỗi lần bật đều ghi nhật ký.
+- **Đã làm (P5.3):** realtime đọc cấu hình và thông báo đang phát **mỗi 5 giây từ DB** (chưa có Redis), gửi `ops` cho người mới vào và cho cả phòng khi có thay đổi. Hộp nổi và toàn màn hình hiện một lần (đóng rồi thì nhớ trên máy đó); dòng chạy hiện suốt thời gian phát. Toàn màn hình chỉ quản trị viên được phát. Bảo trì: người đang chơi không bị đẩy ra, chỉ thấy dòng nhắn; nhân viên (biên tập, kiểm duyệt, quản trị) vẫn vào được để kiểm tra; người khác thấy lời nhắn bảo trì thay vì "không kết nối được". Tắt chat: ô chat bị khoá và ghi "Chat đang tắt". Kết thúc sớm: trang Cấu hình liệt kê nhiệm vụ đang chạy, mở sang trình soạn để bấm "Kết thúc sớm".
 
 ## 6. Kiểm duyệt
 

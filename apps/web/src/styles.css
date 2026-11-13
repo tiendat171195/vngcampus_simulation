@@ -1626,3 +1626,115 @@ body {
   color: #9aa7b4;
   font-size: 12px;
 }
+
+/* ---------- announcements (docs/08 §5) ---------- */
+
+.announce-strip {
+  position: fixed;
+  top: calc(58px + env(safe-area-inset-top));
+  left: 50%;
+  z-index: 7;
+  display: grid;
+  gap: 4px;
+  width: min(560px, calc(100vw - 340px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.announce-strip p {
+  margin: 0;
+  overflow: hidden;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgb(16 20 24 / 82%);
+  color: #f3f5f7;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.announce-strip .announce-maintenance {
+  border: 1px solid rgb(242 140 40 / 70%);
+  white-space: normal;
+}
+
+.announce-ticker span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: announce-scroll 22s linear infinite;
+}
+
+@keyframes announce-scroll {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announce-strip .announce-ticker {
+    white-space: normal;
+  }
+
+  .announce-ticker span {
+    padding-left: 0;
+    animation: none;
+  }
+}
+
+/* Phones: below the minimap; the mission tracker sits at the bottom there. */
+@media (max-width: 640px) {
+  .announce-strip {
+    top: calc(150px + env(safe-area-inset-top));
+    width: calc(100vw - 24px);
+  }
+}
+
+.announce-backdrop,
+.announce-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(8 10 14 / 45%);
+}
+
+.announce-fullscreen {
+  background: rgb(8 10 14 / 92%);
+}
+
+.announce-card {
+  width: min(420px, 100%);
+  padding: 20px 22px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 16px;
+  background: rgb(16 20 24 / 96%);
+  color: #f3f5f7;
+  text-align: center;
+}
+
+.announce-card h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f28c28;
+}
+
+.announce-card p {
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.announce-ok {
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #f28c28;
+  color: #1a1206;
+  font: inherit;
+  font-weight: 600;
+}

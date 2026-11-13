@@ -1,7 +1,8 @@
-import { type Db, missions, quizQuestions, settings } from '@campus/db';
+import { type Db, missions, quizQuestions } from '@campus/db';
 import type { MapIndex } from '@campus/map-data';
-import { type MissionDefinition, missionDefinitionSchema } from '@campus/shared';
+import { DEFAULT_SETTINGS, type MissionDefinition, missionDefinitionSchema } from '@campus/shared';
 import { and, eq, ne } from 'drizzle-orm';
+import { readSettings } from '../operations/settings';
 import { vnDateOf } from '../time';
 import { sumRewards } from './rewards';
 import { missionMapProblems } from './validate';
@@ -17,7 +18,7 @@ export interface PublishCheck {
 }
 
 /** Points one mission may give at most, unless `settings.rewardCap` says otherwise. */
-export const DEFAULT_REWARD_CAP = 1000;
+export const DEFAULT_REWARD_CAP = DEFAULT_SETTINGS.rewardCap;
 
 /**
  * Everything checked before a mission may be published (docs/08 §4.3). The API runs it on every
@@ -84,8 +85,7 @@ export async function checkMissionForPublish(
   }
 
   // Rewards within the configured cap.
-  const [capRow] = await db.select().from(settings).where(eq(settings.key, 'rewardCap'));
-  const cap = typeof capRow?.value === 'number' ? capRow.value : DEFAULT_REWARD_CAP;
+  const cap = (await readSettings(db)).rewardCap;
   const best = Math.max(1, ...(definition.bonusWindows ?? []).map((window) => window.multiplier));
   const { points } = sumRewards(definition.rewards, best);
   if (points > cap) errors.push(`Thưởng tối đa ${points} điểm vượt hạn mức ${cap}.`);

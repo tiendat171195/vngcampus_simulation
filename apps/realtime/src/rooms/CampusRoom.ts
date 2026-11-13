@@ -21,11 +21,13 @@ import {
   NET,
   type NoticeMessage,
   type OnlineEntry,
+  type OpsMessage,
   PLAYER_STATUS,
   type PongMessage,
   pingSchema,
   profileSchema,
   quizAnswerSchema,
+  STAFF_ROLES,
   seatTakeSchema,
 } from '@campus/shared';
 import {
@@ -48,6 +50,7 @@ import {
   WindowCounter,
   type WorldLimits,
 } from '../movement';
+import type { OpsWatcher } from '../operations';
 import { PlayerState, RoomState } from './state';
 
 export interface CampusRoomOptions {
@@ -64,6 +67,8 @@ export interface CampusRoomOptions {
   missions?: MissionRuntime;
   /** Mutes and bans; without it nobody is ever muted. */
   sanctions?: SanctionWatcher;
+  /** Kill switches, maintenance and announcements; without it chat is on and nothing is shown. */
+  ops?: OpsWatcher;
   softCap?: number;
   hardCap?: number;
   reconnectGraceSeconds?: number;
@@ -132,8 +137,12 @@ export class CampusRoom extends Room<{
   override state = new RoomState();
   override patchRate = 1000 / NET.serverPatchHz;
 
-  private config!: Required<Omit<CampusRoomOptions, 'verifyToken' | 'missions' | 'sanctions'>>;
+  private config!: Required<
+    Omit<CampusRoomOptions, 'verifyToken' | 'missions' | 'sanctions' | 'ops'>
+  >;
   private sanctions: SanctionWatcher | null = null;
+  private ops: OpsWatcher | null = null;
+  private stopWatchingOps: (() => void) | null = null;
   private stopWatchingBans: (() => void) | null = null;
   private missions: RoomMissionBinding | null = null;
   private verifyToken: TokenVerifier | undefined;
@@ -173,6 +182,10 @@ export class CampusRoom extends Room<{
             client.leave(CLOSE.kicked, 'Tài khoản đã bị khoá.');
         }
       }) ?? null;
+    this.ops = options.ops ?? null;
+    // Switches and announcements reach everyone inside within seconds (docs/08 §5).
+    this.stopWatchingOps =
+      this.ops?.onChange((view) => this.broadcast(MSG.ops, view satisfies OpsMessage)) ?? null;
     if (options.missions)
       this.missions = new RoomMissionBinding(options.missions, {
         send: (sessionId, type, payload) =>
@@ -241,9 +254,11 @@ export class CampusRoom extends Room<{
       }
       if (this.sanctions?.isBanned(identity.userId))
         throw new ServerError(403, 'Tài khoản đã bị khoá.');
+      this.refuseDuringMaintenance(identity.role);
       return identity;
     }
-    if (guest && this.config.devGuestAuth)
+    if (guest && this.config.devGuestAuth) {
+      this.refuseDuringMaintenance('player');
       return {
         userId: `guest:${guest.id}`,
         name: guest.name,
@@ -252,7 +267,15 @@ export class CampusRoom extends Room<{
         hidden: false,
         role: 'player',
       };
+    }
     throw new ServerError(401, 'Cần đăng nhập.');
+  }
+
+  /** During maintenance only staff get in (docs/08 §5); the others see why. */
+  private refuseDuringMaintenance(role: string): void {
+    const maintenance = this.ops?.current.maintenance;
+    if (maintenance && !(STAFF_ROLES as readonly string[]).includes(role))
+      throw new ServerError(503, maintenance);
   }
 
   override async onJoin(
@@ -299,6 +322,7 @@ export class CampusRoom extends Room<{
         ? joinOptions.preview
         : undefined;
     void this.missions?.join(client.sessionId, identity.userId, identity.name, preview);
+    if (this.ops) client.send(MSG.ops, this.ops.current satisfies OpsMessage);
     // One person, one session: any older session of this user, in any channel, is closed.
     this.presence.publish(SESSION_TOPIC, { userId: identity.userId, sessionId: client.sessionId });
   }
@@ -335,6 +359,7 @@ export class CampusRoom extends Room<{
     clearInterval(this.housekeeping);
     this.missions?.dispose();
     this.stopWatchingBans?.();
+    this.stopWatchingOps?.();
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
@@ -450,6 +475,12 @@ export class CampusRoom extends Room<{
     if (!tracking || !player || !parsed.success) return;
     const text = normaliseChat(parsed.data.text, CHAT.maxLength);
     if (!text) return;
+    if (this.ops && !this.ops.current.chatEnabled) {
+      client.send(MSG.notice, {
+        text: 'Chat đang tạm tắt trên toàn campus.',
+      } satisfies NoticeMessage);
+      return;
+    }
     const muted = this.sanctions?.muteNotice(player.userId);
     if (muted) {
       client.send(MSG.notice, { text: muted } satisfies NoticeMessage);

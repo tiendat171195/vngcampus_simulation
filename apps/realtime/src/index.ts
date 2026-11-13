@@ -1,10 +1,12 @@
-import { activeSanctions } from '@campus/core';
+import { activeAnnouncements, activeSanctions, readSettings } from '@campus/core';
 import { createDb } from '@campus/db';
+import type { LocalizedText } from '@campus/shared';
 import { createTokenVerifier } from './auth';
 import { devGuestAuthEnabled, devSpawnEnabled, loadEnv } from './env';
 import { MissionRuntime } from './missions/runtime';
 import { dbSource } from './missions/source';
 import { SanctionWatcher } from './moderation';
+import { OpsWatcher } from './operations';
 import { createServer } from './server';
 
 const env = loadEnv();
@@ -16,9 +18,25 @@ const missions = new MissionRuntime(
 missions.start();
 const sanctions = new SanctionWatcher(() => activeSanctions(db));
 sanctions.start();
+const ops = new OpsWatcher(async () => {
+  const settings = await readSettings(db);
+  const onAir = await activeAnnouncements(db);
+  return {
+    chatEnabled: settings.chatEnabled,
+    maintenance: settings.maintenance.on ? settings.maintenance.message : null,
+    announcements: onAir.map((row) => ({
+      id: row.id,
+      level: row.level,
+      text: row.text as LocalizedText,
+      endsAt: row.endsAt.toISOString(),
+    })),
+  };
+});
+ops.start();
 const server = createServer({
   missions,
   sanctions,
+  ops,
   devGuestAuth: devGuestAuthEnabled(env),
   devSpawn: devSpawnEnabled(env),
   verifyToken: createTokenVerifier(new URL(env.AUTH_JWKS_URL)),

@@ -104,9 +104,11 @@ Tên message và schema payload định nghĩa một lần trong `packages/share
 | `mission:completed` | `{ missionId, title, points, xp, multiplier, streak, streakBonus, level, durationMs }` | |
 | `quiz:question` / `quiz:result` | Câu hỏi (không kèm đáp án) / `{ correct, explanation?, finished }` | |
 | `notice` | `{ text }` | "Lại gần hơn một chút", "Vật này không còn ở đây"… |
-| `announce` | `{ level, text, ttl }` | Thông báo từ admin |
+| `ops` | `{ chatEnabled, maintenance, announcements: [{ id, level, text, endsAt }] }` | Công tắc khẩn, bảo trì và thông báo đang phát (thay cho `announce`, P5.3). Gửi khi vào phòng và cho cả phòng khi có thay đổi |
 | `toast` | `{ text }` | "X vừa hoàn thành nhiệm vụ" (có tiết lưu) |
 | `error` | `{ code, message }` | |
+
+**Từ chối vào phòng:** `onAuth` ném lỗi có mã — `401` chưa/hết đăng nhập, `403` tài khoản bị khoá, `503` đang bảo trì (lời nhắn bảo trì là `message`; nhân viên vẫn vào được). Client hiện `message` của `403`/`503` thay cho "không kết nối được".
 
 **Mã đóng kết nối:** server tắt để deploy dùng mã có sẵn của Colyseus (`4001`, client tự vào lại). Mã riêng của ứng dụng đặt trong dải `41xx` để không trùng mã của framework: `4101` đăng nhập ở nơi khác · `4102` bị khoá/mời ra · `4103` treo máy quá lâu.
 

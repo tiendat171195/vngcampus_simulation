@@ -14,6 +14,7 @@ const VISIBLE_LINES = 6;
 export function ChatBox() {
   const lines = useSession((state) => state.chat);
   const online = useSession((state) => state.net.status === 'online');
+  const chatOff = useSession((state) => !state.ops.chatEnabled);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [, setTick] = useState(0);
@@ -72,8 +73,14 @@ export function ChatBox() {
             className="chat-input"
             value={text}
             maxLength={CHAT.maxLength}
-            placeholder={online ? 'Nói với người xung quanh…' : 'Chưa kết nối'}
-            disabled={!online}
+            placeholder={
+              !online
+                ? 'Chưa kết nối'
+                : chatOff
+                  ? 'Chat đang tạm tắt trên toàn campus'
+                  : 'Nói với người xung quanh…'
+            }
+            disabled={!online || chatOff}
             aria-label="Tin nhắn"
             onChange={(event) => setText(event.target.value)}
             onKeyDown={(event) => {
@@ -90,7 +97,7 @@ export function ChatBox() {
         </form>
       ) : (
         <button type="button" className="chat-open" onClick={() => setOpen(true)}>
-          💬 Trò chuyện <kbd>Enter</kbd>
+          {chatOff ? '💬 Chat đang tắt' : '💬 Trò chuyện'} <kbd>Enter</kbd>
         </button>
       )}
     </div>
