@@ -316,12 +316,27 @@ importers:
 
   tests/e2e:
     devDependencies:
+      '@campus/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@campus/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@playwright/test':
         specifier: 1.63.0
         version: 1.63.0
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.5
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(postgres@4.1.1)
+      postgres:
+        specifier: ^4.1.1
+        version: 4.1.1
 
   tools/loadtest:
     dependencies:

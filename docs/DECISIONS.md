@@ -15,6 +15,17 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Giao diện nhiệm vụ
+
+- Gói việc: P4.3
+- Quyết định:
+  - Chỉ đường bằng la bàn giữa mép trên + cột sáng tại đích (đơn giản, rõ trên điện thoại) thay cho mũi tên chạy theo mép màn hình.
+  - Lời nhắc tương tác dùng chung cho ghế và vật thể nhiệm vụ; vật thể nhiệm vụ được ưu tiên.
+  - Phát hiện khi làm: nhiệm vụ bắt đầu lúc người chơi đã đứng sẵn ở điểm cần ghé thì trước đây không được tính tới khi họ di chuyển — server giờ kiểm tra lại vị trí mọi người khi tập nhiệm vụ đổi (có test).
+  - E2E nhiệm vụ (`specs/z-missions.spec.ts`) tự đăng một nhiệm vụ sự kiện vào DB e2e, chạy cuối cùng để biểu ngữ không chen vào các test khác, và dùng `?spawn=<POI>` để tới từng vật phẩm — mỗi lần là một lần thoát ra vào lại, nên cũng kiểm tra luôn tiến độ được giữ.
+- Khác plan ở đâu: `06-missions.md` §8.
+- Hệ quả: mô hình vật phẩm/kiosk/NPC là tạm, thay ở P6.
+
 ## 2026-11-13 — Runtime nhiệm vụ trong phòng
 
 - Gói việc: P4.2

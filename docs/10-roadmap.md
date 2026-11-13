@@ -144,7 +144,7 @@ Ngoài nghiệm thu: thông báo quyền riêng tư và ghi nhận đồng ý, I
 |---|---|---|:-:|---|
 | P4.1 | Mô hình và engine | Schema dùng chung (mission, objective). Bảng DB (missions, mission_progress, wallet_ledger, user_stats, quiz_questions). `MissionEngine` + handler `visit`, `collect`, `quiz`, `social` kèm unit test. `RewardService` (sổ cái, streak theo ngày làm việc). Lệnh CLI nạp nhiệm vụ từ file JSON | L | Xong |
 | P4.2 | Runtime trong phòng | Phát sự kiện game từ các system, `AreaTriggerSystem`, entity dùng chung và riêng, kiểm tra tương tác, các message nhiệm vụ, lưu và khôi phục khi vào lại. Test phòng đầu-cuối | M | Xong |
-| P4.3 | Trải nghiệm phía client | Hệ tương tác, hiển thị vật phẩm/kiosk/NPC tạm, biểu ngữ, bảng theo dõi, chỉ đường, hộp thoại quiz, màn chúc mừng | M | Chưa làm |
+| P4.3 | Trải nghiệm phía client | Hệ tương tác, hiển thị vật phẩm/kiosk/NPC tạm, biểu ngữ, bảng theo dõi, chỉ đường, hộp thoại quiz, màn chúc mừng | M | Xong |
 | P4.4 | Thưởng và bảng xếp hạng | Giao diện điểm/cấp/streak, BXH (Redis + API + UI), lịch sử nhiệm vụ, bộ đếm mục tiêu cộng đồng, worker + job chốt nhiệm vụ | M | Chưa làm |
 
 **Nghiệm thu:**

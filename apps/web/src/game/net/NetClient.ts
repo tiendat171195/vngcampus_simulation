@@ -10,13 +10,20 @@ import {
   decodeYaw,
   encodePosition,
   encodeYaw,
+  type MissionCompletedMessage,
+  type MissionEntitiesMessage,
+  type MissionProgressMessage,
+  type MissionStateMessage,
   MSG,
   NET,
   type NoticeMessage,
   type PongMessage,
+  type QuizQuestionMessage,
+  type QuizResultMessage,
 } from '@campus/shared';
 import { Client, CloseCode, type Room } from '@colyseus/sdk';
 import { type NetStatus, useSession } from '../core/session';
+import { setMissionEntities, useMissions } from '../missions/missionStore';
 import { ClockSync, Interpolator } from './Interpolator';
 
 /** What the client reads from the room state; the server schema is in apps/realtime. */
@@ -218,6 +225,20 @@ export class NetClient {
     if (this.status === 'online') this.room?.send(MSG.seatTake, { seatId });
   }
 
+  /** Uses a mission thing (pick up, talk to a kiosk); the server checks distance. */
+  interact(id: string): void {
+    if (this.status === 'online') this.room?.send(MSG.interact, { id });
+  }
+
+  answerQuiz(answer: {
+    missionId: string;
+    objectiveId: string;
+    questionId: string;
+    choice: number;
+  }): void {
+    if (this.status === 'online') this.room?.send(MSG.quizAnswer, answer);
+  }
+
   leaveSeat(): void {
     if (this.status === 'online' && this.seatId) this.room?.send(MSG.seatLeave, {});
   }
@@ -250,6 +271,28 @@ export class NetClient {
     });
     room.onMessage(MSG.notice, (message: NoticeMessage) =>
       useSession.getState().showNotice(message.text),
+    );
+    room.onMessage(MSG.toast, (message: NoticeMessage) =>
+      useSession.getState().showNotice(message.text),
+    );
+    // Missions (docs/06 §8): rare messages, straight into the HUD store.
+    room.onMessage(MSG.missionState, (message: MissionStateMessage) =>
+      useMissions.getState().setMissions(message.missions),
+    );
+    room.onMessage(MSG.missionProgress, (message: MissionProgressMessage) =>
+      useMissions.getState().updateObjective(message.missionId, message.objective),
+    );
+    room.onMessage(MSG.missionEntities, (message: MissionEntitiesMessage) =>
+      setMissionEntities(message.entities),
+    );
+    room.onMessage(MSG.missionCompleted, (message: MissionCompletedMessage) =>
+      useMissions.getState().complete(message),
+    );
+    room.onMessage(MSG.quizQuestion, (message: QuizQuestionMessage) =>
+      useMissions.getState().setQuiz(message),
+    );
+    room.onMessage(MSG.quizResult, (message: QuizResultMessage) =>
+      useMissions.getState().setQuizResult(message),
     );
     room.onMessage(MSG.chat, (message: ChatMessage) => {
       this.bubbles.set(message.from, { text: message.text, until: performance.now() + BUBBLE_MS });

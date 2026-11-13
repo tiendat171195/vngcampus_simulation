@@ -160,6 +160,8 @@ export class RoomMissionBinding {
       for (const id of player.slots.keys()) if (!ids.has(id)) player.slots.delete(id);
       await this.loadSlots(player);
       this.sendState(sessionId);
+      // Someone already standing where a new mission sends them counts without moving.
+      this.move(sessionId);
     }
   }
 

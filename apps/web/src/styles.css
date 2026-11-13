@@ -1263,3 +1263,290 @@ body {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* ---------- missions ---------- */
+
+.mission-banner,
+.quiz,
+.mission-complete {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 22px 22px 18px;
+  border: 1px solid rgb(242 140 40 / 45%);
+  border-radius: 18px;
+  background: rgb(16 20 24 / 94%);
+}
+
+.mission-kicker {
+  margin: 0 0 4px;
+  color: #f28c28;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mission-banner h1,
+.mission-complete h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.mission-lead {
+  margin: 0 0 12px;
+  color: #c9d2db;
+  font-size: 15px;
+}
+
+.mission-goals {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  color: #e9edf1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.mission-goals li[data-done="true"] {
+  color: #7d8894;
+  text-decoration: line-through;
+}
+
+.mission-optional {
+  color: #9aa7b4;
+}
+
+.mission-meta {
+  margin: 0 0 14px;
+  color: #9aa7b4;
+  font-size: 13px;
+}
+
+.mission-go {
+  width: 100%;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #f28c28;
+  color: #1a1206;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mission-tracker {
+  position: fixed;
+  top: calc(150px + env(safe-area-inset-top));
+  left: calc(12px + env(safe-area-inset-left));
+  z-index: 6;
+  width: min(250px, calc(100vw - 24px));
+  padding: 8px 10px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 12px;
+  background: rgb(16 20 24 / 80%);
+  font-size: 13px;
+}
+
+.mission-tracker-head,
+.mission-title {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: #f7b46c;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mission-title {
+  color: #fff;
+}
+
+.mission-block[data-done="true"] .mission-title {
+  color: #3ecf8e;
+}
+
+.mission-tracker ol {
+  margin: 2px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.mission-step {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: #c9d2db;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mission-step[data-active="true"] {
+  background: rgb(242 140 40 / 18%);
+  color: #fff;
+}
+
+.mission-step[data-done="true"] {
+  color: #7d8894;
+  cursor: default;
+}
+
+.mission-count {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.waypoint {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top));
+  left: 50%;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 340px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgb(16 20 24 / 82%);
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.waypoint[hidden] {
+  display: none;
+}
+
+.waypoint span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waypoint-arrow {
+  display: inline-block;
+  color: #f28c28;
+  font-size: 15px;
+}
+
+.quiz-text {
+  margin: 4px 0 14px;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.quiz-choices {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quiz-choice {
+  padding: 11px 14px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 6%);
+  color: #e9edf1;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quiz-feedback {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgb(229 72 77 / 18%);
+  color: #ffb3b6;
+  font-size: 14px;
+}
+
+.quiz-feedback[data-correct="true"] {
+  background: rgb(62 207 142 / 18%);
+  color: #9ff0c8;
+}
+
+.quiz-close {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #9aa7b4;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mission-complete {
+  overflow: hidden;
+  text-align: center;
+}
+
+.mission-reward {
+  margin: 0 0 6px;
+  color: #ffcf3f;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.mission-streak {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  top: -10px;
+  left: calc(5% + var(--i) * 5%);
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: hsl(calc(var(--i) * 47deg) 85% 60%);
+  animation: confetti 2.4s ease-in calc(var(--i) * 0.07s) both;
+}
+
+@keyframes confetti {
+  to {
+    transform: translateY(420px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .mission-tracker {
+    top: auto;
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    width: min(220px, calc(100vw - 24px));
+  }
+
+  .waypoint {
+    top: calc(60px + env(safe-area-inset-top));
+    max-width: calc(100vw - 24px);
+  }
+}

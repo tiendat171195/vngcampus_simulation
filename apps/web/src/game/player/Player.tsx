@@ -1,15 +1,26 @@
 import { areasAt, distance, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
-import { ANIM, type AnimId, EMOTE_BY_ID, EMOTES, MOVEMENT, parseAvatar } from '@campus/shared';
+import {
+  ANIM,
+  type AnimId,
+  EMOTE_BY_ID,
+  EMOTES,
+  INTERACT_RANGE,
+  MOVEMENT,
+  parseAvatar,
+} from '@campus/shared';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import { DoubleSide, type PerspectiveCamera, Ray, Vector3 } from 'three';
 import { Avatar } from '../avatars/Avatar';
 import { input, readMove } from '../core/input';
-import { hudSink, useSession } from '../core/session';
+import { playerPose } from '../core/pose';
+import { hudSink, type Prompt, useSession } from '../core/session';
 import { useSettings } from '../core/settings';
 import { tutorialSink } from '../core/tutorial';
 import { playerSink, useDebugStore } from '../debug/debugStore';
+import { entityLabel } from '../missions/labels';
+import { missionWorld } from '../missions/missionStore';
 import { BubbleView } from '../net/bubbles';
 import { net } from '../net/net';
 import { useWorld } from '../world/CampusWorld';
@@ -53,7 +64,8 @@ export function Player() {
     /** Seat granted by the server, '' when standing. */
     seatId: '',
     promptIn: 0,
-    promptSeat: '',
+    /** What the prompt offers: `seat:<id>` or `entity:<id>`, '' for nothing. */
+    promptKey: '',
   });
 
   useEffect(() => () => avatar.dispose(), [avatar]);
@@ -169,10 +181,12 @@ export function Player() {
       if (emoteName === 'wave') tutorialSink.waved = true;
     }
 
-    // Interaction: sit on the free seat the prompt points at.
+    // Interaction: use the mission thing, or sit on the free seat, the prompt points at.
     if (input.interact) {
       input.interact = false;
-      if (s.promptSeat && !s.seatId) net.takeSeat(s.promptSeat);
+      const prompt = useSession.getState().prompt;
+      if (prompt?.kind === 'entity') net.interact(prompt.id);
+      else if (prompt?.kind === 'seat' && !s.seatId) net.takeSeat(prompt.id);
     }
 
     s.accumulator += dt;
@@ -220,6 +234,11 @@ export function Player() {
     );
 
     avatar.object.position.copy(s.rendered);
+    playerPose.x = s.rendered.x;
+    playerPose.y = s.rendered.y;
+    playerPose.z = s.rendered.z;
+    playerPose.ready = true;
+    playerPose.heading = rig.heading;
     avatar.object.rotation.y = s.yaw;
     avatar.update(dt, { anim, speed: motor.speed, emote: s.emote.id, emoteSeq: s.emote.seq });
 
@@ -241,9 +260,21 @@ export function Player() {
           }
         }
       }
-      if (best !== s.promptSeat) {
-        s.promptSeat = best;
-        useSession.getState().setPrompt(best ? { seatId: best, label: 'Ngồi xuống' } : null);
+      // A mission thing within reach comes first.
+      let prompt: Prompt | null = best ? { kind: 'seat', id: best, label: 'Ngồi xuống' } : null;
+      let nearest = INTERACT_RANGE - 0.4;
+      for (const entity of missionWorld.entities) {
+        if (Math.abs(entity.y - motor.position.y) > 1.5) continue;
+        const d = Math.hypot(entity.x - motor.position.x, entity.z - motor.position.z);
+        if (d < nearest) {
+          nearest = d;
+          prompt = { kind: 'entity', id: entity.id, label: entityLabel(entity) };
+        }
+      }
+      const key = prompt ? `${prompt.kind}:${prompt.id}` : '';
+      if (key !== s.promptKey) {
+        s.promptKey = key;
+        useSession.getState().setPrompt(prompt);
       }
     }
 

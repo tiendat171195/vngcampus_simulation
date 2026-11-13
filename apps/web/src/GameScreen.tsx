@@ -5,6 +5,7 @@ import { useSettings } from './game/core/settings';
 import { firstRunDone, markFirstRunDone, tutorialDone } from './game/core/tutorial';
 import { useDebugStore } from './game/debug/debugStore';
 import { GameCanvas } from './game/GameCanvas';
+import { missionWorld, useMissions } from './game/missions/missionStore';
 import { net } from './game/net/net';
 import { currentUser, signIn } from './services/auth';
 import { ActionBar, NoticeToast } from './ui/ActionBar';
@@ -14,6 +15,13 @@ import { ChatBox } from './ui/ChatBox';
 import { ConnectionBanner } from './ui/ConnectionBanner';
 import { InputLayer } from './ui/InputLayer';
 import { MiniMap } from './ui/MiniMap';
+import {
+  MissionBanner,
+  MissionComplete,
+  MissionTracker,
+  QuizDialog,
+  WaypointCompass,
+} from './ui/MissionHud';
 import { ProfileCard } from './ui/ProfileCard';
 import { Toolbar } from './ui/Toolbar';
 import { Tutorial } from './ui/Tutorial';
@@ -97,6 +105,8 @@ export default function GameScreen() {
     if (!new URLSearchParams(window.location.search).has('debug')) return;
     (window as unknown as { campus: unknown }).campus = {
       user: () => currentUser(),
+      missions: () => useMissions.getState().missions,
+      entities: () => missionWorld.entities,
       remotes: () =>
         [...net.remotes.values()].map((remote) => ({
           name: remote.name,
@@ -130,6 +140,11 @@ export default function GameScreen() {
       {playing && <Toolbar />}
       {playing && modal === 'avatar' && <AvatarEditor firstRun={firstRun} />}
       {playing && <ProfileCard />}
+      {playing && <MissionTracker />}
+      {steering && <WaypointCompass />}
+      {playing && modal === null && <MissionBanner />}
+      {playing && <QuizDialog />}
+      {playing && <MissionComplete />}
       {steering && tutorial && <Tutorial onFinish={endTutorial} />}
     </>
   );

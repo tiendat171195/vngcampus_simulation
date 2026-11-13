@@ -29,6 +29,13 @@ export interface PlayerLocation {
   floorLabel: string;
 }
 
+/** What the player can do right here: sit on a seat, or use a mission thing. */
+export interface Prompt {
+  kind: 'seat' | 'entity';
+  id: string;
+  label: string;
+}
+
 interface SessionState {
   phase: Phase;
   /** Milliseconds from navigation start until the first frame of the world was drawn. */
@@ -38,10 +45,10 @@ interface SessionState {
   /** Effective quality, after auto adjustment. */
   quality: { level: QualityLevel; dpr: number };
   /** What the player can do right here, offered as a button / the E key. */
-  prompt: { seatId: string; label: string } | null;
+  prompt: Prompt | null;
   /** A short message from the game, shown for a moment. `id` changes with every message. */
   notice: { text: string; id: number } | null;
-  setPrompt(prompt: { seatId: string; label: string } | null): void;
+  setPrompt(prompt: Prompt | null): void;
   showNotice(text: string): void;
   /** Recent nearby chat, newest last. Kept in memory only, never stored. */
   chat: ChatLine[];
@@ -52,8 +59,8 @@ interface SessionState {
   avatar: string;
   setAvatar(avatar: string): void;
   /** A full-screen dialog over the game; the game ignores keys and touches meanwhile. */
-  modal: 'avatar' | null;
-  setModal(modal: 'avatar' | null): void;
+  modal: 'avatar' | 'quiz' | null;
+  setModal(modal: 'avatar' | 'quiz' | null): void;
   /** The colleague whose profile card is open. */
   profileCard: { userId: string; name: string; guest: boolean } | null;
   setProfileCard(card: { userId: string; name: string; guest: boolean } | null): void;

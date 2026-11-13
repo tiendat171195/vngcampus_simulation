@@ -4,6 +4,7 @@ import { BotCrowd } from './bots/BotCrowd';
 import { QualityController, WorldReadySignal } from './core/QualityController';
 import { statsSink, useDebugStore } from './debug/debugStore';
 import { OrbitCamera } from './debug/OrbitCamera';
+import { MissionEntities } from './missions/MissionEntities';
 import { RemotePlayers } from './net/RemotePlayers';
 import { Player } from './player/Player';
 import { CampusWorld } from './world/CampusWorld';
@@ -58,6 +59,7 @@ export function GameCanvas() {
           <Player />
           <BotCrowd />
           <RemotePlayers />
+          <MissionEntities />
         </CampusWorld>
         {!following && <OrbitCamera />}
         <StatsSampler />

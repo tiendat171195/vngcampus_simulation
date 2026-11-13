@@ -107,6 +107,26 @@ describe('room missions', () => {
     expect(source.progress.get(`${mission.id}/${ME}`)?.progress.o1?.done).toBe(true);
   });
 
+  it('counts a player already standing at the place when the mission starts', async () => {
+    source.missions = [];
+    const runtime = new MissionRuntime(source);
+    await runtime.refresh();
+    const late = new RoomMissionBinding(runtime, {
+      send: (to, type, payload) => sent.push({ to, type, payload }),
+      broadcast: () => {},
+      position: (sessionId) => positions.get(sessionId) ?? null,
+      players: () => [],
+      now: () => clock,
+    });
+    positions.set('s1', { x: 0, y: 0, z: -52 });
+    await late.join('s1', ME, 'Đứng Sẵn');
+    expect(progressOf('o1')).toBe(0);
+    source.missions = [mission];
+    await runtime.refresh();
+    await settle();
+    expect(progressOf('o1')).toBe(1);
+  });
+
   it('shows nothing and keeps nothing when the save fails; the next try works', async () => {
     await enter('s1', ME);
     source.fail = true;

@@ -250,6 +250,8 @@ DB chỉ lưu `publish_status` (`draft` / `published` / `archived`); "đang ch�
 - **Hoàn thành:** hiệu ứng ăn mừng, bảng phần thưởng, streak, thứ hạng tạm thời, nút tạo ảnh chia sẻ.
 - Mỗi loại objective có một *presenter* phía client (`game/missions/presenters`) quyết định điểm đánh dấu và giao diện riêng (ví dụ hộp thoại quiz).
 
+**Đã làm (P4.3):** `apps/web/src/game/missions` (kho trạng thái, vật thể 3D, đích chỉ đường) và `apps/web/src/ui/MissionHud.tsx` (biểu ngữ, bảng theo dõi, la bàn, quiz, màn hoàn thành). Biểu ngữ hiện mỗi lần vào game khi còn nhiệm vụ chưa xong. Chỉ đường là **một la bàn ở giữa mép trên** (mũi tên xoay theo camera + khoảng cách + tên đích) cộng cột sáng tại đích, thay vì mũi tên chạy theo mép màn hình. Vật phẩm tạm: ly cà phê hoặc viên đá quý xoay trên vòng sáng; kiosk là khối cam có dấu "?". Đứng trong 2,6 m thì nút hành động (phím E) đổi thành "Nhặt …" / "Trả lời câu hỏi" (ưu tiên hơn ghế). Chưa tách presenter theo từng loại: một hàm `waypointTarget` xử lý cả bốn loại.
+
 ## 9. Chống gian lận (mức tương xứng với giá trị phần thưởng)
 
 | Nguy cơ | Biện pháp |
