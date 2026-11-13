@@ -11,7 +11,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { ApiFailure, api, gameUrl } from '../api';
 import { MapPicker } from '../components/MapPicker';
-import { useLoad } from '../hooks';
+import { href, useLoad } from '../hooks';
 import { fromVn, today, vnClock, vnDate } from '../time';
 import { KIND_LABEL, STATE_LABEL } from './Missions';
 
@@ -922,7 +922,7 @@ export function MissionEditorPage({ id, go }: { id: string | null; go: (path: st
         {id && (state === 'running' || state === 'ended') && (
           <a
             className="button secondary"
-            href={`/missions/${id}/results`}
+            href={href(`/missions/${id}/results`)}
             onClick={(event) => {
               event.preventDefault();
               go(`/missions/${id}/results`);

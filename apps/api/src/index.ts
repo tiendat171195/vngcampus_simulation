@@ -54,7 +54,7 @@ const app = await buildApp(
     secureCookies: env.NODE_ENV === 'production',
   },
   {
-    trustProxy: true,
+    trustProxy: env.TRUST_PROXY,
     logger:
       env.NODE_ENV === 'development'
         ? {

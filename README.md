@@ -20,7 +20,7 @@ pnpm dev
 |---|---|---|
 | `web` — game | http://localhost:5173 | Nhân vật đi trong campus 3D. WASD/mũi tên, Shift chạy, Space nhảy, kéo chuột xoay, lăn zoom. Nút **Debug** góc phải: camera tự do, cắt lớp theo tầng, lưới va chạm |
 | `web` — bản đồ debug | http://localhost:5173/debug/map | Sơ đồ 2D từng tầng, toạ độ và khu vực dưới con trỏ |
-| `admin` | http://localhost:5174 | Trang quản trị: tổng quan số liệu, nhiệm vụ và kết quả, mẫu, quiz, thông báo, cấu hình và công tắc khẩn, báo cáo vi phạm, người dùng, vai trò, án phạt, nhật ký thao tác. Đăng nhập trong game bằng tài khoản công ty có trong `ADMIN_EMAILS` (thử với IdP giả lập) rồi mở trang này |
+| `admin` | http://localhost:5174/admin/ | Trang quản trị: tổng quan số liệu, nhiệm vụ và kết quả, mẫu, quiz, thông báo, cấu hình và công tắc khẩn, báo cáo vi phạm, người dùng, vai trò, án phạt, nhật ký thao tác. Đăng nhập trong game bằng tài khoản công ty có trong `ADMIN_EMAILS` (thử với IdP giả lập) rồi mở trang này |
 | `api` | http://localhost:3001/api/health | REST (Fastify) |
 | `realtime` | http://localhost:2567/health | Colyseus |
 
@@ -104,6 +104,10 @@ Các gói trong `packages/` xuất thẳng mã TypeScript, không có bước bu
 ## Cấu hình
 
 Mọi biến môi trường đều có giá trị mặc định cho dev, nên không cần file `.env`. Muốn đổi cổng hay mức log thì sao chép [`.env.example`](.env.example) thành `.env` ở gốc repo.
+
+## Triển khai
+
+Một máy chạy Docker Compose: `Dockerfile` (ba image `api`, `realtime`, `web` = Caddy phục vụ game ở `/` và admin ở `/admin/`), [`infra/compose.prod.yaml`](infra/compose.prod.yaml) (thêm Postgres, migration, sao lưu hằng đêm) và workflow `Deploy` (đẩy image lên GHCR, staging theo nhánh chính, production theo tag `v*` có phê duyệt). Cài lần đầu, cập nhật, lùi phiên bản, khôi phục: [sổ tay vận hành](docs/runbook.md). `infra/smoke-stack.sh` dựng cả stack từ image và kiểm tra qua Caddy (CI chạy nó mỗi lần push).
 
 ## Tài liệu
 

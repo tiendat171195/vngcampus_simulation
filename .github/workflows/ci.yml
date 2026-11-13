@@ -65,6 +65,53 @@ jobs:
       - name: Smoke-test the built servers
         run: pnpm smoke
 
+  images:
+    name: Production images and stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build the api image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: api
+          load: true
+          tags: campus/api:ci
+          cache-from: type=gha,scope=campus
+          cache-to: type=gha,scope=campus,mode=max
+
+      - name: Build the realtime image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: realtime
+          load: true
+          tags: campus/realtime:ci
+          cache-from: type=gha,scope=campus
+
+      - name: Build the web image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: web
+          load: true
+          tags: campus/web:ci
+          cache-from: type=gha,scope=campus
+
+      - name: Start the production stack and check it through Caddy
+        run: infra/smoke-stack.sh
+        env:
+          IMAGE_REPO: campus
+          IMAGE_TAG: ci
+
   e2e:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest

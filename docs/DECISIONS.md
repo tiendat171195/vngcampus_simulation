@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-14 — Hạ tầng một máy: một Dockerfile, Caddy phục vụ cả hai app, admin ở /admin/
+
+- Gói việc: P7.1
+- Bối cảnh: thiết kế có app tĩnh sau CDN, Redis, worker riêng, BullMQ, Sentry và Prometheus; chưa có máy chủ, tài khoản CDN hay dịch vụ giám sát nào. Admin chạy riêng cổng 5174 lúc dev nhưng phải dùng chung cookie phiên với game.
+- Quyết định: (1) Một `Dockerfile` nhiều target: `api` (kèm `dist/migrate.mjs` — bước migration riêng của production), `realtime`, `web` (Caddy chứa sẵn bản build của game và admin). Server chỉ mang dependency npm production (`pnpm deploy --prod`); mã workspace đã nằm trong bundle. (2) `infra/compose.prod.yaml`: Postgres, `migrate` chạy một lần trước `api`/`realtime`, Caddy tự xin TLS, `backup` dump hằng đêm. Không có Redis, worker, BullMQ: job chạy trong tiến trình API, realtime đọc DB mỗi 5 giây (đủ cho một tiến trình realtime). (3) Admin build với `base: '/admin/'` và router bỏ tiền tố — cùng host nên dùng chung cookie, không cần CORS hay domain cookie. (4) `TRUST_PROXY` (mặc định `true`) để rate limit theo IP thật sau Caddy; chỉ đúng khi API không lộ trực tiếp ra ngoài. (5) CI dựng thật cả stack từ image và kiểm tra qua Caddy (`infra/smoke-stack.sh`), thay cho e2e chạy qua compose. (6) Deploy bằng SSH + compose với tag image bất biến; lùi phiên bản = đổi `IMAGE_TAG`.
+- Khác plan ở đâu: đã sửa `09-infra-security.md` §4–§6, §10 (trỏ tới `runbook.md` mới), `08-admin-cms.md` §8, README.
+- Hệ quả: Sentry, Prometheus/Grafana, uptime từ ngoài và chép sao lưu ra object storage là việc cấu hình khi có máy thật (runbook ghi cách). Khi cần nhiều tiến trình realtime (bậc 1) mới thêm Redis presence/driver.
+
 ## 2026-11-14 — Báo cáo vi phạm đi qua realtime; số liệu đếm sẵn, không lưu sự kiện thô
 
 - Gói việc: P5.4

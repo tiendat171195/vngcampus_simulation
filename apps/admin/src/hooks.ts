@@ -20,18 +20,27 @@ export function useLoad<T>(load: () => Promise<T>, deps: unknown[]) {
   return { data, error, reload };
 }
 
+/**
+ * The admin lives under `/admin/` on the game's host (it shares the sign-in cookie). Routes are
+ * written without that prefix; `href` adds it for links.
+ */
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+const route = (pathname: string) =>
+  (pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname) || '/';
+export const href = (path: string) => `${BASE}${path}`;
+
 /** The current path, kept in step with the address bar; `go` moves without reloading. */
 export function usePath(): [string, (path: string) => void] {
-  const [path, setPath] = useState(window.location.pathname);
+  const [path, setPath] = useState(route(window.location.pathname));
   useEffect(() => {
-    const onPop = () => setPath(window.location.pathname);
+    const onPop = () => setPath(route(window.location.pathname));
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
   const go = useCallback((next: string) => {
-    window.history.pushState(null, '', next);
+    window.history.pushState(null, '', href(next));
     // The query (`?date=`) stays in the address; routes match on the path alone.
-    setPath(window.location.pathname);
+    setPath(route(window.location.pathname));
   }, []);
   return [path, go];
 }

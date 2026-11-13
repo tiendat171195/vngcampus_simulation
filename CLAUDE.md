@@ -18,7 +18,7 @@ Browser-based multiplayer 3D recreation of VNG Campus with admin-authored daily 
 
 ## Commands
 
-- `pnpm dev` runs web (5173), admin (5174), api (3001) and realtime (2567) together.
+- `pnpm dev` runs web (5173), admin (5174, at `/admin/`), api (3001) and realtime (2567) together.
 - `pnpm check` runs lint → typecheck → test → build → smoke, the same chain as CI. Run it before every commit; `pnpm format` fixes formatting.
 - One package: `pnpm --filter @campus/realtime test`.
 - The API and its tests need PostgreSQL: databases `campus`, `campus_test` (`TEST_DATABASE_URL`) and `campus_e2e` (`E2E_DATABASE_URL`), user/password `campus`. `pnpm infra:up` makes them with Docker; without Docker, start a local server (in cloud sessions: `sudo pg_ctlcluster 16 main start`). The API migrates on start outside production.

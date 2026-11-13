@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  // `migrate` is the production deploy step that applies migrations (docs/09 §4).
+  entry: ['src/index.ts', 'src/migrate.ts'],
   format: 'esm',
   platform: 'node',
   target: 'node22',

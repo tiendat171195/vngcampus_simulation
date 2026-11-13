@@ -19,3 +19,7 @@ blob-report/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# production secrets and backups on a server checkout
+infra/prod.env
+infra/backups/

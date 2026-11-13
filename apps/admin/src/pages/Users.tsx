@@ -2,7 +2,7 @@ import type { AdminMeDto, AdminUserDetailDto, AdminUserDto, SanctionDto } from '
 import { type FormEvent, useState } from 'react';
 import { ROLE_LABEL } from '../App';
 import { ApiFailure, api } from '../api';
-import { useLoad, when } from '../hooks';
+import { href, useLoad, when } from '../hooks';
 
 const STATUS_LABEL: Record<string, string> = {
   active: 'Bình thường',
@@ -68,7 +68,7 @@ export function UsersPage({ go }: { go: (path: string) => void }) {
             <tr key={user.id} className="clickable" onClick={() => go(`/users/${user.id}`)}>
               <td>
                 <a
-                  href={`/users/${user.id}`}
+                  href={href(`/users/${user.id}`)}
                   onClick={(event) => {
                     event.preventDefault();
                     go(`/users/${user.id}`);

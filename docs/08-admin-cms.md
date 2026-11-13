@@ -124,7 +124,7 @@ Mọi số liệu đều ở dạng **tổng hợp**; không có báo cáo theo 
 ## 8. Ghi chú kỹ thuật
 
 - Stack: Vite + React + TanStack Query + React Router + Tailwind + bộ component shadcn/ui; form bằng react-hook-form + zod. **Đã làm (P5.1):** chỉ React + vài hook nhỏ (`useLoad`, `usePath`) và CSS thuần — admin còn ít màn hình, chưa cần thêm thư viện (xem DECISIONS).
-- Đăng nhập: admin không có màn hình đăng nhập riêng; dùng chung cookie phiên với game (cùng host). Chưa đăng nhập hoặc không đủ quyền thì admin chỉ đường sang game để đăng nhập bằng tài khoản công ty.
+- Đăng nhập: admin không có màn hình đăng nhập riêng; dùng chung cookie phiên với game (cùng host). **Đã làm (P7.1):** admin nằm ở `/admin/` trên chính host của game (cả lúc dev: `localhost:5174/admin/`). Chưa đăng nhập hoặc không đủ quyền thì admin chỉ đường sang game để đăng nhập bằng tài khoản công ty.
 - Kiểu dữ liệu và schema lấy từ `packages/shared`; hình học bản đồ từ `packages/map-data`.
 - Số người online trực tiếp: gọi lại `/presence/summary` mỗi vài giây (không cần WebSocket riêng cho admin).
 - Trước khi có admin (P4), nhiệm vụ được tạo bằng file JSON và một lệnh CLI seed — cùng schema, nên dữ liệu chuyển thẳng sang admin sau này.

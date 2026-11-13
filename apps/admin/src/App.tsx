@@ -1,7 +1,7 @@
 import type { AdminMeDto, Permission } from '@campus/shared';
 import { useEffect, useState } from 'react';
 import { ApiFailure, api, gameUrl } from './api';
-import { usePath } from './hooks';
+import { href, usePath } from './hooks';
 import { AnnouncementsPage } from './pages/Announcements';
 import { AuditPage } from './pages/Audit';
 import { MissionEditorPage } from './pages/MissionEditor';
@@ -97,7 +97,7 @@ export function App() {
         {allowed.map((item) => (
           <a
             key={item.path}
-            href={item.path}
+            href={href(item.path)}
             aria-current={
               path === item.path || (item.path !== '/' && path.startsWith(item.path))
                 ? 'page'

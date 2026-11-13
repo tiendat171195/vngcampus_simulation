@@ -15,6 +15,15 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_HOST: z.string().default('127.0.0.1'),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+  /**
+   * Whose X-Forwarded-For to believe, so per-IP rate limits see people rather than the proxy:
+   * `true` (the API is reachable only through the proxy, as in the Vite dev server and the
+   * Compose stack), `false`, or comma-separated addresses/CIDRs of the proxies.
+   */
+  TRUST_PROXY: z
+    .string()
+    .default('true')
+    .transform((value) => (value === 'true' ? true : value === 'false' ? false : value)),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   DATABASE_URL: z.string().default('postgres://campus:campus@127.0.0.1:5432/campus'),
   /**

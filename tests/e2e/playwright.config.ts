@@ -73,7 +73,7 @@ export default defineConfig({
     {
       command: `pnpm --filter @campus/admin exec vite preview --port ${PORTS.admin} --strictPort`,
       env: { API_PORT: String(PORTS.api), REALTIME_PORT: String(PORTS.realtime) },
-      url: `http://localhost:${PORTS.admin}`,
+      url: `http://localhost:${PORTS.admin}/admin/`,
       reuseExistingServer: false,
     },
     {

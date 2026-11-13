@@ -7,7 +7,7 @@ import {
 } from '@campus/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../api';
-import { useLoad } from '../hooks';
+import { href, useLoad } from '../hooks';
 import { duration } from './MissionResults';
 
 const STATE_LABEL: Record<string, string> = {
@@ -85,7 +85,7 @@ export function OverviewPage({ me, go }: { me: AdminMeDto; go: (path: string) =>
           {data.alerts.map((alert) => (
             <li key={alert.text} data-level={alert.level}>
               {alert.link ? (
-                <a href={alert.link} onClick={link(alert.link)}>
+                <a href={href(alert.link)} onClick={link(alert.link)}>
                   {alert.text}
                 </a>
               ) : (
@@ -156,7 +156,7 @@ export function OverviewPage({ me, go }: { me: AdminMeDto; go: (path: string) =>
                   <tr key={mission.id}>
                     <td>
                       <a
-                        href={`/missions/${mission.id}/results`}
+                        href={href(`/missions/${mission.id}/results`)}
                         onClick={link(`/missions/${mission.id}/results`)}
                       >
                         {mission.title.vi}

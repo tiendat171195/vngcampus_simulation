@@ -1,0 +1,16 @@
+# Only what the build needs: sources and the lockfile. Everything below is rebuilt in the image.
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+.env
+.env.*
+!.env.example
+infra/*.env
+tests/e2e/test-results
+tests/e2e/playwright-report
+tests/e2e/blob-report
+docs/reference

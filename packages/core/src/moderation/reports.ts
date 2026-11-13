@@ -67,7 +67,7 @@ export async function resolveReport(
   input: ResolveReport & { reportId: string; actorId: string },
 ): Promise<{ status: ReportDto['status']; closed: number } | null> {
   const [report] = await db.select().from(reports).where(eq(reports.id, input.reportId));
-  if (!report || report.status !== 'open') return null;
+  if (report?.status !== 'open') return null;
   const resolution = input.note?.trim() || null;
   if (input.action !== 'dismiss') {
     const hours =

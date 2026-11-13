@@ -6,6 +6,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    // Served at /admin/ on the game's host, so it shares the session cookie (docs/08 §8).
+    base: '/admin/',
     envDir: '../..',
     server: {
       port: 5174,

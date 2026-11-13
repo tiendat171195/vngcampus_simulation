@@ -68,7 +68,7 @@ export const ownPosition = async (page: Page) => {
 };
 
 /** The admin app of the suite. */
-export const ADMIN = 'http://localhost:4174';
+export const ADMIN = 'http://localhost:4174/admin';
 
 /** Signs in on the game with the e2e administrator's company account; the admin shares the session. */
 export async function signInAsAdmin(page: Page) {

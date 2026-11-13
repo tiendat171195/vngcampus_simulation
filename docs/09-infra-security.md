@@ -74,6 +74,8 @@ flowchart TB
 | `deploy-staging` | Merge vào nhánh chính | Build image → đẩy lên registry → migration → `compose pull && up -d` → kiểm tra health |
 | `deploy-prod` | Tag phiên bản + phê duyệt | Như staging |
 
+**Đã làm (P7.1):** `ci.yml` có thêm job `images`: build ba image (`api`, `realtime`, `web`) từ `Dockerfile` rồi chạy `infra/smoke-stack.sh` — dựng `compose.prod.yaml` thật, kiểm tra qua Caddy: hai app tĩnh, header cache/bảo mật, `/rt/metrics` bị chặn, đăng ký khách (DB đã migrate), giữ chỗ realtime bằng token của API, nâng cấp WebSocket, bản sao lưu đầu tiên. `e2e` chạy ở mọi push trên bản build, không qua compose. `deploy.yml` gộp hai workflow deploy: một job build và đẩy image lên GHCR (tag = 12 ký tự commit, hoặc `v*`), job `staging` (nhánh `main`) và `production` (tag `v*`, environment `production` cần người duyệt) gọi `infra/deploy.sh` qua SSH: chép compose, đổi `IMAGE_TAG`, `pull`, `run --rm migrate`, `up -d`, kiểm tra health qua địa chỉ công khai. Job deploy chỉ chạy khi có biến `STAGING_HOST`/`PRODUCTION_HOST`. Chưa có asset riêng trên object storage (P6.1), nên "asset trước" chưa áp dụng.
+
 Nguyên tắc deploy:
 
 - **Asset trước, app sau.** Asset có hash tải lên trước; bản app mới trỏ tới chúng. Bản cũ vẫn chạy được trong lúc chuyển.
@@ -91,13 +93,15 @@ Nguyên tắc deploy:
 | Phòng | `@colyseus/monitor` (sau lớp xác thực) | Xem phòng và client đang kết nối |
 | Uptime | Kiểm tra từ bên ngoài mỗi phút | `/api/health`, `/rt/health` |
 
+**Đã làm (P7.1), bậc 0:** healthcheck Docker cho `api`, `realtime` và `backup` (unhealthy khi bản dump tốt gần nhất cũ hơn 26 giờ); log JSON của container xoay vòng 5 × 20 MB; `/metrics` của realtime (JSON: phòng, người, tick, patch, message) chỉ đọc được trong mạng nội bộ. Uptime từ bên ngoài, Sentry, Prometheus/Grafana và cảnh báo chưa dựng — chọn dịch vụ khi có máy thật (xem runbook §6).
+
 **Cảnh báo:** health check thất bại; tỉ lệ lỗi tăng vọt; tick p95 > 10 ms; độ trễ event loop > 50 ms; số người online tụt đột ngột; đĩa > 80%; sao lưu thất bại.
 
 ## 6. Sao lưu và khôi phục
 
 | Hạng mục | Bậc 0 | Bậc 1 |
 |---|---|---|
-| Postgres | `pg_dump` hằng đêm lên object storage, giữ 14 ngày (mất tối đa 24 giờ dữ liệu) | Sao lưu theo thời điểm của dịch vụ quản lý |
+| Postgres | `pg_dump` hằng đêm lên object storage, giữ 14 ngày (mất tối đa 24 giờ dữ liệu). **Đã làm (P7.1):** container `backup` dump lúc 02:30 vào thư mục trên máy, giữ 14 ngày; chép ra object storage bằng cron + rclone theo runbook | Sao lưu theo thời điểm của dịch vụ quản lý |
 | Redis | Không cần sao lưu; có script dựng lại BXH từ Postgres | Như bậc 0 |
 | Asset | Lưu trên object storage + nguồn trong repo/kho riêng | Như bậc 0 |
 | Diễn tập | Khôi phục thử vào staging trước khi mở cửa, sau đó mỗi quý | Như bậc 0 |
@@ -165,6 +169,8 @@ Dự án dựng lại một trụ sở có thật, nên có vài việc cần l�
 | Nếu mở ra ngoài công ty | Rà soát lại toàn bộ với truyền thông và an ninh thông tin |
 
 ## 10. Sổ tay vận hành (tối thiểu)
+
+Bản đầy đủ — cài đặt, deploy, lùi phiên bản, sao lưu/khôi phục, giám sát — ở [runbook.md](runbook.md).
 
 | Tình huống | Cách xử lý |
 |---|---|

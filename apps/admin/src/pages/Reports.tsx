@@ -1,7 +1,7 @@
 import { REPORT_REASONS, type ReportDto, type ResolveReport } from '@campus/shared';
 import { useState } from 'react';
 import { api } from '../api';
-import { useLoad, when } from '../hooks';
+import { href, useLoad, when } from '../hooks';
 
 const STATUS_LABEL: Record<ReportDto['status'], string> = {
   open: 'Chờ xử lý',
@@ -92,7 +92,7 @@ export function ReportsPage({ go }: { go: (path: string) => void }) {
             <header className="row">
               <b>
                 <a
-                  href={`/users/${report.target.id}`}
+                  href={href(`/users/${report.target.id}`)}
                   onClick={(event) => {
                     event.preventDefault();
                     go(`/users/${report.target.id}`);
