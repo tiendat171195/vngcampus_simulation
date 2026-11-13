@@ -54,6 +54,17 @@ const WAY = {
 
 const BOUNDS: { min: Vec2; max: Vec2 } = { min: [-200, -90], max: [150, 110] };
 
+/** How far each kind of prop keeps from any point of interest, in metres. */
+const PROP_CLEARANCE: Record<string, number> = {
+  tree_a: 1.5,
+  tree_b: 1.5,
+  lamp: 1,
+  car: 2.8,
+  planter: 1.6,
+  desk_cluster: 2.6,
+  plant_shelf: 1.8,
+};
+
 const vi = (text: string) => ({ vi: text });
 const round = (points: Polygon) => points.map((point) => roundVec(point));
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -565,7 +576,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     [-18, -52],
     [-100, -43],
     [-60, 38],
-    [15, 13],
+    [16.6, 11],
     [40, -8],
     [80, 70],
   ];
@@ -699,6 +710,9 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     at: Vec2,
     options: { yawDeg?: number; s?: number } = {},
   ) => {
+    // Solid props stay off the spots where items, seats and characters are placed.
+    const clearance = PROP_CLEARANCE[model] ?? 1.5;
+    if (pois.some((poi) => poi.floor === floor && distance(poi.position, at) < clearance)) return;
     const instance: Instance = { p: roundVec(at), floor };
     if (options.yawDeg !== undefined) instance.yawDeg = Math.round(options.yawDeg);
     if (options.s !== undefined) instance.s = Math.round(options.s * 100) / 100;

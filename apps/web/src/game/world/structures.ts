@@ -1,0 +1,304 @@
+import {
+  type Connector,
+  closestPointOnSegment,
+  connectorFootprint,
+  type FloorId,
+  nearestEdge,
+  type Polygon,
+  pointInPolygon,
+  polygonCentroid,
+  type ReadonlyVec2,
+  type Structure,
+  type Vec2,
+} from '@campus/map-data';
+import { type BuildContext, LAYER, type LevelId } from './context';
+import { along, spansOutsideGaps } from './ground';
+import { PALETTE } from './palette';
+
+const WALL_THICKNESS = 0.3;
+const GLASS_THICKNESS = 0.08;
+/** Opaque band at the foot of each storey. */
+const SPANDREL = 0.9;
+/** Opaque band under each ceiling. */
+const HEADER = 0.6;
+const DOOR_HEIGHT = 2.8;
+const LINTEL = 0.3;
+const SLAB_THICKNESS = 0.3;
+const RAIL_HEIGHT = 1.05;
+const RAIL_THICKNESS = 0.08;
+const STEP_RISE = 0.18;
+
+const edgeKey = (a: ReadonlyVec2, b: ReadonlyVec2) => {
+  const key = (p: ReadonlyVec2) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+  return [key(a), key(b)].sort().join('|');
+};
+
+interface Storey {
+  floor: FloorId;
+  y0: number;
+  y1: number;
+}
+
+function storeysOf(ctx: BuildContext, structure: Structure): Storey[] {
+  return structure.floors.map((floor, i) => {
+    const y0 = ctx.floorY(floor);
+    const next = structure.floors[i + 1];
+    const height = structure.height ?? ctx.index.floors.get(floor)?.height ?? 4;
+    return { floor, y0, y1: next ? ctx.floorY(next) : y0 + height };
+  });
+}
+
+/** Holes in the slab of one floor: declared voids plus stairwells that are not already inside one. */
+function slabHoles(
+  ctx: BuildContext,
+  structure: Structure,
+  floor: FloorId,
+): { voids: Polygon[]; stairwells: Connector[] } {
+  const voids = structure.voids
+    .filter((v) => v.floors.includes(floor))
+    .map((v) => v.polygon as Polygon);
+  const stairwells = ctx.map.connectors.filter((connector) => {
+    if (connector.structure !== structure.id || connector.upper.floor !== floor) return false;
+    const centre = polygonCentroid(connectorFootprint(connector));
+    return !voids.some((hole) => pointInPolygon(centre, hole));
+  });
+  return { voids, stairwells };
+}
+
+function buildWalls(
+  ctx: BuildContext,
+  structure: Structure,
+  shared: Map<string, number>,
+  built: Set<string>,
+): void {
+  const solidStyle = structure.style === 'kiosk';
+  const footprint = structure.footprint;
+
+  for (const storey of storeysOf(ctx, structure)) {
+    const { solid, glass } = ctx.level(storey.floor);
+    const { y0, y1 } = storey;
+    const header = Math.min(HEADER, (y1 - y0) / 4);
+
+    for (let i = 0; i < footprint.length; i++) {
+      const a = footprint[i] as ReadonlyVec2;
+      const b = footprint[(i + 1) % footprint.length] as ReadonlyVec2;
+      const key = `${edgeKey(a, b)}@${storey.floor}`;
+      // A wall shared by two buildings is built once, as an interior partition.
+      if (built.has(key)) continue;
+      built.add(key);
+      const interior = (shared.get(edgeKey(a, b)) ?? 0) > 1;
+      const colour = solidStyle ? PALETTE.kiosk : interior ? PALETTE.interiorWall : PALETTE.wall;
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+
+      const doors = structure.openings
+        .filter((opening) => opening.floor === storey.floor)
+        .flatMap((opening) => {
+          const hit = nearestEdge(opening.at, footprint);
+          if (hit.edge !== i || hit.distance > 0.2) return [];
+          const centre = hit.t * length;
+          return [[centre - opening.width / 2, centre + opening.width / 2] as [number, number]];
+        });
+      const doorTop = y0 + Math.min(DOOR_HEIGHT, y1 - y0 - header - 0.2);
+
+      for (const [from, to] of spansOutsideGaps(length, doors)) {
+        const p = along(a, b, from);
+        const q = along(a, b, to);
+        ctx.collider.wall(p, q, WALL_THICKNESS, y0, y1, colour);
+        if (solidStyle || interior) {
+          solid.wall(p, q, WALL_THICKNESS, y0, y1 - header, colour);
+        } else {
+          solid.wall(p, q, WALL_THICKNESS, y0, y0 + SPANDREL, colour);
+          glass.wall(p, q, GLASS_THICKNESS, y0 + SPANDREL, y1 - header, PALETTE.glass);
+        }
+      }
+      solid.wall(a, b, WALL_THICKNESS, y1 - header, y1, colour);
+
+      for (const [from, to] of doors) {
+        const p = along(a, b, Math.max(0, from));
+        const q = along(a, b, Math.min(length, to));
+        ctx.collider.wall(p, q, WALL_THICKNESS, doorTop, y1, colour);
+        solid.wall(p, q, WALL_THICKNESS + 0.1, doorTop, doorTop + LINTEL, PALETTE.wallAccent);
+        if (interior) solid.wall(p, q, WALL_THICKNESS, doorTop + LINTEL, y1 - header, colour);
+        else glass.wall(p, q, GLASS_THICKNESS, doorTop + LINTEL, y1 - header, PALETTE.glass);
+        for (const post of [p, q]) {
+          solid.box(
+            [post[0], (y0 + doorTop) / 2, post[1]],
+            [0.4, doorTop - y0, 0.4],
+            PALETTE.wallAccent,
+          );
+        }
+      }
+    }
+  }
+}
+
+function buildSlabs(ctx: BuildContext, structure: Structure): void {
+  const storeys = storeysOf(ctx, structure);
+  const ground = storeys[0] as Storey;
+
+  // Interior finish of the ground floor, then any named rooms tinted on top of it.
+  const lowest = ctx.level(ground.floor).solid;
+  lowest.polygon(
+    structure.footprint,
+    ground.y0 + LAYER.floor,
+    structure.style === 'kiosk' ? PALETTE.kiosk : PALETTE.floor,
+  );
+
+  for (const storey of storeys.slice(1)) {
+    const { voids, stairwells } = slabHoles(ctx, structure, storey.floor);
+    const holes = [...voids, ...stairwells.map((c) => connectorFootprint(c) as Polygon)];
+    ctx
+      .level(storey.floor)
+      .solid.slab(
+        structure.footprint,
+        holes,
+        storey.y0,
+        SLAB_THICKNESS,
+        PALETTE.floor,
+        PALETTE.slabEdge,
+      );
+    ctx.collider.slab(structure.footprint, holes, storey.y0, SLAB_THICKNESS, PALETTE.slab);
+  }
+
+  // Roof, with skylights left open and glazed over.
+  const top = storeys[storeys.length - 1] as Storey;
+  const roofLevel: LevelId = storeys.length > 1 ? 'ROOF' : top.floor;
+  const skylights = structure.voids
+    .filter((v) => v.floors.includes('ROOF'))
+    .map((v) => v.polygon as Polygon);
+  const roofTop = top.y1 + SLAB_THICKNESS;
+  ctx
+    .level(roofLevel)
+    .solid.slab(
+      structure.footprint,
+      skylights,
+      roofTop,
+      SLAB_THICKNESS,
+      PALETTE.roof,
+      PALETTE.slabEdge,
+    );
+  ctx.collider.slab(structure.footprint, skylights, roofTop, SLAB_THICKNESS, PALETTE.roof);
+  for (const skylight of skylights) {
+    ctx.level(roofLevel).glass.polygon(skylight, roofTop - 0.05, PALETTE.glass);
+  }
+}
+
+function buildRooms(ctx: BuildContext): void {
+  for (const area of ctx.map.areas) {
+    if (area.kind !== 'indoor' || area.tags.includes('base')) continue;
+    const y = ctx.floorY(area.floor) + LAYER.room;
+    ctx
+      .level(area.floor)
+      .solid.polygon(
+        area.polygon,
+        y,
+        area.tags.includes('landmark') ? PALETTE.landmark : PALETTE.room,
+      );
+  }
+}
+
+function rail(
+  ctx: BuildContext,
+  level: LevelId,
+  a: ReadonlyVec2,
+  b: ReadonlyVec2,
+  atA: number,
+  atB: number,
+): void {
+  const heights = [[atA, atA + RAIL_HEIGHT] as const, [atB, atB + RAIL_HEIGHT] as const] as const;
+  ctx.level(level).solid.slopedWall(a, b, RAIL_THICKNESS, heights[0], heights[1], PALETTE.rail);
+  ctx.collider.slopedWall(a, b, RAIL_THICKNESS * 2, heights[0], heights[1], PALETTE.rail);
+}
+
+function buildStairs(ctx: BuildContext, connector: Connector): void {
+  const level = connector.lower.floor;
+  const { solid } = ctx.level(level);
+  const a = connector.lower.at;
+  const b = connector.upper.at;
+  const yA = ctx.floorY(connector.lower.floor);
+  const yB = ctx.floorY(connector.upper.floor);
+  const run = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const rise = yB - yA;
+
+  // Characters walk on a smooth ramp; the steps are only drawn (docs/04-client.md §6).
+  ctx.collider.slopedWall(a, b, connector.width, [yA - 0.25, yA], [yB - 0.25, yB], PALETTE.stairs);
+  solid.slopedWall(
+    a,
+    b,
+    connector.width,
+    [yA - 0.3, yA - 0.1],
+    [yB - 0.3, yB - 0.1],
+    PALETTE.slabEdge,
+  );
+
+  const steps = Math.max(2, Math.round(rise / STEP_RISE));
+  const stepHeight = rise / steps;
+  for (let i = 0; i < steps; i++) {
+    const from = along(a, b, (run * i) / steps);
+    const to = along(a, b, (run * (i + 1)) / steps);
+    // Treads sit half a step low so the ramp passes through the middle of each one.
+    const top = yA + (i + 0.5) * stepHeight;
+    solid.wall(from, to, connector.width, top - stepHeight - 0.05, top, PALETTE.stairs);
+  }
+
+  const [sideA1, sideB1, sideB2, sideA2] = connectorFootprint(connector) as [
+    Vec2,
+    Vec2,
+    Vec2,
+    Vec2,
+  ];
+  rail(ctx, level, sideA1, sideB1, yA, yB);
+  rail(ctx, level, sideA2, sideB2, yA, yB);
+}
+
+/** Guard rails around every hole in an upper floor, open where a flight of stairs lands. */
+function buildRailings(ctx: BuildContext, structure: Structure): void {
+  for (const floor of structure.floors.slice(1)) {
+    const y = ctx.floorY(floor);
+    const { voids, stairwells } = slabHoles(ctx, structure, floor);
+    const rings = [...voids, ...stairwells.map((c) => connectorFootprint(c) as Polygon)];
+    const landings = ctx.map.connectors.filter(
+      (c) => c.structure === structure.id && c.upper.floor === floor,
+    );
+
+    for (const ring of rings) {
+      for (let i = 0; i < ring.length; i++) {
+        const a = ring[i] as ReadonlyVec2;
+        const b = ring[(i + 1) % ring.length] as ReadonlyVec2;
+        const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const gaps = landings.flatMap((connector) => {
+          const hit = closestPointOnSegment(connector.upper.at, a, b);
+          if (hit.distance > 0.3) return [];
+          const centre = hit.t * length;
+          return [[centre - connector.width / 2, centre + connector.width / 2] as [number, number]];
+        });
+        for (const [from, to] of spansOutsideGaps(length, gaps)) {
+          rail(ctx, floor, along(a, b, from), along(a, b, to), y, y);
+        }
+      }
+    }
+  }
+}
+
+export function buildStructures(ctx: BuildContext): void {
+  const shared = new Map<string, number>();
+  for (const structure of ctx.map.structures) {
+    const { footprint } = structure;
+    for (let i = 0; i < footprint.length; i++) {
+      const key = edgeKey(
+        footprint[i] as ReadonlyVec2,
+        footprint[(i + 1) % footprint.length] as ReadonlyVec2,
+      );
+      shared.set(key, (shared.get(key) ?? 0) + 1);
+    }
+  }
+
+  const built = new Set<string>();
+  for (const structure of ctx.map.structures) {
+    buildWalls(ctx, structure, shared, built);
+    buildSlabs(ctx, structure);
+    buildRailings(ctx, structure);
+  }
+  buildRooms(ctx);
+  for (const connector of ctx.map.connectors) buildStairs(ctx, connector);
+}

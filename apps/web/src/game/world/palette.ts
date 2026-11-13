@@ -1,0 +1,62 @@
+/** Colours of the greybox campus. One place, so the look can be tuned without touching geometry. */
+export const PALETTE = {
+  skyTop: '#5fa8e6',
+  skyHorizon: '#dbeeff',
+  sunlight: '#fff3dc',
+  skylight: '#dcefff',
+  groundBounce: '#b7a98c',
+
+  outside: '#a9c48f',
+  grass: '#b9d99b',
+  park: '#a5d08a',
+  paved: '#e6dfcf',
+  road: '#8d949c',
+  walkway: '#ecdfc4',
+  water: '#4fbbe6',
+  river: '#6aa9cc',
+  curb: '#f3f0e8',
+  fence: '#5d6b63',
+
+  wall: '#f5f2ea',
+  wallAccent: '#f28c28',
+  interiorWall: '#e9e4d9',
+  glass: '#a9d6ea',
+  slab: '#e6e1d6',
+  slabEdge: '#cfc8b9',
+  roof: '#dfe3e7',
+  floor: '#f4eddd',
+  room: '#f6e2ba',
+  landmark: '#ffd39b',
+  kiosk: '#e7c9a2',
+
+  stairs: '#d3cbbb',
+  rail: '#73808c',
+
+  trunk: '#8a6a4a',
+  leafA: '#5faa5c',
+  leafB: '#7cc06a',
+  lamp: '#4a5560',
+  lampHead: '#fff3c4',
+  planter: '#c9b48f',
+  desk: '#ead9b6',
+  chair: '#4a6fa5',
+  monitor: '#2b3038',
+  shelf: '#c9a26b',
+  carBody: '#ffffff',
+  carGlass: '#2f3a45',
+  carTyre: '#22262b',
+  bench: '#b8875a',
+  sofa: '#d9795f',
+  lounger: '#f2efe6',
+} as const;
+
+/** Tints applied per parked car. */
+export const CAR_COLOURS = [
+  '#e5484d',
+  '#3b82c4',
+  '#f2f2f2',
+  '#2f3338',
+  '#f5a623',
+  '#8fa3ad',
+  '#3fa66b',
+] as const;
