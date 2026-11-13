@@ -170,7 +170,7 @@ Ngoài nghiệm thu: streak theo ngày làm việc, giờ vàng, BXH tuần/thá
 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
-| P5.1 | Vỏ admin + phân quyền | SPA admin, đăng nhập, kiểm tra vai trò ở server (có test), quản lý người dùng, vai trò, án phạt, nhật ký thao tác | M | Chưa làm |
+| P5.1 | Vỏ admin + phân quyền | SPA admin, đăng nhập, kiểm tra vai trò ở server (có test), quản lý người dùng, vai trò, án phạt, nhật ký thao tác | M | Xong |
 | P5.2 | Trình soạn nhiệm vụ | Danh sách + lịch, form sinh từ schema, bản đồ chọn vị trí, kiểm tra tự động, xuất bản/gỡ/kết thúc/nhân bản, ngân hàng quiz + nhập CSV, xem thử trong game | L | Chưa làm |
 | P5.3 | Mẫu, tự điền, vận hành | Kho mẫu, job tự điền ngày trống, thông báo (phát ngay và hẹn giờ), cấu hình + cờ tính năng + công tắc khẩn | M | Chưa làm |
 | P5.4 | Kiểm duyệt và số liệu | Nút báo cáo trong game, hàng đợi kiểm duyệt, mute/ban có hiệu lực ngay, đường ống sự kiện analytics, dashboard, trang kết quả nhiệm vụ | M | Chưa làm |

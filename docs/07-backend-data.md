@@ -137,10 +137,12 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 | Nhiệm vụ | CRUD `/missions`; `POST /missions/validate`; `POST /missions/:id/publish` · `unpublish` · `end` · `duplicate`; `GET /missions/:id/stats` |
 | Mẫu, quiz | CRUD `/templates`, `/quiz` (+ nhập CSV) |
 | Thông báo | CRUD `/announcements`; `POST /announcements/:id/broadcast` |
-| Người dùng | `GET /users`; `PATCH /users/:id/role`; `POST` / `DELETE /users/:id/sanctions` |
+| Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id` |
 | Kiểm duyệt | `GET /reports`; `POST /reports/:id/resolve` |
 | Số liệu | `GET /stats/overview` · `/stats/missions` |
-| Hệ thống | `GET` / `PUT /settings`; `GET /audit-logs` |
+| Hệ thống | `GET` / `PUT /settings`; `GET /audit?all=1` (đã làm: của mình, hoặc của mọi người với quyền admin) |
+
+Mọi route admin đọc vai trò **từ DB ở mỗi request** (không tin claim `role` trong token), nên hạ quyền có hiệu lực ngay; khách và tài khoản bị khoá không bao giờ là nhân viên. Án phạt: khoá tài khoản thu hồi mọi phiên; realtime đọc án phạt đang có hiệu lực mỗi 5 giây — người bị cấm chat được báo đến lúc nào, người bị khoá bị đẩy ra và không vào lại được; job mỗi phút trả trạng thái khi án phạt hết hạn.
 
 ## 5. Xác thực
 

@@ -15,6 +15,18 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Admin: vỏ, phân quyền, người dùng, án phạt
+
+- Gói việc: P5.1
+- Quyết định:
+  - Admin dùng React thuần + hook nhỏ và CSS thuần, chưa dùng TanStack Query/React Router/Tailwind/shadcn như ghi chú kỹ thuật ở docs/08 §8 — ít màn hình, ít phụ thuộc. Sẽ cân nhắc lại khi làm trình soạn nhiệm vụ (P5.2).
+  - Không có màn hình đăng nhập riêng cho admin: dùng chung phiên của game (cookie refresh cùng host), và cùng khoá Web Lock khi làm mới token để không giẫm lên tab game.
+  - Quyền kiểm tra ở server bằng vai trò đọc từ DB mỗi request, không tin token.
+  - Án phạt có hiệu lực trong game qua việc realtime đọc DB mỗi 5 giây (chưa có Redis pub/sub). Đáp ứng "sau vài giây" của nghiệm thu P5.
+  - Kiểm duyệt viên không phạt được quản trị viên; không ai tự phạt hay tự đổi vai trò của mình.
+- Khác plan ở đâu: `08-admin-cms.md` §8, `07-backend-data.md` §4 (Admin).
+- Hệ quả: khi có Redis (P7) có thể đổi sang pub/sub để nhanh hơn 5 giây.
+
 ## 2026-11-13 — Phần thưởng và bảng xếp hạng không cần Redis/BullMQ
 
 - Gói việc: P4.4

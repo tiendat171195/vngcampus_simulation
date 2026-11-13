@@ -20,7 +20,7 @@ pnpm dev
 |---|---|---|
 | `web` — game | http://localhost:5173 | Nhân vật đi trong campus 3D. WASD/mũi tên, Shift chạy, Space nhảy, kéo chuột xoay, lăn zoom. Nút **Debug** góc phải: camera tự do, cắt lớp theo tầng, lưới va chạm |
 | `web` — bản đồ debug | http://localhost:5173/debug/map | Sơ đồ 2D từng tầng, toạ độ và khu vực dưới con trỏ |
-| `admin` | http://localhost:5174 | Trang trống, xây ở P5 |
+| `admin` | http://localhost:5174 | Trang quản trị: người dùng, vai trò, án phạt, nhật ký thao tác. Đăng nhập trong game bằng tài khoản công ty có trong `ADMIN_EMAILS` (thử với IdP giả lập) rồi mở trang này |
 | `api` | http://localhost:3001/api/health | REST (Fastify) |
 | `realtime` | http://localhost:2567/health | Colyseus |
 

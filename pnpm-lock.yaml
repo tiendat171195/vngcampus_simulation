@@ -65,6 +65,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: 'catalog:'
         version: 19.3.1
