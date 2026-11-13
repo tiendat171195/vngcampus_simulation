@@ -1550,3 +1550,79 @@ body {
     max-width: calc(100vw - 24px);
   }
 }
+
+/* ---------- progress ---------- */
+
+.stats-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(16 20 24 / 72%);
+  color: #e9edf1;
+  font-size: 12px;
+}
+
+.stats-level {
+  position: relative;
+  padding-bottom: 3px;
+  color: #ffcf3f;
+  font-weight: 700;
+}
+
+.stats-level i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: #ffcf3f;
+}
+
+.leaderboard-list,
+.history-list {
+  display: grid;
+  gap: 2px;
+  max-height: 46vh;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.leaderboard-list li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.leaderboard-list li[data-me="true"] {
+  background: rgb(242 140 40 / 20%);
+}
+
+.leaderboard-me {
+  margin-top: 4px;
+  border-top: 1px dashed rgb(255 255 255 / 20%);
+}
+
+.leaderboard-score {
+  color: #9aa7b4;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.mission-community {
+  margin: 0 0 4px;
+  color: #9aa7b4;
+  font-size: 12px;
+}

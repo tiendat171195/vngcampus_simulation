@@ -68,3 +68,48 @@ export interface BootstrapResponse {
 export interface ApiErrorBody {
   error: { code: string; message: string; details?: unknown };
 }
+
+/** Points, level and streak (docs/06 §7). */
+export interface StatsDto {
+  points: number;
+  xp: number;
+  level: number;
+  /** Xp where the current level started and where the next one starts. */
+  levelFrom: number;
+  levelTo: number;
+  streakCurrent: number;
+  streakBest: number;
+  missionsCompleted: number;
+}
+
+export interface MissionHistoryItem {
+  missionId: string;
+  kind: string;
+  title: { vi: string; en?: string };
+  startedAt: string;
+  completedAt: string | null;
+  durationMs: number | null;
+  rank: number | null;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  score: number;
+  members?: number;
+}
+
+export interface LeaderboardDto {
+  board: 'points' | 'mission' | 'departments';
+  /** Period key: `all`, a month `2026-11`, a week's Monday `2026-11-09`, or a mission id. */
+  period: string;
+  rows: LeaderboardEntry[];
+  /** The asking person's line when below the top rows. */
+  me: LeaderboardEntry | null;
+}
+
+export interface CommunityGoalDto {
+  completions: number;
+  target: number | null;
+}

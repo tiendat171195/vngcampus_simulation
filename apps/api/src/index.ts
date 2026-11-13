@@ -5,6 +5,7 @@ import { buildApp } from './app';
 import { createKeyRing } from './auth/keys';
 import { createOidcProvider, type OidcProvider } from './auth/oidc';
 import { loadEnv } from './env';
+import { startJobs } from './jobs';
 
 const env = loadEnv();
 const { db, close } = createDb(env.DATABASE_URL);
@@ -67,9 +68,12 @@ const app = await buildApp(
   },
 );
 
+const stopJobs = startJobs(db, (message) => app.log.info(message));
+
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, 'shutting down');
+    stopJobs();
     Promise.all([app.close(), close()]).then(
       () => process.exit(0),
       (error) => {

@@ -233,7 +233,7 @@ DB chỉ lưu `publish_status` (`draft` / `published` / `archived`); "đang ch�
 
 **Idempotent:** `wallet_ledger` có ràng buộc duy nhất `(user_id, currency, ref_type, ref_id)`, ví dụ `(u1, points, mission, m42)`. Ghi lần hai là không có tác dụng.
 
-**Bảng xếp hạng (Redis sorted set, chụp về Postgres cuối kỳ):**
+**Bảng xếp hạng** (thiết kế: Redis sorted set, chụp về Postgres cuối kỳ; **đã làm ở P4.4: tính thẳng từ Postgres** — `wallet_ledger` có index `(currency, created_at)`, `mission_progress` có index `(mission_id, completed_at)` — xem DECISIONS):
 
 | Bảng | Khoá | Điểm số |
 |---|---|---|

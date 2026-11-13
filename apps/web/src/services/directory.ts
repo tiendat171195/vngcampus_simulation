@@ -1,4 +1,12 @@
-import type { ApiErrorBody, DepartmentDto, PublicProfileDto } from '@campus/shared';
+import type {
+  ApiErrorBody,
+  CommunityGoalDto,
+  DepartmentDto,
+  LeaderboardDto,
+  MissionHistoryItem,
+  PublicProfileDto,
+  StatsDto,
+} from '@campus/shared';
 import { accessToken } from './auth';
 
 /** A signed-in request to the API: the parsed body, or a message to show when it failed. */
@@ -39,3 +47,29 @@ export const loadProfile = (userId: string) =>
 
 /** A new recovery code for this guest account; the previous one stops working. */
 export const newRecoveryCode = () => authed<{ recoveryCode: string }>('POST', '/me/recovery-code');
+
+/** Points, level and streak. */
+export const loadStats = () => authed<StatsDto>('GET', '/me/stats');
+
+/** Missions this person started, newest first. */
+export const loadHistory = () => authed<MissionHistoryItem[]>('GET', '/missions/history');
+
+/** A leaderboard: points by period, departments this week, or one mission by time. */
+export function loadLeaderboard(
+  board:
+    | { kind: 'points'; period: 'week' | 'month' | 'all' }
+    | { kind: 'departments' }
+    | { kind: 'mission'; missionId: string },
+) {
+  const path =
+    board.kind === 'points'
+      ? `/leaderboards/points?period=${board.period}`
+      : board.kind === 'departments'
+        ? '/leaderboards/departments'
+        : `/leaderboards/mission/${encodeURIComponent(board.missionId)}`;
+  return authed<LeaderboardDto>('GET', path);
+}
+
+/** How many have finished a mission, towards its community goal. */
+export const loadCommunity = (missionId: string) =>
+  authed<CommunityGoalDto>('GET', `/missions/${encodeURIComponent(missionId)}/community`);

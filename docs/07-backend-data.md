@@ -121,9 +121,10 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 
 | Method | Đường dẫn | Mô tả |
 |---|---|---|
-| GET | `/missions/active` · `/missions/:id` · `/missions/history` | Nhiệm vụ đang chạy · chi tiết · lịch sử của tôi |
-| GET | `/leaderboards/:board?period=&around=me` | Bảng xếp hạng |
-| GET | `/me/stats` · `/me/items` · `/items` | Chỉ số, tủ đồ, danh mục |
+| GET | `/missions/history` | Lịch sử nhiệm vụ của tôi (đã làm: P4.4). Nhiệm vụ đang chạy đến từ realtime (`mission:state`) |
+| GET | `/missions/:id/community` | `{ completions, target }` cho mục tiêu chung |
+| GET | `/leaderboards/points?period=week\|month\|all` · `/leaderboards/departments` · `/leaderboards/mission/:id` | Bảng xếp hạng; kèm dòng của chính mình khi ở dưới top 50 |
+| GET | `/me/stats` · `/me/items` · `/items` | Chỉ số (đã làm), tủ đồ và danh mục (V1) |
 | POST | `/shop/purchase` | Đổi điểm lấy cosmetic (V1) |
 | POST | `/reports` | Báo cáo vi phạm |
 
@@ -181,7 +182,8 @@ Vai trò nằm trong claim `role`. Endpoint admin yêu cầu tài khoản không
 
 | Job | Lịch | Việc làm |
 |---|---|---|
-| `mission-finalize` | 1 phút sau `endsAt` của mỗi nhiệm vụ | Tính hạng, trao thưởng hạng, chụp BXH, ghi `mission_stats` (idempotent) |
+| `mission-finalize` | 1 phút sau `endsAt` của mỗi nhiệm vụ | Tính hạng, trao thưởng hạng và mục tiêu chung, chụp BXH, ghi `mission_stats` (idempotent). **Đã làm (P4.4)** trong tiến trình API, chạy mỗi phút (`apps/api/src/jobs.ts`) |
+| `leaderboard-snapshot` (đã làm) | Mỗi phút kiểm tra | Chụp BXH điểm của tuần/tháng vừa hết vào `leaderboard_snapshots`, một lần |
 | `daily-autofill` | 23:00 giờ VN | Ngày mai chưa có nhiệm vụ ngày → sinh từ kho mẫu, báo biên tập viên |
 | `dept-leaderboard` | Mỗi 10 phút | Tính lại BXH phòng ban |
 | `leaderboard-snapshot` | Cuối tuần, cuối tháng | Chụp BXH về Postgres |

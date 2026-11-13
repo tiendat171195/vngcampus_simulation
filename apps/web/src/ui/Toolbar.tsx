@@ -3,9 +3,10 @@ import { DebugPanel } from '../game/debug/DebugPanel';
 import { ChannelBadge } from './ConnectionBanner';
 import { PeoplePanel } from './PeoplePanel';
 import { ProfilePanel } from './ProfilePanel';
+import { LeaderboardPanel, StatsChip } from './ProgressHud';
 import { SettingsPanel } from './SettingsPanel';
 
-type Open = 'profile' | 'people' | 'settings' | 'debug' | null;
+type Open = 'profile' | 'people' | 'ranks' | 'settings' | 'debug' | null;
 
 /** Buttons in the top-right corner, each opening its panel underneath. */
 export function Toolbar() {
@@ -34,6 +35,14 @@ export function Toolbar() {
         <button
           type="button"
           className="pill"
+          aria-expanded={open === 'ranks'}
+          onClick={() => toggle('ranks')}
+        >
+          Xếp hạng
+        </button>
+        <button
+          type="button"
+          className="pill"
           aria-expanded={open === 'settings'}
           onClick={() => toggle('settings')}
         >
@@ -49,8 +58,10 @@ export function Toolbar() {
         </button>
       </div>
       <ChannelBadge />
+      <StatsChip />
       <ProfilePanel hidden={open !== 'profile'} />
       <PeoplePanel hidden={open !== 'people'} />
+      <LeaderboardPanel hidden={open !== 'ranks'} />
       <SettingsPanel hidden={open !== 'settings'} />
       <DebugPanel hidden={open !== 'debug'} />
     </div>

@@ -1,10 +1,11 @@
-import type { MissionView } from '@campus/shared';
+import type { CommunityGoalDto, MissionView } from '@campus/shared';
 import { useEffect, useRef, useState } from 'react';
 import { playerPose } from '../game/core/pose';
 import { useSession } from '../game/core/session';
 import { waypointSink } from '../game/missions/MissionEntities';
 import { useMissions } from '../game/missions/missionStore';
 import { net } from '../game/net/net';
+import { loadCommunity } from '../services/directory';
 
 const KIND_LABEL: Record<string, string> = {
   daily: 'Nhiệm vụ hôm nay',
@@ -60,6 +61,30 @@ export function MissionBanner() {
   );
 }
 
+/** "Cả công ty: 120/300" for missions with a community goal, refreshed every half minute. */
+function CommunityLine({ missionId }: { missionId: string }) {
+  const [goal, setGoal] = useState<CommunityGoalDto | null>(null);
+  useEffect(() => {
+    let live = true;
+    const load = () =>
+      void loadCommunity(missionId).then((result) => {
+        if (live && typeof result !== 'string') setGoal(result);
+      });
+    load();
+    const timer = window.setInterval(load, 30_000);
+    return () => {
+      live = false;
+      window.clearInterval(timer);
+    };
+  }, [missionId]);
+  if (!goal?.target) return null;
+  return (
+    <p className="mission-community" data-testid="community-goal">
+      Cả công ty: {Math.min(goal.completions, goal.target)}/{goal.target} lượt hoàn thành
+    </p>
+  );
+}
+
 /** The compact list on the HUD: every objective with its count; tap one to be guided to it. */
 export function MissionTracker() {
   const missions = useMissions((state) => state.missions);
@@ -90,6 +115,7 @@ export function MissionTracker() {
               {mission.completed ? '✓ ' : ''}
               {mission.title.vi}
             </button>
+            <CommunityLine missionId={mission.id} />
             {!mission.completed && (
               <ol>
                 {mission.objectives.map((objective) => {

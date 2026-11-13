@@ -203,6 +203,8 @@ export const walletLedger = pgTable(
   },
   (table) => [
     uniqueIndex('wallet_ledger_once').on(table.userId, table.currency, table.refType, table.refId),
+    // Weekly and monthly leaderboards add up recent points.
+    index('wallet_ledger_recent').on(table.currency, table.createdAt),
   ],
 );
 
@@ -220,3 +222,28 @@ export const userStats = pgTable('user_stats', {
   missionsCompleted: integer('missions_completed').notNull().default(0),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Written once by the finalize job when a mission has ended (docs/06 §6); also its marker. */
+export const missionStats = pgTable('mission_stats', {
+  missionId: uuid('mission_id')
+    .primaryKey()
+    .references(() => missions.id, { onDelete: 'cascade' }),
+  participants: integer('participants').notNull(),
+  completions: integer('completions').notNull(),
+  medianDurationMs: integer('median_duration_ms'),
+  computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Leaderboards as they stood at the end of a period (docs/06 §7). */
+export const leaderboardSnapshots = pgTable(
+  'leaderboard_snapshots',
+  {
+    board: text('board').notNull(),
+    period: text('period').notNull(),
+    rank: integer('rank').notNull(),
+    subjectId: text('subject_id').notNull(),
+    score: integer('score').notNull(),
+    ...timestamps,
+  },
+  (table) => [primaryKey({ columns: [table.board, table.period, table.rank] })],
+);

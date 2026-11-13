@@ -15,6 +15,19 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Phần thưởng và bảng xếp hạng không cần Redis/BullMQ
+
+- Gói việc: P4.4
+- Bối cảnh: thiết kế dùng Redis cho BXH và BullMQ cho job; dự án chưa có Redis (P7), và môi trường dev/CI hiện chỉ có Postgres.
+- Quyết định:
+  - BXH tính bằng truy vấn Postgres có `rank()` (điểm theo tuần/tháng/mọi lúc theo lịch Việt Nam, phòng ban theo điểm trung bình trên người có điểm trong tuần, nhiệm vụ theo thời gian hoàn thành). Ở quy mô một công ty (vài nghìn người) truy vấn có index là đủ; nếu chậm sẽ thêm cache hoặc chuyển sang Redis ở P7 mà không đổi API.
+  - Job chốt nhiệm vụ và chụp BXH chạy mỗi phút ngay trong tiến trình API. Không cần khoá: mỗi bước tự "nhận việc" trong transaction (dòng `mission_stats` được chèn trước, ràng buộc khoá chính chặn tiến trình thứ hai), nên chạy nhiều bản API cùng lúc vẫn an toàn.
+  - Thưởng mục tiêu chung trả lúc chốt nhiệm vụ (không trả ngay khi đạt mốc) cho mọi người đã hoàn thành.
+  - Phần thưởng `item`/`badge` vẫn chưa trao (chờ cửa hàng/huy hiệu ở V1).
+  - Ở chế độ `GUEST_MODE=limited` khách không lên BXH điểm.
+- Khác plan ở đâu: `06-missions.md` §7, `07-backend-data.md` §4, §6.
+- Hệ quả: khi bật Redis ở P7 có thể chuyển BXH sang sorted set nếu cần; bảng `mission_stats` vừa là tổng kết vừa là dấu "đã chốt".
+
 ## 2026-11-13 — Giao diện nhiệm vụ
 
 - Gói việc: P4.3

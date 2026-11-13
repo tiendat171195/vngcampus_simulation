@@ -4,6 +4,7 @@ import {
   type DepartmentDto,
   type GuestSignUpResponse,
   healthResponseSchema,
+  type LeaderboardDto,
   PRIVACY_NOTICE_VERSION,
   type PublicProfileDto,
   type SessionResponse,
@@ -428,5 +429,38 @@ describe('profile and colleagues', () => {
       url: `/api/v1/users/${viewer.body.user.id}`,
     });
     expect(signedOut.statusCode).toBe(401);
+  });
+});
+
+describe('progress endpoints', () => {
+  it('give a new player zero stats, no history and a place on no board yet', async () => {
+    const { body } = await signUp('Người Mới Chơi');
+    const auth = { authorization: `Bearer ${body.accessToken}` };
+    const get = (url: string) => app.inject({ method: 'GET', url, headers: auth });
+
+    expect((await get('/api/v1/me/stats')).json()).toEqual({
+      points: 0,
+      xp: 0,
+      level: 1,
+      levelFrom: 0,
+      levelTo: 100,
+      streakCurrent: 0,
+      streakBest: 0,
+      missionsCompleted: 0,
+    });
+    expect((await get('/api/v1/missions/history')).json()).toEqual([]);
+    const week = (await get('/api/v1/leaderboards/points?period=week')).json() as LeaderboardDto;
+    expect(week.board).toBe('points');
+    expect(week.period).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(week.me).toBeNull();
+    expect((await get('/api/v1/leaderboards/points?period=year')).statusCode).toBe(400);
+    expect((await get('/api/v1/leaderboards/departments')).json()).toMatchObject({
+      board: 'departments',
+    });
+    expect((await get('/api/v1/leaderboards/mission/not-a-uuid')).statusCode).toBe(404);
+    expect(
+      (await get('/api/v1/missions/01900000-0000-7000-8000-000000000000/community')).statusCode,
+    ).toBe(404);
+    expect((await app.inject({ method: 'GET', url: '/api/v1/me/stats' })).statusCode).toBe(401);
   });
 });

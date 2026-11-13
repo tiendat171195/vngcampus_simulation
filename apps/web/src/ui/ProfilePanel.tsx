@@ -5,6 +5,7 @@ import { nameProblem, saveName } from '../game/net/identity';
 import { net } from '../game/net/net';
 import { currentUser, saveProfile, signOut } from '../services/auth';
 import { loadDepartments, newRecoveryCode } from '../services/directory';
+import { MissionHistory } from './ProgressHud';
 
 /** One's own profile: name, avatar, department, title, privacy, recovery code, sign-out. */
 export function ProfilePanel({ hidden }: { hidden: boolean }) {
@@ -167,6 +168,8 @@ export function ProfilePanel({ hidden }: { hidden: boolean }) {
           )}
         </div>
       )}
+
+      <MissionHistory hidden={hidden} />
 
       <button
         type="button"

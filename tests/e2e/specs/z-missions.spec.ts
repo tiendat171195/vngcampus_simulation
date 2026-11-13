@@ -86,6 +86,14 @@ test('two colleagues play a mission from start to end, leaving and coming back o
     timeout: 20_000,
   });
   expect(await entities(an.page)).toEqual([]);
+  // Points on the chip, and both finishers on the mission's board, fastest first.
+  await expect(an.page.getByTestId('stats-chip')).toContainText('40 điểm');
+  await an.page.getByRole('button', { name: 'Xếp hạng' }).click();
+  await an.page.getByRole('button', { name: 'Hôm nay' }).click();
+  const board = an.page.getByTestId('leaderboard');
+  await expect(board.locator('li')).toHaveCount(2);
+  await expect(board).toContainText('Nhiệm Vụ An');
+  await expect(board).toContainText('Nhiệm Vụ Bình');
   await an.context.close();
   await binh.context.close();
 });

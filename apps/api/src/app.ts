@@ -10,6 +10,7 @@ import { authRoutes } from './routes/auth';
 import { directoryRoutes } from './routes/directory';
 import { meRoutes } from './routes/me';
 import { oidcRoutes } from './routes/oidc';
+import { progressRoutes } from './routes/progress';
 import { worldRoutes } from './routes/world';
 
 declare module 'fastify' {
@@ -72,6 +73,7 @@ export async function buildApp(
       await oidcRoutes(v1, deps);
       await meRoutes(v1, deps);
       await directoryRoutes(v1, deps);
+      await progressRoutes(v1, deps);
       await worldRoutes(v1, deps);
     },
     { prefix: '/api/v1' },
