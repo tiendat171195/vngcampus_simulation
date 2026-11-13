@@ -65,9 +65,16 @@ flowchart LR
 | P1.1 | Map-data v0 | Kiểu + zod schema của `CampusMap`. Script nhập `docs/reference/osm-campus.geojson` → `campus.json` v0: khối nhà, đường, sông, hồ bơi, các khu vực và POI giả định (cổng, sảnh, Atrium, canteen, hồ Koi, ghế, điểm xuất hiện, `spawnSet`). Hàm hình học + unit test. `renderFloorSvg()` và một trang debug xem bản đồ 2D từng tầng | M | Xong |
 | P1.2 | Dựng thế giới | Bộ dựng thủ tục từ map-data: nền tô màu theo khu, đường, khối nhà có sàn từng tầng + khoảng thông tầng + dốc/cầu thang, mặt nước, cây/ghế/đèn bằng instancing, bảng tên khu. Ánh sáng, bầu trời, sương. Lưới va chạm (BVH) | M | Xong |
 | P1.3 | Nhân vật và điều khiển | Nhân vật mẫu có xương (CC0) với đứng/đi/chạy/nhảy. `CharacterMotor` (capsule + BVH). Camera góc nhìn thứ ba chống xuyên tường. Bàn phím + chuột; joystick cảm ứng + kéo xoay + chụm zoom. Máy trạng thái animation | M | Xong |
-| P1.4 | Vỏ ứng dụng | Màn hình chào, các bước tải, mức chất lượng + tự điều chỉnh DPR, cài đặt, minimap, thông báo tên khu khi bước vào, lớp phủ debug, sinh avatar giả để đo hiệu năng đám đông | M | Chưa làm |
+| P1.4 | Vỏ ứng dụng | Màn hình chào, các bước tải, mức chất lượng + tự điều chỉnh DPR, cài đặt, minimap, thông báo tên khu khi bước vào, lớp phủ debug, sinh avatar giả để đo hiệu năng đám đông | M | Xong |
 
-**Ghi chú tiến độ:** sau P1.2, trang chính hiện campus 3D với camera bay tự do và bảng debug (góc nhìn, cắt lớp theo tầng, lưới va chạm). Thế giới hiện tại: khoảng 46 draw call, 52.500 tam giác; lưới va chạm 6.800 tam giác. FPS chưa đo được trên thiết bị thật — môi trường phát triển trên cloud chỉ có render phần mềm.
+**Kết quả nghiệm thu P1 (13/11/2026):**
+
+| Tiêu chí | Kết quả |
+|---|---|
+| Cổng → hồ bơi → Atrium → tầng 2 → tầng 3 không lọt sàn, không kẹt | Đạt — có test tự động chạy motor nhân vật trên lưới va chạm thật (`CharacterMotor.test.ts`), kể cả chạy nhanh và lên/xuống |
+| 60 FPS desktop; ≥ 30 FPS Android tầm trung với 50 avatar giả ở mức Medium | **Chưa đo được.** Môi trường phát triển chỉ có render phần mềm. Số đo thay thế: cảnh ~46 draw call / 52.500 tam giác; thêm 50 avatar giả +34 draw call / +4.600 tam giác. Cần thử trên thiết bị thật: mở `/?bots=50&quality=medium&enter`, bấm Debug để xem FPS |
+| Đo được thời gian tới lúc đi được và dung lượng tải, nằm trong ngân sách | Đạt — màn hình chào 69 KB gzip; toàn bộ JS trước khi đi được 422 KB gzip (ngân sách 600 KB, kiểm tra tự động bằng `pnpm budget`); dựng xong campus sau ~1,5 s trên máy render phần mềm |
+| Chơi được khi cầm điện thoại dọc | Đạt trên trình giả lập Pixel 7 (joystick, xoay camera, nút nhảy); chưa thử máy thật |
 
 **Nghiệm thu:**
 - Đi bộ từ cổng → hồ bơi → Atrium → lên tầng 2, tầng 3 mà không lọt sàn, không kẹt.

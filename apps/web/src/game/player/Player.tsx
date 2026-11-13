@@ -124,7 +124,7 @@ export function Player() {
     }
 
     const floorNow = floorAt(campusIndex, s.rendered.y);
-    hudSink.player?.(s.rendered.x, s.rendered.z, s.yaw, floorNow);
+    hudSink.player?.(s.rendered.x, s.rendered.z, s.yaw, floorNow, rig.heading);
 
     if (following) {
       rig.sensitivity = useSettings.getState().lookSensitivity;

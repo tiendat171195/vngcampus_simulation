@@ -15,6 +15,17 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Vỏ ứng dụng: tầm nhìn dài hơn, minimap xoay theo hướng nhìn, cửa chính rộng hơn
+
+- Gói việc: P1.4
+- Bối cảnh và quyết định:
+  - **Tầm nhìn** đổi từ 80/150/300 m thành 140/220/400 m. Cảnh được gộp thành vài lưới lớn nên mặt phẳng xa gần như không cắt bớt được gì; sương dày ở 80 m chỉ làm mất định hướng trong một campus rộng 350 m. Nút thắt hiệu năng thật là độ phân giải (DPR) và số avatar, nên thang tự động điều chỉnh hai thứ đó.
+  - **Minimap xoay theo hướng camera** (phía trước luôn ở trên). Ở cổng, người chơi nhìn vào toà nhà theo hướng +Z, tức là hướng *xuống* trên bản đồ cố định — rất dễ nhầm. Nhãn trên minimap là phần tử HTML riêng, luôn đứng thẳng.
+  - **Cửa chính phía bắc rộng 12 m** (trước là 8 m): điểm xuất hiện ở cổng trải rộng 9 m, đi thẳng từ điểm ngoài cùng sẽ đâm vào tường cạnh cửa. Có test cho mọi điểm xuất hiện.
+  - **Màn hình chào nằm trong chunk riêng** (69 KB gzip), three.js tải sau; campus chỉ được dựng sau khi màn hình chào đã hiện. Nút "Vào campus" là khoảnh khắc "đi làm" và cũng là thao tác người dùng cần có để bật âm thanh sau này.
+- Khác plan ở đâu: đã sửa `04-client.md` §4 và §13; vị trí cửa trong map-data.
+- Hệ quả: avatar giả hiện mỗi người là một draw call; trần LOD và impostor làm ở P2.2.
+
 ## 2026-11-13 — Nhân vật tạm dựng bằng code thay vì bộ CC0
 
 - Gói việc: P1.3

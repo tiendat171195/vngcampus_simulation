@@ -64,13 +64,13 @@ Các "system" giao tiếp qua event bus có kiểu (`player.areaChanged`, `net.d
 |---|---|---|---|
 | Tỉ lệ điểm ảnh tối đa (DPR) | 1,0 | 1,5 | 2,0 |
 | Bóng đổ | Bóng tròn dưới chân | Bóng tròn + bóng bake | Shadow map cho nắng |
-| Tầm nhìn (có sương che đường cắt) | 80 m | 150 m | 300 m |
+| Tầm nhìn (có sương che đường cắt) | 140 m | 220 m | 400 m |
 | Avatar chi tiết (LOD0 / LOD1) | 12 / 20 | 25 / 40 | 50 / 80 |
 | Mật độ cây và đạo cụ | Thưa | Vừa | Dày |
 | Nước | Mặt phẳng màu | Sóng nhẹ | Sóng + phản xạ giả |
 | Hậu kỳ | Không | Không | Khử răng cưa, bloom nhẹ |
 
-- **Chọn mức tự động:** lần đầu dò GPU để đoán mức; khi chạy, theo dõi FPS — dưới 28 trong 2 giây thì hạ DPR rồi hạ mức, trên 55 ổn định thì nâng dần. Người dùng ghi đè được trong Cài đặt.
+- **Chọn mức tự động** (`game/core/quality.ts`): một "thang" 8 nấc mức × DPR, từ Thấp@0,75 tới Cao@2. Lần đầu đoán nấc theo GPU (render phần mềm → thấp nhất; cảm ứng → Trung bình; desktop → Cao@1,5). Khi chạy: dưới 28 FPS trong 2 giây thì xuống một nấc, trên 55 FPS trong 5 giây thì lên một nấc; nấc vừa phải rời không được thử lại trong 60 giây để khỏi dao động. Người dùng chọn cố định trong Cài đặt hoặc `?quality=`.
 - **Kỹ thuật bắt buộc:** instancing cho mọi vật lặp lại (cây, ghế, bàn, kệ cây); gộp mesh tĩnh theo material trong từng zone; atlas texture; nén KTX2; cắt theo tầng (chỉ vẽ tầng đang đứng); tránh vật trong suốt chồng lớp; không cấp phát bộ nhớ trong vòng lặp frame.
 - **Dev có lớp phủ ngân sách:** số draw call, tam giác, bộ nhớ texture — vượt ngưỡng ở [03](03-world-and-assets.md#6-ngân-sách-asset-và-hiệu-năng) thì cảnh báo.
 
@@ -184,4 +184,4 @@ Bước 3  Tải ngầm theo khoảng cách: zone gần, phần avatar người 
 - Camera bay tự do; hiện đa giác khu vực và POI; bấm để lấy toạ độ; xuất POI ra JSON.
 - **Sinh bot giả ngay trên client** (50–200 avatar đi lang thang) để đo hiệu năng đám đông mà không cần server.
 - Giả lập mạng chậm/mất gói cho phần nội suy.
-- Tham số URL: `?quality=low`, `?spawn=poi.id`, `?debug=1`.
+- Tham số URL: `?quality=low|medium|high|auto`, `?spawn=poi.id`, `?bots=50` (avatar giả đi lang thang), `?enter` (bỏ qua nút "Vào campus"). Bảng Debug mở bằng nút ở góc phải.

@@ -146,7 +146,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       floors: ['F1', 'F2', 'F3'],
       voids: [{ id: 'atrium', polygon: atriumVoid, floors: ['F2', 'F3', 'ROOF'] }],
       openings: [
-        { id: 'door.main.north', floor: 'F1', at: onWall(mainFootprint, [0, -34.3]), width: 8 },
+        { id: 'door.main.north', floor: 'F1', at: onWall(mainFootprint, [0, -34.3]), width: 12 },
         { id: 'door.main.west', floor: 'F1', at: onWall(mainFootprint, [-38.7, 17.9]), width: 8 },
         { id: 'door.main.south', floor: 'F1', at: onWall(mainFootprint, [20, 35.9]), width: 6 },
         { id: 'door.main.east', floor: 'F1', at: onWall(mainFootprint, [53.8, 10.7]), width: 5 },

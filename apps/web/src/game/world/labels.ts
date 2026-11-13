@@ -1,4 +1,10 @@
-import { type CampusMap, type MapIndex, pointInPolygon, polygonCentroid } from '@campus/map-data';
+import {
+  type CampusMap,
+  type MapIndex,
+  pointInPolygon,
+  polygonArea,
+  polygonCentroid,
+} from '@campus/map-data';
 import { CanvasTexture, LinearFilter, Sprite, SpriteMaterial, SRGBColorSpace } from 'three';
 import type { LevelId } from './context';
 
@@ -51,8 +57,19 @@ export function createLabelSprite(text: string, worldHeight: number): Sprite {
 
 /** Floating name boards over the landmark areas of the map. */
 export function createAreaLabels(map: CampusMap, index: MapIndex): AreaLabel[] {
-  return map.areas
-    .filter((area) => area.tags.includes('landmark'))
+  const landmarks = map.areas.filter((area) => area.tags.includes('landmark'));
+  // A landmark inside another one (the koi pond in the koi corner) would stack two boards on the
+  // same spot; the enclosing one names the place well enough.
+  const nested = (area: (typeof landmarks)[number]) =>
+    landmarks.some(
+      (other) =>
+        other !== area &&
+        other.floor === area.floor &&
+        polygonArea(other.polygon) > polygonArea(area.polygon) &&
+        pointInPolygon(polygonCentroid(area.polygon), other.polygon),
+    );
+  return landmarks
+    .filter((area) => !nested(area))
     .map((area) => {
       const [x, z] = polygonCentroid(area.polygon);
       const floorY = index.floors.get(area.floor)?.y ?? 0;

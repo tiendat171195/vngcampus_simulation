@@ -1,4 +1,4 @@
-import { floorAt, pointInPolygon } from '@campus/map-data';
+import { floorAt, pointInPolygon, poisOfSet } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import { MOVEMENT } from '@campus/shared';
 import { describe, expect, it } from 'vitest';
@@ -108,6 +108,14 @@ describe('speed', () => {
 });
 
 describe('walls, doors and edges', () => {
+  it('walks straight from every gate spawn point into the building', () => {
+    for (const spawnPoint of poisOfSet(campusIndex, 'players_gate')) {
+      const motor = spawn(spawnPoint.position[0], 0, spawnPoint.position[1]);
+      wait(motor, 12, { x: 0, z: 1, run: false, jump: false });
+      expect(motor.position.z, spawnPoint.id).toBeGreaterThan(-25);
+    }
+  });
+
   it('walks in through the north door', () => {
     const motor = spawn(0, 0, -52);
     follow(motor, [[0, -25]]);

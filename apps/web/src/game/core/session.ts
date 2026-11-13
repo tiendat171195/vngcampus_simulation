@@ -46,5 +46,6 @@ export const useSession = create<SessionState>((set, get) => ({
  * a React render.
  */
 export const hudSink: {
-  player: ((x: number, z: number, yaw: number, floor: string) => void) | null;
+  /** Feet position, body yaw, floor, and the camera heading (the minimap turns with it). */
+  player: ((x: number, z: number, yaw: number, floor: string, heading: number) => void) | null;
 } = { player: null };

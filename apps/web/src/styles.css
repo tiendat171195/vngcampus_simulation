@@ -409,13 +409,38 @@ body {
   border-radius: 16px;
 }
 
-.minimap img {
+.minimap-layer {
   position: absolute;
   top: 50%;
   left: 50%;
-  max-width: none;
+  width: 0;
+  height: 0;
   transform-origin: 0 0;
   pointer-events: none;
+}
+
+.minimap-layer img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+}
+
+.minimap-label {
+  position: absolute;
+  padding: 0 3px;
+  color: #c9d2db;
+  font-size: 10px;
+  white-space: nowrap;
+  text-shadow:
+    0 0 2px #12161a,
+    0 0 2px #12161a;
+  transform: translate(-50%, -50%) rotate(var(--upright, 0rad));
+}
+
+.minimap-label[data-landmark="true"] {
+  color: #fff;
+  font-weight: 600;
 }
 
 .minimap-marker {

@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** P0.1 → P1.3 xong: mở trang là điều khiển được một nhân vật đi khắp campus 3D dạng khối (bàn phím + chuột, hoặc joystick cảm ứng trên điện thoại). Chưa có multiplayer.
+**Trạng thái:** xong phase P1 (P0.1 → P1.4): mở trang → màn hình chào → "Vào campus" → điều khiển nhân vật đi khắp campus 3D dạng khối, có minimap, tên khu khi bước vào, cài đặt chất lượng, và avatar giả để thử đám đông. Chưa có multiplayer (P2).
 
 ## Chạy thử
 
@@ -27,6 +27,8 @@ pnpm dev
 Trang web chỉ nói chuyện với **chính origin của nó**: `/api` là REST, `/rt` là realtime. Lúc dev, Vite đóng vai reverse proxy; khi triển khai thật, Caddy làm việc đó.
 
 Mở thêm một tab nữa sẽ thấy số "người đang xem" tăng lên — đó là hai trình duyệt cùng ở trong một phòng realtime.
+
+Tham số URL hữu ích: `?enter` (bỏ qua nút "Vào campus"), `?bots=50` (50 avatar giả đi lang thang), `?quality=low|medium|high`, `?spawn=poi.checkpoint.atrium` (xuất hiện ở chỗ khác — danh sách POI xem ở `/debug/map`).
 
 **Thử trên điện thoại cùng Wi-Fi:**
 
@@ -58,6 +60,7 @@ pnpm infra:down
 | `pnpm typecheck` | Kiểm tra kiểu toàn bộ workspace |
 | `pnpm test` | Chạy test (Vitest) |
 | `pnpm build` | Build cả 4 app |
+| `pnpm budget` | Kiểm tra dung lượng JS của bản build web theo ngân sách tải (màn hình chào ≤ 120 KB, trước khi đi được ≤ 600 KB, gzip) |
 | `pnpm smoke` | Khởi động bản build của `api` và `realtime`, kiểm tra health |
 | `pnpm check` | Tất cả các bước trên theo thứ tự — chạy trước khi commit; CI chạy đúng chuỗi này |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
