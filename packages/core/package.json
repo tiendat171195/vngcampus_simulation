@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@campus/map-data": "workspace:*",
     "@campus/shared": "workspace:*"
   },
   "devDependencies": {

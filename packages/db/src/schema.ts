@@ -7,10 +7,12 @@ import { sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
   boolean,
+  date,
   index,
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -106,4 +108,115 @@ export const settings = pgTable('settings', {
   key: text('key').primaryKey(),
   value: jsonb('value').notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// ---------- missions (docs/07 §2.2) ----------
+
+export const MISSION_KINDS = ['daily', 'weekly', 'event', 'onboarding'] as const;
+export const PUBLISH_STATUSES = ['draft', 'published', 'archived'] as const;
+
+export const missions = pgTable(
+  'missions',
+  {
+    id: uuid('id').primaryKey(),
+    kind: text('kind', { enum: MISSION_KINDS }).notNull(),
+    publishStatus: text('publish_status', { enum: PUBLISH_STATUSES }).notNull().default('draft'),
+    title: jsonb('title').notNull(),
+    description: jsonb('description').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    /** Vietnam calendar day of a daily mission. */
+    dailyDate: date('daily_date'),
+    /** The whole validated MissionDefinition (objectives, rewards…). */
+    definition: jsonb('definition').notNull(),
+    mapVersion: text('map_version').notNull(),
+    autoFilled: boolean('auto_filled').notNull().default(false),
+    version: integer('version').notNull().default(1),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+    ...timestamps,
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // One published daily mission per day.
+    uniqueIndex('missions_one_daily_per_day')
+      .on(table.dailyDate)
+      .where(sql`${table.kind} = 'daily' and ${table.publishStatus} = 'published'`),
+    index('missions_window').on(table.startsAt, table.endsAt),
+  ],
+);
+
+export const missionProgress = pgTable(
+  'mission_progress',
+  {
+    missionId: uuid('mission_id')
+      .notNull()
+      .references(() => missions.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Per objective: { current, done, data }. */
+    state: jsonb('state').notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    durationMs: integer('duration_ms'),
+    rank: integer('rank'),
+    isPreview: boolean('is_preview').notNull().default(false),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.missionId, table.userId] }),
+    index('mission_progress_completed').on(table.missionId, table.completedAt),
+  ],
+);
+
+export const quizQuestions = pgTable('quiz_questions', {
+  id: text('id').primaryKey(),
+  text: jsonb('text').notNull(),
+  choices: jsonb('choices').notNull(),
+  correctIndex: integer('correct_index').notNull(),
+  explanation: jsonb('explanation'),
+  tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
+  active: boolean('active').notNull().default(true),
+  ...timestamps,
+});
+
+// ---------- rewards (docs/07 §2.3) ----------
+
+export const CURRENCIES = ['points', 'xp'] as const;
+
+/** Every change to points and xp, never edited. The unique key makes each grant happen once. */
+export const walletLedger = pgTable(
+  'wallet_ledger',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    currency: text('currency', { enum: CURRENCIES }).notNull(),
+    delta: integer('delta').notNull(),
+    reason: text('reason').notNull(),
+    /** What the grant is for, e.g. ('mission', <mission id>) or ('streak', '7:2026-11-16'). */
+    refType: text('ref_type').notNull(),
+    refId: text('ref_id').notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex('wallet_ledger_once').on(table.userId, table.currency, table.refType, table.refId),
+  ],
+);
+
+export const userStats = pgTable('user_stats', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  points: integer('points').notNull().default(0),
+  xp: integer('xp').notNull().default(0),
+  level: integer('level').notNull().default(1),
+  streakCurrent: integer('streak_current').notNull().default(0),
+  streakBest: integer('streak_best').notNull().default(0),
+  /** Last Vietnam day a daily mission was completed. */
+  lastDailyDate: date('last_daily_date'),
+  missionsCompleted: integer('missions_completed').notNull().default(0),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

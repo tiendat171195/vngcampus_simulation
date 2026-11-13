@@ -5,7 +5,8 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./fixtures": "./src/missions.fixtures.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

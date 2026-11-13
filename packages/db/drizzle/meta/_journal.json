@@ -15,6 +15,13 @@
       "when": 1794585031203,
       "tag": "0001_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794586572311,
+      "tag": "0002_missions",
+      "breakpoints": true
     }
   ]
 }
