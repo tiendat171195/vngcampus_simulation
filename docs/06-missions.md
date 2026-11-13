@@ -24,7 +24,7 @@
 
 ## 3. Mô hình dữ liệu
 
-Định nghĩa ở `packages/shared/missions` (kiểu + zod schema), dùng chung cho API, realtime, admin và client.
+Định nghĩa ở `packages/shared/src/missions.ts` (kiểu + zod schema), dùng chung cho API, realtime, admin và client. Engine ở `packages/core/src/missions` (`engine.ts` định tuyến sự kiện, `handlers/*` từng loại objective, `rewards.ts` luật thưởng, `store.ts` đọc/ghi DB). Nhiệm vụ mẫu ở `tools/mission-tools/examples`; nạp bằng `pnpm missions:load <file.json> [--draft] [--today]` và `pnpm quiz:load <file.json>`.
 
 ```ts
 type MissionKind = 'daily' | 'weekly' | 'event' | 'onboarding';
@@ -132,7 +132,7 @@ type GameEvent =
   | { type: 'area.dwell'; userId: string; areaId: string; seconds: number }
   | { type: 'entity.interacted'; userId: string; entityId: string; action?: string }
   | { type: 'emote.performed'; userId: string; emote: string; nearbyUserIds: string[] }
-  | { type: 'quiz.answered'; userId: string; runId: string; questionId: string; choice: number }
+  | { type: 'quiz.answered'; userId: string; questionId: string; choice: number; correct: boolean }  // `correct` do server tra ngân hàng câu hỏi
   | { type: 'seat.taken'; userId: string; seatId: string }
   | { type: 'tick'; roomId: string };          // 1 Hz, cho objective theo thời gian và tập thể
 ```
@@ -223,8 +223,8 @@ DB chỉ lưu `publish_status` (`draft` / `published` / `archived`); "đang ch�
 | Thành phần | Thiết kế |
 |---|---|
 | **Điểm** | Nhận từ nhiệm vụ, điểm danh, mốc streak. Tiêu ở cửa hàng cosmetic (V1). Mọi thay đổi đi qua **sổ cái** `wallet_ledger`, không sửa số dư trực tiếp |
-| **Kinh nghiệm & cấp** | Chỉ để khoe; cấp hiện trên thẻ tên |
-| **Streak** | Số ngày liên tiếp hoàn thành nhiệm vụ ngày. **Chỉ tính ngày làm việc**: cuối tuần, ngày lễ và ngày không có nhiệm vụ không làm đứt streak. Mốc thưởng 3 / 7 / 14 / 30 ngày |
+| **Kinh nghiệm & cấp** | Chỉ để khoe; cấp hiện trên thẻ tên. Cấp n cần 50·n·(n−1) kinh nghiệm (100, 300, 600, 1.000…) |
+| **Streak** | Số ngày liên tiếp hoàn thành nhiệm vụ ngày. **Chỉ tính ngày làm việc**: cuối tuần, ngày lễ (danh sách ở `settings.holidays`) và ngày không có nhiệm vụ không làm đứt streak. Mốc thưởng 3 / 7 / 14 / 30 ngày: +20 / 50 / 100 / 200 điểm |
 | **Huy hiệu** | Thành tích đặc biệt, hiện trên hồ sơ |
 | **Thưởng hạng** | Nhỏ, mang tính ghi nhận — tránh biến trò chơi thành cuộc đua căng thẳng |
 | **Mục tiêu cộng đồng** | Cả công ty cùng đạt một con số → mọi người tham gia đều nhận thưởng |

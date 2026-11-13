@@ -23,6 +23,8 @@
     "db:generate": "pnpm --filter @campus/db generate",
     "db:migrate": "pnpm --filter @campus/db migrate",
     "db:import-departments": "pnpm --filter @campus/db import:departments",
+    "missions:load": "pnpm --filter @campus/mission-tools load:missions",
+    "quiz:load": "pnpm --filter @campus/mission-tools load:questions",
     "infra:up": "docker compose -f infra/compose.dev.yaml up -d --wait",
     "infra:down": "docker compose -f infra/compose.dev.yaml down"
   },

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "vh-1",
+    "text": {
+      "vi": "Màu cam trên thẻ nhân viên trong game là màu gì của VNG?"
+    },
+    "choices": [
+      {
+        "vi": "Màu nhận diện"
+      },
+      {
+        "vi": "Màu cảnh báo"
+      },
+      {
+        "vi": "Màu ngẫu nhiên"
+      }
+    ],
+    "correctIndex": 0,
+    "tags": ["van-hoa"]
+  },
+  {
+    "id": "vh-2",
+    "text": {
+      "vi": "Campus nằm bên dòng sông nào?"
+    },
+    "choices": [
+      {
+        "vi": "Sông Hồng"
+      },
+      {
+        "vi": "Sông Sài Gòn"
+      },
+      {
+        "vi": "Sông Hậu"
+      }
+    ],
+    "correctIndex": 1,
+    "tags": ["van-hoa"]
+  },
+  {
+    "id": "vh-3",
+    "text": {
+      "vi": "Hồ cá trong campus nuôi loại cá nào?"
+    },
+    "choices": [
+      {
+        "vi": "Cá vàng"
+      },
+      {
+        "vi": "Cá Koi"
+      },
+      {
+        "vi": "Cá rô"
+      }
+    ],
+    "correctIndex": 1,
+    "tags": ["van-hoa"]
+  },
+  {
+    "id": "vh-4",
+    "text": {
+      "vi": "Nhiệm vụ ngày được làm mới lúc mấy giờ (giờ Việt Nam)?"
+    },
+    "choices": [
+      {
+        "vi": "00:00"
+      },
+      {
+        "vi": "08:00"
+      },
+      {
+        "vi": "12:00"
+      }
+    ],
+    "correctIndex": 0,
+    "tags": ["van-hoa"]
+  }
+]

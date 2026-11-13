@@ -1,0 +1,54 @@
+{
+  "kind": "daily",
+  "title": { "vi": "Chào tuần mới" },
+  "description": { "vi": "Điểm danh, chào đồng nghiệp và nạp cà phê cho ngày thứ Hai." },
+  "startsAt": "2026-11-15T17:00:00Z",
+  "endsAt": "2026-11-16T16:59:59Z",
+  "mapVersion": "0.1.0",
+  "objectiveMode": "all",
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "visit",
+      "title": { "vi": "Điểm danh ở cổng chính" },
+      "target": 1,
+      "params": { "targets": [{ "areaId": "area.gate_main" }], "mode": "all" }
+    },
+    {
+      "id": "o2",
+      "type": "social",
+      "title": { "vi": "Vẫy tay chào 5 đồng nghiệp" },
+      "target": 5,
+      "params": { "emote": "wave", "radius": 4 }
+    },
+    {
+      "id": "o3",
+      "type": "collect",
+      "title": { "vi": "Tìm 4 ly cà phê quanh campus" },
+      "target": 4,
+      "params": {
+        "item": "coffee_cup",
+        "source": { "spawnSet": "outdoor_common" },
+        "scope": "perPlayer"
+      }
+    },
+    {
+      "id": "o4",
+      "type": "quiz",
+      "title": { "vi": "Trả lời đúng 2 câu ở quầy lễ tân" },
+      "target": 2,
+      "params": {
+        "at": { "poiId": "poi.kiosk.lobby" },
+        "from": { "tags": ["van-hoa"], "pick": 3 },
+        "maxAttempts": 2
+      }
+    }
+  ],
+  "rewards": [{ "type": "points", "amount": 100 }, { "type": "xp", "amount": 50 }],
+  "bonusWindows": [{ "from": "12:00", "to": "13:30", "multiplier": 1.5 }],
+  "communityGoal": {
+    "metric": "completions",
+    "target": 300,
+    "rewards": [{ "type": "badge", "badgeId": "team_spirit_2026w47" }]
+  }
+}

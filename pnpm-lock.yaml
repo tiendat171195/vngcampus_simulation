@@ -87,6 +87,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@campus/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@campus/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -145,6 +148,9 @@ importers:
       '@campus/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@campus/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@campus/map-data':
         specifier: workspace:*
         version: link:../../packages/map-data
@@ -160,9 +166,15 @@ importers:
       '@colyseus/ws-transport':
         specifier: ^0.18.5
         version: 0.18.5(@colyseus/core@0.18.28)(express@5.3.0)
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(postgres@4.1.1)
       jose:
         specifier: ^6.2.17
         version: 6.2.17
+      postgres:
+        specifier: ^4.1.1
+        version: 4.1.1
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -240,12 +252,18 @@ importers:
 
   packages/core:
     dependencies:
+      '@campus/db':
+        specifier: workspace:*
+        version: link:../db
       '@campus/map-data':
         specifier: workspace:*
         version: link:../map-data
       '@campus/shared':
         specifier: workspace:*
         version: link:../shared
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(postgres@4.1.1)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -329,6 +347,37 @@ importers:
       '@campus/map-data':
         specifier: workspace:*
         version: link:../../packages/map-data
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.23.15
+      vitest:
+        specifier: 'catalog:'
+        version: 5.1.0(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
+
+  tools/mission-tools:
+    dependencies:
+      '@campus/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@campus/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@campus/map-data':
+        specifier: workspace:*
+        version: link:../../packages/map-data
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(postgres@4.1.1)
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

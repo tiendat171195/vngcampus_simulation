@@ -70,6 +70,8 @@ Không có Docker thì dùng một Postgres cài sẵn, tạo user `campus` (m�
 | `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước, cần Postgres): đăng nhập khách và qua IdP giả lập, hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang, emote, chat, chuyển kênh |
 | `pnpm load -- --url http://127.0.0.1:2567 --bots 500` | Thử tải realtime bằng bot (server cần `DEV_GUEST_AUTH=on`); kết quả mẫu ở `docs/05-multiplayer.md` §11 |
 | `pnpm db:import-departments -- <file.csv>` | Nạp danh sách phòng ban (cột `name`, `parent`) vào database ở `DATABASE_URL` |
+| `pnpm missions:load -- <file.json> [--draft] [--today]` | Nạp nhiệm vụ viết bằng JSON (mẫu ở `tools/mission-tools/examples`); `--today` dời nhiệm vụ ngày sang hôm nay để chơi thử |
+| `pnpm quiz:load -- <file.json>` | Nạp/cập nhật câu hỏi quiz |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
 
 Chạy lệnh cho một gói: `pnpm --filter @campus/api test`.
@@ -91,6 +93,7 @@ infra/        Docker Compose cho môi trường dev
 tools/
   map-tools/  sinh bản đồ campus từ dữ liệu OpenStreetMap
   mock-idp/   nhà cung cấp OpenID Connect giả lập cho dev và e2e
+  mission-tools/ nạp nhiệm vụ và câu hỏi từ file JSON
   loadtest/   bot thử tải realtime
 scripts/      script bảo trì repo (smoke test)
 docs/         plan và thiết kế kỹ thuật

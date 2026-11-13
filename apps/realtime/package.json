@@ -12,12 +12,15 @@
   },
   "dependencies": {
     "@campus/core": "workspace:*",
+    "@campus/db": "workspace:*",
     "@campus/map-data": "workspace:*",
     "@campus/shared": "workspace:*",
     "@colyseus/core": "^0.18.28",
     "@colyseus/schema": "^5.0.48",
     "@colyseus/ws-transport": "^0.18.5",
+    "drizzle-orm": "^0.45.4",
     "jose": "^6.2.17",
+    "postgres": "^4.1.1",
     "zod": "catalog:"
   },
   "devDependencies": {

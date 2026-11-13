@@ -15,6 +15,21 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Engine nhiệm vụ: chi tiết chốt khi làm
+
+- Gói việc: P4.1
+- Quyết định:
+  - `quiz.answered` mang sẵn `correct` (server tra ngân hàng câu hỏi trước khi gọi engine); handler không cần biết đáp án. Bỏ `runId`: một "lượt" quiz là danh sách câu đang hỏi trong trạng thái của objective. Hết lượt mà chưa đủ câu đúng thì quay lại kiosk để rút lượt mới, không lặp các câu đã đúng.
+  - `collect` kiểu `perPlayer` sinh đúng `target` vật phẩm cho mỗi người, chọn từ bộ điểm theo hạt giống `missionId:objectiveId:userId`. Kiểm tra bản đồ chặn bộ điểm nhỏ hơn `target`.
+  - Sự kiện `area.entered` dùng chung cho khu vực và cho POI-có-bán-kính (id POI đặt vào `areaId`), để `visit` chỉ cần một loại sự kiện.
+  - Trao thưởng: hàng `mission_progress` được đánh dấu `completed_at` trong cùng transaction là cửa chặn chính (chỉ một lần chuyển từ chưa xong sang xong); ràng buộc duy nhất của `wallet_ledger` là lớp thứ hai. Test gửi hai lần hoàn thành cùng lúc.
+  - Phần thưởng `item` và `badge` chưa được trao (chưa có bảng `items`/`badges`) — làm ở P4.4/V1. Thưởng mốc streak cố định: 3/7/14/30 ngày → 20/50/100/200 điểm; cấp độ theo 50·n·(n−1) xp.
+  - Ngày lễ đọc từ `settings` khoá `holidays` (mảng `YYYY-MM-DD`); admin sửa ở P5.
+  - Test DB của engine (store, phần thưởng) nằm trong bộ test của `apps/api`, nơi đã có Postgres riêng cho test, để hai gói không cùng xoá/dựng lại một database khi `pnpm test` chạy song song.
+  - Thêm `tools/mission-tools` (nạp nhiệm vụ và câu hỏi từ JSON); nhiệm vụ mẫu ở bản đồ hiện tại có `mapVersion` 0.1.0.
+- Khác plan ở đâu: `06-missions.md` §3, §5.1, §7.
+- Hệ quả: P4.2 cần một `QuestionPicker` đọc bảng `quiz_questions`, và realtime giờ phụ thuộc `@campus/db`.
+
 ## 2026-11-13 — Hồ sơ, phòng ban tự chọn, lần đầu vào game
 
 - Gói việc: P3.4

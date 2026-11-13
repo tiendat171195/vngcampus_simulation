@@ -1,0 +1,25 @@
+{
+  "name": "@campus/mission-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "load:missions": "tsx --env-file-if-exists=../../.env src/load-missions.ts",
+    "load:questions": "tsx --env-file-if-exists=../../.env src/load-questions.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@campus/core": "workspace:*",
+    "@campus/db": "workspace:*",
+    "@campus/map-data": "workspace:*",
+    "@campus/shared": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "vitest": "catalog:"
+  }
+}
