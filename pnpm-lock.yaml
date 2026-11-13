@@ -263,6 +263,25 @@ importers:
         specifier: 'catalog:'
         version: 22.20.5
 
+  tools/loadtest:
+    dependencies:
+      '@campus/map-data':
+        specifier: workspace:*
+        version: link:../../packages/map-data
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@colyseus/sdk':
+        specifier: ^0.18.10
+        version: 0.18.10(@colyseus/core@0.18.28)(typescript@7.0.2)(zod@4.6.7)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.23.15
+
   tools/map-tools:
     dependencies:
       '@campus/map-data':

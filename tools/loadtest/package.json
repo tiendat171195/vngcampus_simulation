@@ -1,0 +1,19 @@
+{
+  "name": "@campus/loadtest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "load": "tsx src/run.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@campus/map-data": "workspace:*",
+    "@campus/shared": "workspace:*",
+    "@colyseus/sdk": "^0.18.10"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:"
+  }
+}

@@ -8,6 +8,7 @@ import {
 import { createEndpoint, createRouter, defineRoom, defineServer, matchMaker } from '@colyseus/core';
 import { WebSocketTransport } from '@colyseus/ws-transport';
 import { z } from 'zod';
+import { type MetricsSnapshot, snapshot } from './metrics';
 import {
   type CampusMetadata,
   CampusRoom,
@@ -45,6 +46,19 @@ export function createServer(options: ServerOptions) {
           })
           .sort((a, b) => a.channel - b.channel);
       }),
+      // Process numbers for load tests and monitoring. Internal: not routed by the public proxy (P7.1).
+      metrics: createEndpoint(
+        '/metrics',
+        { method: 'GET', query: z.object({ reset: z.string().optional() }) },
+        async (ctx): Promise<MetricsSnapshot & { rooms: number; clients: number }> => {
+          const rooms = await matchMaker.query({ name: CAMPUS_ROOM });
+          return {
+            ...snapshot(ctx.query?.reset === '1'),
+            rooms: rooms.length,
+            clients: rooms.reduce((sum, room) => sum + room.clients, 0),
+          };
+        },
+      ),
       // Who is online, for "find a colleague" (docs/05-multiplayer.md §7). Lines left behind by
       // a crashed process are skipped: their room no longer exists.
       online: createEndpoint(

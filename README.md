@@ -2,7 +2,7 @@
 
 Campus ảo 3D chạy trên trình duyệt, dựng theo VNG Campus: đăng nhập, điều khiển avatar đi lại trong khuôn viên, gặp đồng nghiệp đang online và cùng làm **nhiệm vụ hằng ngày** do admin tạo.
 
-**Trạng thái:** xong P1 và P2.1–P2.3: nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng. Đăng nhập tạm bằng tên tự đặt (thật ở P3).
+**Trạng thái:** xong phase P1 và P2 (mốc M2 "gặp nhau"): nhiều người cùng vào một kênh, thấy nhau đi lại, vẫy tay/nhảy, ngồi ghế, chat với người đứng gần, tìm đồng nghiệp và chuyển kênh; tự vào lại khi rớt mạng; đã thử tải tới 1.000 người. Đăng nhập tạm bằng tên tự đặt (thật ở P3).
 
 ## Chạy thử
 
@@ -64,6 +64,7 @@ pnpm infra:down
 | `pnpm smoke` | Khởi động bản build của `api` và `realtime`, kiểm tra health |
 | `pnpm check` | Tất cả các bước trên theo thứ tự — chạy trước khi commit; CI chạy đúng chuỗi này |
 | `pnpm e2e` | Test end-to-end bằng Playwright trên bản build (chạy `pnpm build` trước): hai trình duyệt thấy nhau, tab thứ hai, mất mạng, rời trang |
+| `pnpm load -- --url http://127.0.0.1:2567 --bots 500` | Thử tải realtime bằng bot (server cần `DEV_GUEST_AUTH=on`); kết quả mẫu ở `docs/05-multiplayer.md` §11 |
 | `pnpm map:build` | Sinh lại `packages/map-data/src/campus.json` từ dữ liệu OpenStreetMap + bố cục giả định |
 
 Chạy lệnh cho một gói: `pnpm --filter @campus/api test`.

@@ -32,6 +32,7 @@ import {
   Room,
   ServerError,
 } from '@colyseus/core';
+import { countMessage, recordPatch } from '../metrics';
 import {
   type Accepted,
   checkMove,
@@ -244,11 +245,20 @@ export class CampusRoom extends Room<{
     await this.presence.unsubscribe(SESSION_TOPIC, this.onSessionStart);
   }
 
+  /** Measures encoding and sending each patch, the main cost of a busy room. */
+  override broadcastPatch(): boolean {
+    const started = performance.now();
+    const sent = super.broadcastPatch();
+    recordPatch(performance.now() - started);
+    return sent;
+  }
+
   override onBeforePatch(state: RoomState): void {
     state.time = this.now();
   }
 
   private handleMove(client: Client, payload: unknown): void {
+    countMessage();
     const tracking = this.tracking.get(client.sessionId);
     const player = this.state.players.get(client.sessionId);
     if (!tracking || !player) return;

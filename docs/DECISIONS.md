@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-13 — Thử tải: chưa cần tinh chỉnh; số đo nội bộ qua `/rt/metrics`
+
+- Gói việc: P2.4
+- Bối cảnh: plan đặt giả thuyết "một tiến trình chịu vài trăm người"; cần số đo.
+- Quyết định: thêm `GET /rt/metrics` (JSON: thời gian mã hoá patch, độ trễ event loop, CPU, RAM, message/giây, số phòng/người) và `tools/loadtest`. Kết quả ở `05-multiplayer.md` §11: 1.000 bot dùng ~22% một nhân, nên giữ nguyên thiết kế (đồng bộ cả phòng, 10 Hz, kênh 80/100), không làm lọc theo vùng.
+- Khác plan ở đâu: plan dự định dùng `@colyseus/loadtest`; công cụ tự viết dùng chính SDK của game, đo thêm băng thông và thời gian vào phòng, không cần thêm gói.
+- Hệ quả: `/rt/metrics` là endpoint nội bộ — P7.1 phải chặn nó ở reverse proxy (hoặc chuyển sang định dạng Prometheus sau lớp xác thực).
+
 ## 2026-11-13 — Giao lưu: emote, ghế, chat gần, vắng mặt, danh bạ
 
 - Gói việc: P2.3

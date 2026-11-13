@@ -18,6 +18,7 @@
     "smoke": "node scripts/smoke.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm budget && pnpm smoke",
     "e2e": "pnpm --filter @campus/e2e e2e",
+    "load": "pnpm --filter @campus/loadtest load",
     "map:build": "pnpm --filter @campus/map-tools build:campus",
     "infra:up": "docker compose -f infra/compose.dev.yaml up -d --wait",
     "infra:down": "docker compose -f infra/compose.dev.yaml down"

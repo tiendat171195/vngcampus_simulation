@@ -91,7 +91,18 @@ flowchart LR
 | P2.1 | Phòng realtime | `CampusRoom` + schema. Token khách tạm cho dev. Vào/ra. Xử lý `move` có kiểm tra tốc độ và biên. Kênh với ngưỡng mềm/cứng + tự xếp kênh. Kết nối lại, một người một phiên. Test phòng bằng `@colyseus/testing` | M | Xong |
 | P2.2 | Lớp mạng phía client | `NetClient`, đồng bộ đồng hồ, avatar người khác có nội suy, pool đối tượng, trần LOD, thẻ tên. Lớp phủ kết nối lại. Test e2e hai trình duyệt | M | Xong |
 | P2.3 | Giao lưu | Emote + bánh xe emote, ghế, chat gần + bong bóng + rate limit + lọc từ, presence trong Redis, danh sách online, chọn kênh, trạng thái AFK | M | Xong |
-| P2.4 | Loadtest | Bot giả lập, endpoint metric, chạy 100 bot/kênh và 500 bot tổng, ghi kết quả vào tài liệu, tinh chỉnh | S | Chưa làm |
+| P2.4 | Loadtest | Bot giả lập, endpoint metric, chạy 100 bot/kênh và 500 bot tổng, ghi kết quả vào tài liệu, tinh chỉnh | S | Xong |
+
+**Kết quả nghiệm thu P2 (13/11/2026):**
+
+| Tiêu chí | Kết quả |
+|---|---|
+| Desktop và mobile thấy nhau chuyển động mượt; e2e tự động xác nhận | Đạt — `tests/e2e/specs/multiplayer.spec.ts` (Chrome desktop + Pixel 7 giả lập), chạy trong CI |
+| Rút mạng 5 giây rồi cắm lại: tự vào lại đúng chỗ | Đạt — e2e: người khác thấy "mất kết nối" rồi trở lại bình thường, không phải tải lại trang |
+| Mở tab thứ hai cùng tài khoản: tab cũ nhận thông báo | Đạt — e2e |
+| Ngưỡng loadtest ở 05 §11 | Đạt — tới 1.000 bot trên một tiến trình, xem bảng kết quả ở 05 §11 |
+
+Ngoài nghiệm thu: emote, ghế, chat gần có lọc từ, danh bạ online và chuyển kênh đều có test server và e2e. Chưa thử trên thiết bị và mạng di động thật.
 
 **Nghiệm thu:**
 - Hai trình duyệt (một desktop, một mobile) thấy nhau chuyển động mượt; test e2e tự động xác nhận.

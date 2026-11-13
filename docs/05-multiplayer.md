@@ -222,6 +222,25 @@ Giả thuyết dung lượng để lập kế hoạch (**phải đo lại bằng
 | Kết nối lại thành công sau khi ngắt mạng 5 giây | > 99% |
 | CPU, RAM, băng thông ra | Ghi lại để tính chi phí cho mỗi 100 người |
 
+### Kết quả đo (P2.4, 13/11/2026)
+
+Chạy bằng `pnpm load` (`tools/loadtest`) trên bản build production của realtime, **một tiến trình Node**, máy 4 vCPU; bot chạy trên **cùng máy** qua localhost (không có độ trễ mạng thật). Bot đi lại 10 Hz giữa các điểm ngoài trời, vẫy tay mỗi 20–60 giây, chat mỗi 2–5 phút, ping mỗi 5 giây.
+
+| Kịch bản | Kênh | Mã hoá + gửi patch p95 / p99 | Event loop trễ p99 | CPU (một nhân) | RAM | Nhận mỗi người | Rớt / bị sửa vị trí |
+|---|:-:|---|---|---|---|---|---|
+| 100 bot, một kênh, 40% đang đi | 1 | 1,44 / 2,01 ms | 1,34 ms | 5% | 99 MB | 3,1 KB/s | 0 / 0 |
+| 100 bot, một kênh, **tất cả đang đi** | 1 | 1,15 / 1,55 ms | 1,26 ms | 6% | 118 MB | 7,5 KB/s | 0 / 0 |
+| 500 bot, kênh mặc định 80/100 | 7 | 0,89 / 1,08 ms | 1,37 ms | 13% | 129 MB | 2,3 KB/s | 0 / 0 |
+| 1.000 bot, kênh mặc định | 13 | 0,96 / 1,14 ms | 1,60 ms | 22% | 133 MB | 2,4 KB/s | 0 / 0 |
+
+Thời gian vào phòng p95 ≤ 13 ms ở mọi kịch bản. Mọi ngưỡng đạt ở mục trên (tick p95 < 5 ms, event loop p99 < 20 ms, vào phòng p95 < 1 s); thử kết nối lại có ở bộ test e2e.
+
+**Đọc kết quả:**
+
+- Một tiến trình còn dư rất nhiều: 1.000 người chỉ dùng khoảng 1/5 một nhân. Ngoại suy thô là vài nghìn người mỗi nhân, nhưng con số thật sẽ thấp hơn vì kết nối thật đi qua mạng và TLS ở reverse proxy, và người chơi thật chat/emote nhiều hơn bot. **Chưa cần tinh chỉnh gì; bậc 1 (một tiến trình) đủ cho mục tiêu vài trăm người đồng thời.**
+- Băng thông xuống thấp hơn ước lượng ở §5 (7,5 thay vì 15 KB/s khi cả kênh cùng đi) vì bot đi trên mặt đất nên `y` không đổi và chỉ trường thay đổi được gửi. Người thật lên xuống cầu thang sẽ cao hơn chút. Dữ liệu di động khi cả kênh cùng đi: khoảng 27 MB/giờ.
+- Chạy lại: khởi động realtime với `DEV_GUEST_AUTH=on` (và `CHANNEL_SOFT_CAP`/`CHANNEL_HARD_CAP` nếu muốn dồn một kênh), rồi `pnpm load --url http://127.0.0.1:2567 --bots 500 --seconds 90 [--moving 1]`. Số đo phía server lấy từ `GET /rt/metrics` (`?reset=1` để bắt đầu cửa sổ đo mới).
+
 ## 12. Voice theo khoảng cách (V2, phác thảo)
 
 - Dùng **LiveKit** (SFU mã nguồn mở, tự host được). API cấp token vào phòng voice tương ứng với kênh.
