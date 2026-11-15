@@ -20,6 +20,15 @@ const Page = path.startsWith('/debug/map')
       ? TermsPage
       : null;
 
+// Production builds keep hashed files in a service worker cache (public/sw.js), so coming back
+// the next day starts almost at once; development never registers it.
+if (import.meta.env.PROD && 'serviceWorker' in navigator)
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error: unknown) => {
+      console.warn('[campus] service worker not registered', error);
+    });
+  });
+
 createRoot(root).render(
   <StrictMode>
     {Page ? (

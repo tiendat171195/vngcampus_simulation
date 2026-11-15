@@ -249,6 +249,17 @@ Thời gian vào phòng p95 ≤ 13 ms ở mọi kịch bản. Mọi ngưỡng đ
 - Băng thông xuống thấp hơn ước lượng ở §5 (7,5 thay vì 15 KB/s khi cả kênh cùng đi) vì bot đi trên mặt đất nên `y` không đổi và chỉ trường thay đổi được gửi. Người thật lên xuống cầu thang sẽ cao hơn chút. Dữ liệu di động khi cả kênh cùng đi: khoảng 27 MB/giờ.
 - Chạy lại: khởi động realtime với `DEV_GUEST_AUTH=on` (và `CHANNEL_SOFT_CAP`/`CHANNEL_HARD_CAP` nếu muốn dồn một kênh), rồi `pnpm load --url http://127.0.0.1:2567 --bots 500 --seconds 90 [--moving 1]`. Số đo phía server lấy từ `GET /rt/metrics` (`?reset=1` để bắt đầu cửa sổ đo mới).
 
+### Qua stack production (P7.3, 15/11/2026)
+
+Cùng công cụ, chạy vào **stack `infra/compose.prod.yaml`** dựng từ image thật: bot → Caddy (`/rt`, HTTP không TLS) → realtime trong container; số phía server đọc thẳng từ container (`--metrics http://<IP container>:2567/metrics`, vì Caddy chặn `/rt/metrics`). Máy 4 vCPU dùng chung, bot cùng máy.
+
+| Kịch bản | Kênh | Patch p95 / p99 | Event loop p99 | CPU realtime | CPU Caddy | RAM realtime | Vào phòng p95 | RTT p95 | Rớt |
+|---|:-:|---|---|---|---|---|---|---|---|
+| 300 bot | 4 | 2,0 / 3,7 ms | 1,8 ms | 12% | — | 123 MB | 14 ms | 3 ms | 0 |
+| 1.000 bot | 13 | 2,1–2,2 / 3,9 ms | 3,7 ms | 28–31% | ~35% | 180–235 MB | 23–24 ms | 9–11 ms | 0 |
+
+Đi qua reverse proxy không đổi kết luận: một máy bậc 0 thừa sức cho vài trăm người. Caddy tốn CPU ngang realtime khi giữ 1.000 WebSocket; TLS thật sẽ thêm chút. Chưa đo trên máy và mạng thật (P7.4).
+
 ## 12. Voice theo khoảng cách (V2, phác thảo)
 
 - Dùng **LiveKit** (SFU mã nguồn mở, tự host được). API cấp token vào phòng voice tương ứng với kênh.

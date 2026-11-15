@@ -148,7 +148,7 @@ Bước 3  Tải ngầm theo khoảng cách: zone gần, phần avatar người 
 
 - Màn hình đăng nhập và chọn avatar chính là thời gian tải: asset bước 2 bắt đầu tải ngay từ bước 0.
 - Mọi asset có hash trong tên file → cache vĩnh viễn ở CDN và trình duyệt.
-- V1: Service Worker (cache-first cho asset có hash) để lần vào hằng ngày gần như tức thì; PWA cài lên màn hình chính.
+- V1: Service Worker (cache-first cho asset có hash) để lần vào hằng ngày gần như tức thì; PWA cài lên màn hình chính. **Đã làm (P7.3):** `public/sw.js` viết tay (không thêm thư viện): file trong `/assets/` lấy từ cache (giữ tối đa 120 file, bỏ file cũ trước), trang đi mạng trước rồi mới dùng bản đã lưu; không đụng tới `/api`, `/rt`, `/admin`. Chỉ đăng ký ở bản production. `manifest.webmanifest` (toàn màn hình, màu nền tối, biểu tượng 192/512/maskable tự vẽ — không dùng logo thương hiệu).
 - Greybox của zone hiển thị ngay, GLB đẹp thay vào khi tải xong.
 
 ## 10. Thiết bị hỗ trợ
@@ -158,6 +158,17 @@ Bước 3  Tải ngầm theo khoảng cách: zone gần, phần avatar người 
 | iOS Safari / webview trên iOS | iOS 16.4+ | Giữ ngân sách texture chặt; xử lý mất WebGL context |
 | Android Chrome / webview | Chrome 110+, máy ~2021 trở lên | Mặc định mức Low/Medium |
 | Desktop | Chrome, Edge, Firefox, Safari bản gần đây | Mặc định Medium/High |
+
+**Kế hoạch thử trên thiết bị thật (P7.3 — chưa chạy, cần người có máy):** mỗi dòng dưới, làm trọn một lượt: mở link → đồng ý → vào campus → đi tới Atrium → vẫy tay, chat → làm một nhiệm vụ có quiz → khoá màn hình 1 phút rồi mở lại (tự vào lại) → cài lên màn hình chính (nếu có) và mở lại hôm sau (lần hai phải nhanh hơn rõ). Ghi: FPS ở góc debug, mức chất lượng tự chọn, thời gian tới lúc đi được, lỗi.
+
+| Thiết bị / trình duyệt | Ghi chú cần để ý |
+|---|---|
+| iPhone (iOS 16.4+) Safari, và một máy iOS cũ nhất còn hỗ trợ | Mất WebGL context khi chuyển app; bàn phím ảo che ô chat; vùng tai thỏ |
+| Android tầm trung ~2021 (Chrome) | Mức Low/Medium; nhiệt độ sau 15 phút |
+| Trình duyệt nhúng: Zalo, Messenger, Microsoft Teams, Slack | Đăng nhập OIDC trong webview (có thể bị chặn popup/cookie bên thứ ba — luồng của ta là chuyển hướng toàn trang); nút cài PWA không có |
+| Windows laptop văn phòng (GPU tích hợp), Chrome và Edge | Mức High có giữ 30 FPS không |
+| macOS Safari | WebSocket qua proxy công ty, WebGL2 |
+| Mạng công ty (proxy/tường lửa) | WebSocket `/rt` có bị chặn không |
 | Trình duyệt nhúng (Zalo, Messenger, Facebook) | Kiểm thử riêng | Cần WebGL2 + WebSocket; âm thanh chỉ bật sau thao tác chạm đầu tiên; có nút "Mở bằng trình duyệt" dự phòng |
 
 ## 11. Khả năng tự phục hồi

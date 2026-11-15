@@ -25,6 +25,8 @@ password="$(openssl rand -hex 16)"
   echo "GUEST_MODE=full"
   echo "AUTH_JWKS_URL=http://api:3001/api/v1/auth/jwks"
   echo "ANALYTICS_SALT=$(openssl rand -hex 24)"
+  # Extra settings for this run, one per line (a load test needs DEV_GUEST_AUTH=on).
+  [ -z "${SMOKE_EXTRA_ENV:-}" ] || printf '%s\n' "$SMOKE_EXTRA_ENV"
 } > "$work/prod.env"
 
 compose() { docker compose -p campus-smoke --env-file "$work/prod.env" -f "$work/compose.prod.yaml" "$@"; }

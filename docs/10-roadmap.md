@@ -217,7 +217,7 @@ Ngoài nghiệm thu: thông báo ba mức (phát ngay/hẹn giờ), công tắc 
 |---|---|---|:-:|---|
 | P7.1 | Hạ tầng production | Dockerfile, Compose, Caddy, workflow deploy staging + production, sao lưu, giám sát + cảnh báo, sổ tay vận hành | M | Xong (chưa có máy thật: deploy và cảnh báo từ ngoài chưa chạy thử) |
 | P7.2 | Bảo mật và quyền riêng tư | Rà soát bảo mật, CSP, rate limit, trang chính sách + đồng ý, job xoá dữ liệu quá hạn, luồng xoá tài khoản | M | Xong |
-| P7.3 | Tải và thiết bị | Loadtest trên hạ tầng giống production, tinh chỉnh; thử trên ma trận thiết bị kể cả trình duyệt nhúng; Service Worker + PWA | M | Chưa làm |
+| P7.3 | Tải và thiết bị | Loadtest trên hạ tầng giống production, tinh chỉnh; thử trên ma trận thiết bị kể cả trình duyệt nhúng; Service Worker + PWA | M | Xong phần làm được ở đây: loadtest qua stack production (1.000 bot qua Caddy, xem 05 §11), Service Worker + PWA (có e2e). **Thử trên thiết bị thật chưa làm** — kế hoạch ở 04 §10 |
 | P7.4 | Pilot và phát hành | Pilot 20–50 người trong 1–2 tuần với nhiệm vụ hằng ngày, thu góp ý, sửa; danh sách kiểm tra phát hành; mở cửa | M | Chưa làm |
 
 **Nghiệm thu:** hoàn tất danh sách kiểm tra ở [09](09-infra-security.md#72-danh-sách-kiểm-tra-trước-khi-mở-cửa); đã khôi phục thử từ bản sao lưu; pilot không còn lỗi chặn; đã có sự đồng ý về thương hiệu và an ninh nếu mở rộng trong công ty.

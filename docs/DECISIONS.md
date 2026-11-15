@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-15 — PWA viết tay; loadtest qua stack production
+
+- Gói việc: P7.3
+- Bối cảnh: thiết kế muốn Service Worker cache-first cho asset có hash và PWA cài được; loadtest "trên hạ tầng giống production"; thử ma trận thiết bị.
+- Quyết định: (1) `apps/web/public/sw.js` viết tay (~60 dòng) thay vì `vite-plugin-pwa`/Workbox: chỉ cần cache-first cho `/assets/*` và mạng-trước cho trang, không thêm phụ thuộc. Không đụng `/api`, `/rt`, `/admin`; cache tối đa 120 file. Có e2e (`pwa.spec.ts`: manifest, file có hash trong cache, mở được khi mất mạng). Service Worker chạy trong mọi e2e từ nay. (2) Manifest `display: fullscreen` cho game 3D; biểu tượng tự vẽ (khối nhà màu cam), **không dùng logo VNG** cho tới khi có đồng ý về thương hiệu (09 §9). (3) Loadtest chạy vào stack compose thật qua Caddy; `tools/loadtest` có `--metrics` để đọc số của realtime qua mạng nội bộ vì Caddy chặn `/rt/metrics`. (4) Ma trận thiết bị cần người và máy thật: ghi kế hoạch ở 04 §10, chưa chạy.
+- Khác plan ở đâu: đã sửa `04-client.md` §9–§10, `05-multiplayer.md` §11.
+- Hệ quả: thử thiết bị và trình duyệt nhúng (Zalo, Teams…) dồn sang pilot P7.4.
+
 ## 2026-11-14 — Rà soát bảo mật P7.2: những gì đã sửa và còn lại
 
 - Gói việc: P7.2

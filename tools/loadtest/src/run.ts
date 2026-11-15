@@ -2,6 +2,7 @@
  * Load test for the realtime server (docs/05-multiplayer.md §11).
  *
  *   pnpm --filter @campus/loadtest load -- --url http://127.0.0.1:2567 --bots 100 --seconds 60
+ *   … --url https://campus.example/rt --metrics http://<realtime on the private network>:2567/metrics
  *
  * Each bot joins through automatic channel assignment with a development guest identity, walks
  * between outdoor points at walking pace (moving about 40% of the time), sends a move ten times a
@@ -34,6 +35,11 @@ const { values } = parseArgs({
     ramp: { type: 'string', default: '20' },
     /** Share of the time a bot is walking, 0–1. */
     moving: { type: 'string', default: '0.4' },
+    /**
+     * Where the server's numbers are, when `url` goes through the public proxy (which hides
+     * them): the realtime server's own address on the private network.
+     */
+    metrics: { type: 'string' },
   },
 });
 const URL = values.url as string;
@@ -41,6 +47,7 @@ const BOTS = Number(values.bots);
 const SECONDS = Number(values.seconds);
 const RAMP = Number(values.ramp);
 const MOVING = Number(values.moving);
+const METRICS = (values.metrics as string | undefined) ?? `${URL}/metrics`;
 
 // Count bytes received by wrapping the WebSocket the SDK uses.
 let bytesIn = 0;
@@ -175,7 +182,8 @@ async function runBot(index: number, until: number): Promise<void> {
 }
 
 async function metrics(reset: boolean) {
-  const response = await fetch(`${URL}/metrics${reset ? '?reset=1' : ''}`);
+  const response = await fetch(`${METRICS}${reset ? '?reset=1' : ''}`);
+  if (!response.ok) return { unavailable: `${METRICS} answered ${response.status}` };
   return response.json() as Promise<Record<string, unknown>>;
 }
 
