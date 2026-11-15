@@ -13,20 +13,21 @@
 ARG NODE_VERSION=24
 
 FROM node:${NODE_VERSION}-alpine AS base
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+# The package store lives in the image layers, not in a cache mount: a CI runner can restore the
+# layer that filled it while starting with an empty cache mount, and offline steps would then fail.
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    npm_config_store_dir=/pnpm/store
 RUN corepack enable
 WORKDIR /repo
 
 FROM base AS build
 # Dependencies first, from the lockfile alone, so source changes reuse this layer.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    --mount=type=secret,id=ca,required=false \
+RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
     corepack install && pnpm fetch
 COPY . .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    --mount=type=secret,id=ca,required=false \
+RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
     pnpm install --frozen-lockfile --offline \
     && pnpm turbo run build --filter=@campus/api --filter=@campus/realtime --filter=@campus/web --filter=@campus/admin \
