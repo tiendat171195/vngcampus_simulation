@@ -18,10 +18,31 @@ import {
 
 export type ServerOptions = CampusRoomOptions;
 
+/** Largest WebSocket message accepted from a client. */
+export const MAX_MESSAGE_BYTES = 4 * 1024;
+
 /** Assembles the realtime server without binding a port, so tests can boot it themselves. */
 export function createServer(options: ServerOptions) {
+  /**
+   * The online directory names people, so only signed-in players may read it (P7.2): a valid
+   * access token, or nothing at all on a development server with development identities.
+   */
+  const mayReadDirectory = async (authorization: string | null) => {
+    const token = /^Bearer (\S+)$/i.exec(authorization ?? '')?.[1];
+    if (!token) return options.devGuestAuth;
+    if (!options.verifyToken) return false;
+    try {
+      await options.verifyToken(token);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return defineServer({
-    transport: new WebSocketTransport(),
+    // Every message the game sends is small (the largest carries an access token); anything
+    // bigger is abuse and closes the connection before it is parsed (docs/09 §7.1).
+    transport: new WebSocketTransport({ maxPayload: MAX_MESSAGE_BYTES }),
     greet: false,
     rooms: {
       // Automatic assignment asks for an `open` room and gets the fullest one first, so the
@@ -65,6 +86,8 @@ export function createServer(options: ServerOptions) {
         '/online',
         { method: 'GET', query: z.object({ q: z.string().max(40).optional() }) },
         async (ctx): Promise<OnlineEntry[]> => {
+          if (!(await mayReadDirectory(ctx.getHeader('authorization'))))
+            throw ctx.error('UNAUTHORIZED', { message: 'Cần đăng nhập.' });
           const [lines, rooms] = await Promise.all([
             matchMaker.presence.hgetall(ONLINE_KEY),
             matchMaker.query({ name: CAMPUS_ROOM }),

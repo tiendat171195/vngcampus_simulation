@@ -178,7 +178,9 @@ sequenceDiagram
 
 ## 7. Presence toàn cục và tìm đồng nghiệp
 
-- Realtime ghi danh bạ vào **presence của Colyseus** (hash `campus:online`: userId → `{ name, channel, roomId, area, status }`), cập nhật khi thay đổi. Một tiến trình dùng bộ nhớ trong; khi bật Redis presence (bậc 2) thì dữ liệu nằm ở Redis mà không phải sửa mã. `GET /rt/online?q=` trả danh sách, tìm theo tên không dấu, bỏ các dòng của phòng không còn tồn tại.
+- Realtime ghi danh bạ vào **presence của Colyseus** (hash `campus:online`: userId → `{ name, channel, roomId, area, status }`), cập nhật khi thay đổi. Một tiến trình dùng bộ nhớ trong; khi bật Redis presence (bậc 2) thì dữ liệu nằm ở Redis mà không phải sửa mã. `GET /rt/online?q=` trả danh sách, tìm theo tên không dấu, bỏ các dòng của phòng không còn tồn tại. **P7.2:** cần `Authorization: Bearer <access token>` (danh sách có tên người); chỉ server dev có `DEV_GUEST_AUTH` mới cho đọc không token. `/rt/channels` (chỉ số đếm) vẫn công khai.
+
+**Giới hạn (P7.2):** mỗi message WebSocket tối đa 4 KB (message lớn nhất là `profile` mang access token); quá thì server đóng kết nối trước khi đọc.
 - API cung cấp danh sách online có tìm kiếm và tổng số theo kênh/khu.
 - "Tìm đồng nghiệp": bảng **Mọi người** → gõ tên → thấy kênh và khu → nút **Tới kênh này** → vào kênh đó, **giữ nguyên vị trí** (client gửi `resume`, server chấp nhận nếu chỗ đó đi được). Mũi tên chỉ đường tới người đó: V1.
 - Quyền riêng tư: mỗi người có tuỳ chọn **ẩn khỏi danh sách online** (vẫn hiện trong thế giới với người đứng gần). Tuỳ chọn đi trong access token (claim `hidden`); đổi giữa chừng thì client gửi `profile` với token mới và server gỡ/ghi lại dòng trong danh bạ.

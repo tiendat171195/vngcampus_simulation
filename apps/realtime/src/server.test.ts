@@ -29,7 +29,7 @@ import { type ActiveSanction, SanctionWatcher } from './moderation';
 import { NO_OPS, OpsWatcher } from './operations';
 import type { CampusRoom, ReportToFile } from './rooms/CampusRoom';
 import type { RoomState } from './rooms/state';
-import { createServer } from './server';
+import { createServer, MAX_MESSAGE_BYTES } from './server';
 
 let colyseus: ColyseusTestServer;
 /** Sanctions in force, as the database would report them. */
@@ -490,6 +490,15 @@ describe('presence', () => {
     await join(guest('Bình'), { spawn: 'poi.checkpoint.atrium' });
     const an = await join(guest('An'));
     await settle(1200);
+    // A forged token is refused even here; development servers accept no token at all.
+    await expect(
+      colyseus.http.get('/online', { headers: { authorization: 'Bearer nope' } }),
+    ).rejects.toMatchObject({ statusCode: 401 });
+    const token = await signToken({ sub: '0190f0c2-0000-7000-8000-0000000000c1', name: 'Tra Cứu' });
+    const withToken = await colyseus.http.get('/online', {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(withToken.statusCode).toBe(200);
     const everyone = (await colyseus.http.get('/online')).data as OnlineEntry[];
     expect(everyone.map((entry) => [entry.name, entry.channel, entry.area])).toEqual([
       ['An', 1, 'Cổng chính'],
@@ -838,5 +847,18 @@ describe('reports and counters', () => {
     await room.leave();
     await settle(200);
     expect(counted).toEqual(['session_length:<5m']);
+  });
+});
+
+describe('limits', () => {
+  it('closes the connection of a client that sends an oversized message', async () => {
+    const room = await join();
+    let closed = 0;
+    room.onLeave((code) => {
+      closed = code;
+    });
+    room.send(MSG.chat, { text: 'x'.repeat(MAX_MESSAGE_BYTES * 2) });
+    await settle(500);
+    expect(closed).toBeGreaterThan(0);
   });
 });

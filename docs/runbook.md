@@ -117,6 +117,7 @@ docker compose --env-file prod.env -f compose.prod.yaml up -d
 | `migrate` thất bại | `api`/`realtime` cũ vẫn chạy (chúng không bị dừng khi `run --rm migrate` lỗi). Xem `docker compose … logs migrate`, sửa rồi deploy lại |
 | Đăng nhập công ty lỗi | Kiểm tra redirect URI ở nhà cung cấp, `PUBLIC_URL`, `AUTH_EMAIL_DOMAINS`; log `api` ghi mã lỗi (`failed`, `domain`, …) |
 | Mọi người bị đăng xuất sau deploy | `JWT_PRIVATE_KEY` đã đổi hoặc trống — đặt lại khoá cũ |
+| Ai đó yêu cầu xoá dữ liệu | Người đó tự xoá trong Hồ sơ → Xoá tài khoản; hoặc quản trị viên mở trang người dùng → Xoá vĩnh viễn. Nếu họ đang online và cần ra ngay, khoá tài khoản trước rồi xoá |
 | Không ai thấy nhau | `realtime` có healthy không; Caddy có chuyển `/rt` (WebSocket) không: `curl -i https://<tên miền>/rt/health` |
 
 ## 8. Bí mật

@@ -3,7 +3,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { useSession } from '../game/core/session';
 import { nameProblem, saveName } from '../game/net/identity';
 import { net } from '../game/net/net';
-import { currentUser, saveProfile, signOut } from '../services/auth';
+import { currentUser, deleteAccount, saveProfile, signOut } from '../services/auth';
 import { loadDepartments, newRecoveryCode } from '../services/directory';
 import { MissionHistory } from './ProgressHud';
 
@@ -184,6 +184,26 @@ export function ProfilePanel({ hidden }: { hidden: boolean }) {
         }}
       >
         Đăng xuất
+      </button>
+      <button
+        type="button"
+        className="profile-delete"
+        onClick={() => {
+          const typed = window.prompt(
+            'Xoá vĩnh viễn tài khoản này cùng điểm, cấp, tiến độ nhiệm vụ và hồ sơ? Không thể hoàn tác.\nGõ XOÁ để xác nhận.',
+          );
+          if (!typed || !['XOÁ', 'XOA'].includes(typed.trim().toUpperCase())) return;
+          void deleteAccount().then(async (problem) => {
+            if (problem) {
+              setMessage({ text: problem, error: true });
+              return;
+            }
+            await net.leave();
+            window.location.reload();
+          });
+        }}
+      >
+        Xoá tài khoản
       </button>
     </section>
   );

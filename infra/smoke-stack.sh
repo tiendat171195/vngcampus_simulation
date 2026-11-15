@@ -5,6 +5,7 @@
 # backup. CI runs it after building the images; locally:
 #   docker build --target api -t campus/api:local .   (same for realtime and web), then
 #   IMAGE_REPO=campus IMAGE_TAG=local infra/smoke-stack.sh
+# SMOKE_KEEP=1 leaves the stack running afterwards, to look around in a browser.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 port="${HTTP_PORT:-8080}"
@@ -29,6 +30,11 @@ password="$(openssl rand -hex 16)"
 compose() { docker compose -p campus-smoke --env-file "$work/prod.env" -f "$work/compose.prod.yaml" "$@"; }
 cleanup() {
   status=$?
+  if [ "$status" -eq 0 ] && [ "${SMOKE_KEEP:-}" = 1 ]; then
+    echo "left running on $base — stop with:"
+    echo "  docker compose -p campus-smoke -f $work/compose.prod.yaml --env-file $work/prod.env down -v"
+    exit 0
+  fi
   [ "$status" -eq 0 ] || compose logs --tail 60 || true
   # The dumps belong to the container's user; remove them from inside.
   compose exec -T backup sh -c 'rm -rf /backups/*' > /dev/null 2>&1 || true
@@ -42,8 +48,8 @@ ok() { echo "ok   $1"; }
 fail() { echo "FAIL $1" >&2; exit 1; }
 json() { node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const v=JSON.parse(s);console.log($1)})"; }
 
-compose up -d --quiet-pull
 base="http://localhost:$port"
+compose up -d --quiet-pull
 for path in /api/health /rt/health; do
   for attempt in $(seq 1 60); do
     curl -fsS "$base$path" > /dev/null 2>&1 && break
@@ -64,6 +70,7 @@ asset="$(grep -oE '/assets/[^"]+\.js' <<< "$home" | head -1)"
 curl -fsSI "$base$asset" | grep -qi 'cache-control: public, max-age=31536000, immutable' || fail "asset caching"
 curl -fsSI "$base/" | grep -qi 'cache-control: no-cache' || fail "page caching"
 curl -fsSI "$base/" | grep -qi 'x-content-type-options: nosniff' || fail "security headers"
+curl -fsSI "$base/" | grep -qi "content-security-policy: default-src 'self'" || fail "content security policy"
 ok "caching and security headers"
 [ "$(curl -s -o /dev/null -w '%{http_code}' "$base/rt/metrics")" = 404 ] || fail "metrics are public"
 ok "metrics stay private"

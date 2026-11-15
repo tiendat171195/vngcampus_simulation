@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-14 — Rà soát bảo mật P7.2: những gì đã sửa và còn lại
+
+- Gói việc: P7.2
+- Bối cảnh: danh sách kiểm tra ở 09 §7.2 trước khi mở cửa.
+- Quyết định: (1) **Chuyển hướng mở:** `return` của đăng nhập OIDC chặn `//` và `/\` nhưng cho qua ký tự tab/xuống dòng — trình duyệt bỏ chúng, nên `/<tab>/evil.example` thành `//evil.example`. Nay chỉ nhận đường dẫn không có khoảng trắng, ký tự điều khiển hay `\` (có test). (2) **Danh bạ online** `/rt/online` trả tên người cho bất kỳ ai: nay cần access token (trừ server dev có danh tính dev). (3) **Số liệu nội bộ** `/rt/metrics` (có cả `?reset=1`) bị chặn ở Caddy — kiểm thử stack phát hiện lệnh `respond` đặt ngoài khối `/rt` không có tác dụng, đã chuyển vào trong. (4) Message WebSocket tối đa 4 KB (thiết kế ghi 1 KB, nhưng message `profile` mang access token gần 1 KB). (5) CSP chặt ở Caddy, cho phép `style` inline (thuộc tính `style` của React, SVG bản đồ). (6) Xoá tài khoản: người dùng tự xoá (`DELETE /me`, phải gửi `confirm: true`, giao diện bắt gõ "XOÁ"), quản trị viên xoá người khác; dữ liệu đi theo cascade, nhật ký không giữ dữ liệu cá nhân. Người bị quản trị viên xoá khi đang online còn ở trong phòng tới khi access token hết hạn (≤ 15 phút) — muốn đẩy ra ngay thì khoá tài khoản trước. (7) Dọn: khách không hoạt động 30 ngày, phiên đã kết thúc 30 ngày. (8) Trang `/terms`. Phiên bản thông báo quyền riêng tư giữ nguyên 1: chỉ thêm cách tự xoá, quyền đã hứa từ trước. (9) `pnpm audit --prod --audit-level high` trong CI.
+- Khác plan ở đâu: đã sửa `05-multiplayer.md` §7, `07-backend-data.md` §4, `09-infra-security.md` §7.2 (đánh dấu từng mục), §8.
+- Hệ quả: còn lại trước khi mở cửa — diễn tập khôi phục trên staging thật, giới hạn kết nối mỗi IP ở tầng mạng nếu mở ra ngoài công ty, và rà soát của bộ phận an ninh/pháp chế nếu dự án thành chính thức.
+
 ## 2026-11-14 — Hạ tầng một máy: một Dockerfile, Caddy phục vụ cả hai app, admin ở /admin/
 
 - Gói việc: P7.1

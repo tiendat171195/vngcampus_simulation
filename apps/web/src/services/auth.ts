@@ -205,6 +205,18 @@ export async function recoverGuest(code: string): Promise<UserDto | string> {
 }
 
 /** Ends the session on this device. */
+/**
+ * Deletes this account for good (docs/09 §8). Returns null when done, or what went wrong. The
+ * session ends with it.
+ */
+export async function deleteAccount(): Promise<string | null> {
+  if (!(await accessToken())) return 'Phiên đăng nhập đã hết, hãy tải lại trang.';
+  const reply = await call('DELETE', '/me', { confirm: true });
+  if (reply?.status !== 200) return errorMessage(reply);
+  held = null;
+  return null;
+}
+
 export async function signOut(): Promise<void> {
   await call('POST', '/auth/logout');
   held = null;

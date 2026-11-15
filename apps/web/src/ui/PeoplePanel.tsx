@@ -2,6 +2,7 @@ import { type ChannelInfo, type OnlineEntry, PLAYER_STATUS } from '@campus/share
 import { useEffect, useState } from 'react';
 import { useSession } from '../game/core/session';
 import { net } from '../game/net/net';
+import { accessToken } from '../services/auth';
 
 const REFRESH_MS = 4000;
 
@@ -22,7 +23,12 @@ export function PeoplePanel({ hidden }: { hidden: boolean }) {
     let cancelled = false;
     const load = async () => {
       const [online, list] = await Promise.all([
-        fetch(`/rt/online?q=${encodeURIComponent(query.trim())}`)
+        accessToken()
+          .then((token) =>
+            fetch(`/rt/online?q=${encodeURIComponent(query.trim())}`, {
+              headers: token ? { authorization: `Bearer ${token}` } : {},
+            }),
+          )
           .then((r) => (r.ok ? (r.json() as Promise<OnlineEntry[]>) : []))
           .catch(() => []),
         fetch('/rt/channels')

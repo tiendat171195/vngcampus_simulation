@@ -105,6 +105,7 @@ Mất toàn bộ Redis không làm mất dữ liệu gốc: BXH dựng lại đ�
 | POST | `/auth/guest/recover` | Lấy lại tài khoản khách bằng mã khôi phục |
 | GET | `/auth/oidc/:provider/start` · `/callback` | Đăng nhập OIDC (`google`, `oidc`). `start?return=/đường-dẫn&consent=<phiên bản>`; lỗi quay về `?auth_error=cancelled\|failed\|expired\|unverified\|domain\|banned\|unknown`. Trình duyệt đang là khách thì callback biến khách thành tài khoản thật, giữ nguyên tiến độ |
 | POST | `/me/consent` | Ghi nhận đồng ý thông báo quyền riêng tư `{ version }` |
+| DELETE | `/me` | Xoá vĩnh viễn tài khoản của mình (P7.2), body `{ confirm: true }`: hồ sơ, tiến độ, điểm, phiên, án phạt và báo cáo về mình (cascade); nhật ký chỉ ghi `user.delete` không kèm dữ liệu cá nhân; xoá cookie phiên |
 | POST | `/me/recovery-code` | Mã khôi phục mới cho khách (mã cũ hết hiệu lực); hiện một lần trong bảng Hồ sơ |
 | GET | `/departments` | Danh sách phòng ban (cần đăng nhập) |
 | GET | `/users/:id` | Thẻ hồ sơ của đồng nghiệp: tên, khách hay không, avatar, phòng ban, chức danh — không có email (cần đăng nhập) |
@@ -140,7 +141,7 @@ Tiến độ nhiệm vụ **không có endpoint ghi**: chỉ realtime ghi đư�
 | Nhiệm vụ (đã làm, P5.2) | `GET /missions?from=&to=`; `GET` · `PUT` · `DELETE /missions/:id`; `POST /missions`; `POST /missions/validate`; `POST /missions/:id/publish` · `unpublish` · `end` · `duplicate`; `GET /missions/:id/stats` (P5.4) |
 | Mẫu, quiz | `/templates` (đã làm, P5.3): `GET`, `GET /:id`, `POST` `{ name, tags?, active?, definition \| missionId }`, `PATCH /:id`, `DELETE /:id`; `POST /missions/autofill` (tự điền ngày mai ngay); `/quiz` (đã làm): `GET ?q=&tag=`, `PUT /quiz/:id`, `DELETE /quiz/:id` (tắt), `POST /quiz/import` `{ csv }` |
 | Thông báo (đã làm, P5.3) | `GET /announcements` (tuần qua và sắp phát); `POST /announcements` `{ level, text, startsAt?, minutes }` — không có `startsAt` là phát ngay; `POST /announcements/:id/cancel`. Mức `fullscreen` chỉ quản trị viên |
-| Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id` |
+| Người dùng (đã làm, P5.1) | `GET /me` (vai trò + quyền); `GET /users?q=`; `GET /users/:id`; `PATCH /users/:id` `{ role }`; `POST /users/:id/sanctions` `{ type, reason, hours }`; `DELETE /sanctions/:id`; `DELETE /users/:id` (P7.2, chỉ quản trị viên, không tự xoá mình) |
 | Kiểm duyệt (đã làm, P5.4) | `GET /reports?status=open\|handled`; `POST /reports/:id/resolve` `{ action: dismiss\|warn\|mute\|ban, hours?, note? }` — một quyết định đóng mọi báo cáo đang mở về cùng người |
 | Số liệu (đã làm, P5.4) | `GET /stats/overview` (quyền dashboard); `GET /missions/:id/stats` (trang kết quả). Số online trực tiếp đọc từ `/rt/channels` |
 | Hệ thống | `GET` / `PUT /settings` (đã làm, P5.3: chỉ quản trị viên; `PUT` nhận một phần, kiểm bằng zod, ghi nhật ký những gì đổi); `GET /audit?all=1` (đã làm: của mình, hoặc của mọi người với quyền admin) |

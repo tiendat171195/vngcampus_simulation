@@ -124,14 +124,16 @@ Nguyên tắc deploy:
 
 ### 7.2 Danh sách kiểm tra trước khi mở cửa
 
-- [ ] HTTPS toàn bộ, HSTS, CSP, cookie `Secure` + `HttpOnly` + `SameSite`
-- [ ] Mọi endpoint và message đều validate bằng zod; có rate limit
-- [ ] Endpoint admin kiểm tra vai trò ở server, có test
-- [ ] Bí mật nằm trong biến môi trường / kho bí mật, không trong repo
-- [ ] Postgres và Redis chỉ nghe trong mạng nội bộ
-- [ ] Sao lưu chạy và đã khôi phục thử
-- [ ] Chạy rà soát bảo mật (`/security-review`) trên toàn bộ thay đổi
-- [ ] Có trang chính sách quyền riêng tư và điều khoản sử dụng
+Tình trạng sau P7.2 (14/11/2026). Ô còn trống cần làm trên máy thật trước khi mở cửa.
+
+- [x] HTTPS toàn bộ, HSTS, CSP, cookie `Secure` + `HttpOnly` + `SameSite` — Caddy tự xin TLS, gửi HSTS và CSP chặt (mọi thứ từ cùng origin, không script inline; đã chạy game trên stack production trong Chromium: không vi phạm nào); cookie phiên `HttpOnly`, `SameSite=Lax`, `Secure` ở production, path `/api/v1/auth`
+- [x] Mọi endpoint và message đều validate bằng zod; có rate limit — đăng ký/đăng nhập/refresh/analytics theo IP, mọi message realtime theo phiên; message WebSocket tối đa 4 KB. Chưa có giới hạn số kết nối mỗi IP (Caddy bản chuẩn không có; thêm ở CDN/tường lửa nếu cần)
+- [x] Endpoint admin kiểm tra vai trò ở server, có test — vai trò đọc từ DB mỗi request
+- [x] Bí mật nằm trong biến môi trường / kho bí mật, không trong repo — `infra/prod.env` bị gitignore, quyền 600; production từ chối chạy thiếu `JWT_PRIVATE_KEY`, `ANALYTICS_SALT`
+- [x] Postgres và Redis chỉ nghe trong mạng nội bộ — compose không mở cổng Postgres; chưa dùng Redis
+- [ ] Sao lưu chạy và đã khôi phục thử — CI dựng stack, dump và khôi phục thử ở mỗi lần push; **còn diễn tập trên staging thật** (runbook §5)
+- [x] Chạy rà soát bảo mật trên toàn bộ thay đổi — rà soát P7.2 (DECISIONS 2026-11-14): sửa chuyển hướng mở qua ký tự tab ở `return`, khoá `/rt/online`, chặn `/rt/metrics`; `pnpm audit --prod` trong CI
+- [x] Có trang chính sách quyền riêng tư và điều khoản sử dụng — `/privacy`, `/terms`, liên kết ở màn hình vào
 
 ## 8. Dữ liệu cá nhân
 
@@ -141,14 +143,15 @@ Khung pháp lý hiện hành: **Luật Bảo vệ dữ liệu cá nhân số 91/
 |---|---|
 | Thu thập tối thiểu | Chỉ lưu: tên hiển thị, email (nếu đăng nhập thật), phòng ban (tuỳ chọn), cấu hình avatar, dữ liệu chơi |
 | Minh bạch và đồng ý | Lần đăng nhập đầu hiện thông báo: thu thập gì, để làm gì, giữ bao lâu; lưu phiên bản đã đồng ý |
-| Quyền của người dùng | Xem và sửa hồ sơ; yêu cầu xoá tài khoản (`DELETE /me`); ẩn mình khỏi danh sách online |
+| Quyền của người dùng | Xem và sửa hồ sơ; yêu cầu xoá tài khoản (`DELETE /me`); ẩn mình khỏi danh sách online. **Đã làm (P7.2):** tự xoá trong Hồ sơ (gõ "XOÁ" để xác nhận), hoặc quản trị viên xoá ở trang người dùng |
 | Không giám sát nhân viên | Không lưu chat; số liệu chỉ ở dạng tổng hợp; không có báo cáo thời gian online theo cá nhân |
 | Giới hạn lưu trữ | Theo bảng dưới, job `data-retention` tự xoá |
 
 | Dữ liệu | Thời hạn lưu |
 |---|---|
 | Hồ sơ người dùng và tiến độ | Tới khi người dùng yêu cầu xoá hoặc tài khoản bị vô hiệu |
-| Tài khoản khách không hoạt động | 30 ngày |
+| Tài khoản khách không hoạt động | 30 ngày (P7.2: job mỗi giờ trong API) |
+| Phiên đăng nhập đã hết hạn hoặc thu hồi | 30 ngày sau khi kết thúc (P7.2) |
 | Bộ đệm chat (trong bộ nhớ phòng realtime, P5.4) | 24 giờ, hoặc tới khi phòng đóng |
 | Báo cáo vi phạm kèm ngữ cảnh | Đoạn chat đính kèm xoá 180 ngày sau khi xử lý; quyết định giữ lại |
 | Sự kiện analytics thô | Không lưu (P5.4): đếm thẳng vào `analytics_daily`, giữ lâu |

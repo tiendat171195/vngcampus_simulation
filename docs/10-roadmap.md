@@ -216,7 +216,7 @@ Ngoài nghiệm thu: thông báo ba mức (phát ngay/hẹn giờ), công tắc 
 | Mã | Gói việc | Phạm vi | Cỡ | Trạng thái |
 |---|---|---|:-:|---|
 | P7.1 | Hạ tầng production | Dockerfile, Compose, Caddy, workflow deploy staging + production, sao lưu, giám sát + cảnh báo, sổ tay vận hành | M | Xong (chưa có máy thật: deploy và cảnh báo từ ngoài chưa chạy thử) |
-| P7.2 | Bảo mật và quyền riêng tư | Rà soát bảo mật, CSP, rate limit, trang chính sách + đồng ý, job xoá dữ liệu quá hạn, luồng xoá tài khoản | M | Chưa làm |
+| P7.2 | Bảo mật và quyền riêng tư | Rà soát bảo mật, CSP, rate limit, trang chính sách + đồng ý, job xoá dữ liệu quá hạn, luồng xoá tài khoản | M | Xong |
 | P7.3 | Tải và thiết bị | Loadtest trên hạ tầng giống production, tinh chỉnh; thử trên ma trận thiết bị kể cả trình duyệt nhúng; Service Worker + PWA | M | Chưa làm |
 | P7.4 | Pilot và phát hành | Pilot 20–50 người trong 1–2 tuần với nhiệm vụ hằng ngày, thu góp ý, sửa; danh sách kiểm tra phát hành; mở cửa | M | Chưa làm |
 

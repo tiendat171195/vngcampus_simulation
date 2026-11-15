@@ -24,13 +24,20 @@ export type SignInFailure =
   | 'banned'
   | 'unknown';
 
+/** A path on this site that no browser can read as another host. */
+const isLocalPath = (value: string) =>
+  /^\/(?![/\\])/.test(value) &&
+  ![...value].some((char) => {
+    const code = char.charCodeAt(0);
+    return code <= 32 || code === 127 || char === '\\';
+  });
+
 const startQuery = z.object({
-  /** Path to come back to; only paths on this site. */
-  return: z
-    .string()
-    .regex(/^\/(?![/\\])/)
-    .max(300)
-    .optional(),
+  /**
+   * Path to come back to; only paths on this site. No whitespace or control characters either:
+   * browsers drop them, so `/<tab>/evil.example` would become `//evil.example`.
+   */
+  return: z.string().refine(isLocalPath).max(300).optional(),
   /** The privacy notice version the person agreed to before leaving, if they did. */
   consent: z.coerce.number().int().optional(),
 });

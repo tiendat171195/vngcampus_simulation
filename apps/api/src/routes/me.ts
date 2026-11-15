@@ -1,3 +1,4 @@
+import { deleteAccount } from '@campus/core';
 import { authIdentities, departments, users } from '@campus/db';
 import {
   AVATAR_MAX_LENGTH,
@@ -15,6 +16,8 @@ import { ACCESS_TOKEN_SECONDS } from '../auth/keys';
 import { newRecoveryCode } from '../auth/recovery';
 import { sha256 } from '../auth/sessions';
 import { ApiError } from '../errors';
+import { parse } from './adminMissions';
+import { REFRESH_COOKIE, REFRESH_COOKIE_PATH } from './auth';
 import { claimsOf, requireUser } from './guard';
 import { claimsFor, toUserDto } from './users';
 
@@ -53,6 +56,17 @@ export async function meRoutes(app: FastifyInstance, deps: AppDeps): Promise<voi
   );
 
   /** Changes the profile; returns a fresh access token because name and avatar travel in it. */
+  /**
+   * Deletes the signed-in account and everything in it (docs/09 §8: the right to erasure). The
+   * body must say so explicitly, so a stray request cannot do it.
+   */
+  app.delete('/me', guard, async (request, reply) => {
+    parse(z.object({ confirm: z.literal(true) }).strict(), request.body);
+    await deleteAccount(db, { userId: claimsOf(request).sub, by: 'self', actorId: null });
+    reply.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH });
+    return { deleted: true };
+  });
+
   app.patch('/me', guard, async (request): Promise<SessionResponse> => {
     const claims = claimsOf(request);
     const parsed = patchBody.safeParse(request.body ?? {});

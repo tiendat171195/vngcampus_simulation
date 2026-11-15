@@ -50,6 +50,10 @@ jobs:
       - name: Lint and format check
         run: pnpm lint
 
+      - name: Known vulnerabilities in production dependencies
+        if: matrix.node == 24
+        run: pnpm audit --prod --audit-level high
+
       - name: Typecheck
         run: pnpm typecheck
 

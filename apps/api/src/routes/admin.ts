@@ -1,4 +1,4 @@
-import { activeSanctions, applySanction, audit, liftSanction } from '@campus/core';
+import { activeSanctions, applySanction, audit, deleteAccount, liftSanction } from '@campus/core';
 import { auditLogs, sanctions, userStats, users } from '@campus/db';
 import {
   type AdminMeDto,
@@ -157,6 +157,17 @@ export async function adminRoutes(app: FastifyInstance, deps: AppDeps): Promise<
       diff: { from: user.role, to: role },
     });
     return toAdminUser(updated ?? user, []);
+  });
+
+  /** Deletes someone's account for good (a privacy request); admins only, never oneself. */
+  app.delete('/admin/users/:id', as('roles'), async (request) => {
+    const { id } = parse(idParams, request.params);
+    const staff = staffOf(request);
+    if (id === staff.id)
+      throw new ApiError(400, 'own_account', 'Tự xoá tài khoản của mình ở trang Hồ sơ trong game.');
+    if (!(await deleteAccount(db, { userId: id, by: 'admin', actorId: staff.id })))
+      throw new ApiError(404, 'not_found', 'Không tìm thấy người này.');
+    return { deleted: true };
   });
 
   app.post('/admin/users/:id/sanctions', as('moderation'), async (request, reply) => {

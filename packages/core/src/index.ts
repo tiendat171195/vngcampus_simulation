@@ -1,6 +1,7 @@
 export * from './analytics/counters';
 export * from './analytics/dashboard';
 export * from './missions';
+export * from './moderation/accounts';
 export * from './moderation/reports';
 export * from './moderation/sanctions';
 export * from './moderation/wordFilter';

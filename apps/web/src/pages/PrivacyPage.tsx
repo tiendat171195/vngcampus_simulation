@@ -63,7 +63,10 @@ export default function PrivacyPage() {
       <h2>Quyền của bạn</h2>
       <ul>
         <li>Xem và sửa hồ sơ của mình; ẩn mình khỏi danh sách người đang online.</li>
-        <li>Yêu cầu xoá tài khoản cùng toàn bộ dữ liệu, bằng cách liên hệ quản trị viên campus.</li>
+        <li>
+          Xoá tài khoản cùng toàn bộ dữ liệu: tự làm trong Hồ sơ → Xoá tài khoản, hoặc nhờ quản trị
+          viên campus. Việc xoá có hiệu lực ngay và không thể hoàn tác.
+        </li>
         <li>Rút lại sự đồng ý bất cứ lúc nào — khi đó bạn sẽ không vào campus được nữa.</li>
       </ul>
 
@@ -71,7 +74,7 @@ export default function PrivacyPage() {
         Khung pháp lý: Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP.
       </p>
       <p>
-        <a href="/">← Về campus</a>
+        <a href="/terms">Điều khoản sử dụng</a> · <a href="/">← Về campus</a>
       </p>
     </main>
   );

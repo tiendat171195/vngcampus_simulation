@@ -1128,6 +1128,18 @@ body {
   cursor: pointer;
 }
 
+.profile-delete {
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f2555a;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* ---------- colleague card ---------- */
 
 .profile-card {

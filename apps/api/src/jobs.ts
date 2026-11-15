@@ -1,6 +1,7 @@
 import {
   autofillTomorrow,
   finalizeEndedMissions,
+  pruneAccounts,
   pruneActivity,
   pruneReportContext,
   settleExpiredSanctions,
@@ -37,8 +38,12 @@ export function startJobs(db: Db, log: (message: string) => void, intervalMs = 6
         prunedAt = Date.now();
         const forgotten = await pruneActivity(db);
         const cleared = await pruneReportContext(db);
-        if (forgotten + cleared > 0)
-          log(`retention: ${forgotten} old activity rows, chat cleared from ${cleared} reports`);
+        const pruned = await pruneAccounts(db);
+        if (forgotten + cleared + pruned.guests + pruned.sessions > 0)
+          log(
+            `retention: ${forgotten} old activity rows, chat cleared from ${cleared} reports, ` +
+              `${pruned.guests} idle guests and ${pruned.sessions} ended sessions deleted`,
+          );
       }
     } catch (error) {
       log(`jobs failed: ${String(error)}`);

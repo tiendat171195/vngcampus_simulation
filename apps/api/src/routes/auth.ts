@@ -23,7 +23,8 @@ import { ApiError } from '../errors';
 import { claimsFor, toUserDto, type UserRow } from './users';
 
 export const REFRESH_COOKIE = 'campus_refresh';
-const COOKIE_PATH = '/api/v1/auth';
+export const REFRESH_COOKIE_PATH = '/api/v1/auth';
+const COOKIE_PATH = REFRESH_COOKIE_PATH;
 
 /** The refresh token lives in an HTTP-only cookie that only the auth routes receive. */
 export function setRefreshCookie(reply: FastifyReply, session: IssuedSession, secure: boolean) {

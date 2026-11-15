@@ -281,7 +281,8 @@ export function Splash() {
         )}
       </form>
       <p className="splash-credit">
-        Bản dựng thử nghiệm · <a href="/privacy">Quyền riêng tư</a> · Dữ liệu bản đồ ©{' '}
+        Bản dựng thử nghiệm · <a href="/privacy">Quyền riêng tư</a> ·{' '}
+        <a href="/terms">Điều khoản</a> · Dữ liệu bản đồ ©{' '}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
           OpenStreetMap contributors
         </a>

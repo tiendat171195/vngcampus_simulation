@@ -247,6 +247,28 @@ export function UserDetailPage({
           </form>
         )}
       </div>
+      {me.permissions.includes('roles') && !self && (
+        <div className="panel">
+          <h2>Xoá tài khoản</h2>
+          <p className="muted">
+            Khi người này yêu cầu xoá dữ liệu: xoá vĩnh viễn hồ sơ, điểm, tiến độ, phiên đăng nhập
+            và báo cáo về họ. Không thể hoàn tác; nhật ký chỉ ghi là đã xoá.
+          </p>
+          <button
+            type="button"
+            className="danger"
+            onClick={() => {
+              if (!window.confirm(`Xoá vĩnh viễn tài khoản "${user.displayName}"?`)) return;
+              api('DELETE', `/admin/users/${id}`).then(
+                () => go('/users'),
+                (failure: Error) => setMessage({ text: failure.message, error: true }),
+              );
+            }}
+          >
+            Xoá vĩnh viễn
+          </button>
+        </div>
+      )}
     </section>
   );
 }

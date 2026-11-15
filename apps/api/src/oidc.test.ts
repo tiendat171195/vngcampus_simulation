@@ -225,7 +225,14 @@ describe('company sign-in', () => {
   });
 
   it('only sends people back to paths on this site', async () => {
-    for (const target of ['//evil.example', 'https://evil.example/', '/\\evil.example']) {
+    for (const target of [
+      '//evil.example',
+      'https://evil.example/',
+      '/\\evil.example',
+      '/\t/evil.example',
+      '/\n/evil.example',
+      '/a\\..\\/evil.example',
+    ]) {
       const response = await app.inject({
         method: 'GET',
         url: `/api/v1/auth/oidc/oidc/start?return=${encodeURIComponent(target)}`,
