@@ -56,7 +56,7 @@ const gateMission = {
     description: { vi: 'Có mặt ở cổng chính.' },
     startsAt: new Date(Date.now() - 3_600_000).toISOString(),
     endsAt: new Date(Date.now() + 3_600_000).toISOString(),
-    mapVersion: '0.2.0',
+    mapVersion: '0.3.0',
     objectives: [
       {
         id: 'o1',
@@ -415,6 +415,18 @@ describe('emotes and seats', () => {
     await settle(200);
     expect(me(a)?.seatId).toBe('');
     expect(b.state.seats.has(seat.id)).toBe(false);
+  });
+
+  it('puts people on a bean bag at the height of its bleacher tier', async () => {
+    const seat = campusIndex.pois.get('poi.seat.atrium_10');
+    if (seat?.y === undefined) throw new Error('no seat on the bleachers');
+    const a = await join(guest('Khán Giả'), { spawn: seat.id });
+    const start = me(a);
+    if (!start) throw new Error('no player');
+    expect(decodePosition(start.y)).toBeCloseTo(seat.y, 1);
+    a.send(MSG.seatTake, { seatId: seat.id });
+    await settle(250);
+    expect(me(a)?.seatId).toBe(seat.id);
   });
 
   it('frees the seat when its occupant leaves', async () => {

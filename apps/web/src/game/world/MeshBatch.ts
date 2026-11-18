@@ -175,9 +175,10 @@ export class MeshBatch {
     thickness: number,
     colour: string | Color,
     sideColour: string | Color = colour,
+    undersideColour: string | Color = sideColour,
   ): void {
     this.polygon(outline, yTop, colour, holes);
-    this.polygon(outline, yTop - thickness, sideColour, holes, true);
+    this.polygon(outline, yTop - thickness, undersideColour, holes, true);
     const side = typeof sideColour === 'string' ? new Color(sideColour) : sideColour;
     const rim = (ring: Polygon, outward: boolean) => {
       // With negative signed area the ring runs counter-clockwise from above, and walking it
@@ -258,6 +259,28 @@ export class MeshBatch {
     const index = geometry.getIndex();
     if (index) for (let i = 0; i < index.count; i++) this.indices.push(base + index.getX(i));
     else for (let i = 0; i < source.count; i++) this.indices.push(base + i);
+  }
+
+  /** Copies everything in another batch into this one, transformed, keeping its colours. */
+  append(source: MeshBatch, matrix: Matrix4): void {
+    const base = this.positions.length / 3;
+    const point = new Vector3();
+    for (let i = 0; i < source.positions.length; i += 3) {
+      point
+        .set(
+          source.positions[i] as number,
+          source.positions[i + 1] as number,
+          source.positions[i + 2] as number,
+        )
+        .applyMatrix4(matrix);
+      this.positions.push(point.x, point.y, point.z);
+      this.colours.push(
+        source.colours[i] as number,
+        source.colours[i + 1] as number,
+        source.colours[i + 2] as number,
+      );
+    }
+    for (const index of source.indices) this.indices.push(base + index);
   }
 
   toGeometry(options: { colours?: boolean } = {}): BufferGeometry {

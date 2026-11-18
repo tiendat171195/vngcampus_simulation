@@ -53,7 +53,7 @@ export async function publishE2eMission(): Promise<string> {
       description: { vi: 'Nhiệm vụ dùng cho test đầu-cuối.' },
       startsAt: new Date(now - 60_000).toISOString(),
       endsAt: new Date(now + 30 * 60_000).toISOString(),
-      mapVersion: '0.2.0',
+      mapVersion: '0.3.0',
       objectives: [
         {
           id: 'o1',

@@ -232,7 +232,7 @@ export function renderFloorSvg(
     polygon(
       connectorFootprint(connector),
       `fill="${onLower ? colours.room : colours.gap}" stroke="${colours.stairs}" stroke-width="1"`,
-      'Cầu thang',
+      connector.kind === 'bleachers' ? 'Khán đài' : 'Cầu thang',
     );
     const [x1, y1] = toSvg(connector.lower.at);
     const [x2, y2] = toSvg(connector.upper.at);

@@ -8,7 +8,7 @@ export const exampleMission: MissionDefinitionInput = {
   description: { vi: 'Điểm danh, chào đồng nghiệp và nạp cà phê cho ngày thứ Hai.' },
   startsAt: '2026-11-15T17:00:00Z',
   endsAt: '2026-11-16T16:59:59Z',
-  mapVersion: '0.2.0',
+  mapVersion: '0.3.0',
   objectiveMode: 'all',
   objectives: [
     {

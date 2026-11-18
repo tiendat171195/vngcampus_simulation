@@ -1,5 +1,9 @@
 import { readFileSync } from 'node:fs';
 import {
+  BLEACHER_MAX_RISE,
+  bleacherHeight,
+  bleacherLayout,
+  bleacherPosition,
   boundsContain,
   campusMapSchema,
   connectorFootprint,
@@ -13,7 +17,7 @@ import {
   type Vec2,
 } from '@campus/map-data';
 import { describe, expect, it } from 'vitest';
-import { buildCampusV0 } from './campus-v0';
+import { buildCampusV0, EXTENT } from './campus-v0';
 import { formatCampusMap } from './format';
 import { loadOsmExtract } from './osm';
 import { CAMPUS_JSON, OSM_EXTRACT } from './paths';
@@ -52,8 +56,27 @@ describe('campus v0', () => {
     expect(outside).toEqual([]);
   });
 
-  it('puts every POI where there is floor to stand on', () => {
-    const stranded = map.pois.filter((poi) => !isWalkable(index, poi.position, poi.floor));
+  it('puts every POI where there is floor to stand on, or a seat on a bleacher tier', () => {
+    const onTier = (poi: (typeof map.pois)[number]) =>
+      map.connectors.some((connector) => {
+        if (connector.kind !== 'bleachers' || connector.lower.floor !== poi.floor) return false;
+        const y0 = index.floors.get(connector.lower.floor)?.y ?? 0;
+        const layout = bleacherLayout(
+          connector,
+          y0,
+          index.floors.get(connector.upper.floor)?.y ?? 0,
+        );
+        const at = bleacherPosition(connector, layout, poi.position);
+        return (
+          at !== null &&
+          Math.abs(y0 + bleacherHeight(layout, at.along, at.offset) - (poi.y ?? 0)) < 0.01
+        );
+      });
+    const stranded = map.pois.filter((poi) =>
+      poi.y === undefined
+        ? !isWalkable(index, poi.position, poi.floor)
+        : poi.kind !== 'seat' || !onTier(poi),
+    );
     expect(stranded.map((poi) => poi.id)).toEqual([]);
   });
 
@@ -147,7 +170,15 @@ describe('campus v0', () => {
   });
 
   it('marks guessed interiors as placeholders', () => {
-    const guessed = ['area.lobby', 'area.canteen', 'area.koi', 'area.gym'];
+    const guessed = [
+      'area.lobby',
+      'area.canteen',
+      'area.koi',
+      'area.gym',
+      'area.yoga',
+      'area.meeting.f2_01',
+      'area.pantry.f3',
+    ];
     for (const id of guessed) expect(index.areas.get(id)?.tags, id).toContain('placeholder');
   });
 });
@@ -184,5 +215,122 @@ describe('outdoor layout checked against public sources (map 0.2)', () => {
     const [sign] = map.props.find((group) => group.model === 'logo_sign')?.instances ?? [];
     expect(sign?.floor).toBe('F3');
     expect(Math.abs((sign?.yawDeg ?? 90) - 0)).toBeLessThan(30);
+  });
+});
+
+describe('interiors furnished after public photos (map 0.3)', () => {
+  const instances = (model: string) =>
+    map.props.find((group) => group.model === model)?.instances ?? [];
+  /** Ground a prop covers, from the same extents the generator uses. */
+  const outline = (model: string, instance: { p: Vec2; yawDeg?: number }): Vec2[] => {
+    const [x0, z0, x1, z1] = EXTENT[model] ?? [0, 0, 0, 0];
+    const yaw = ((instance.yawDeg ?? 0) * Math.PI) / 180;
+    const local = (x: number, z: number): Vec2 => [
+      instance.p[0] + x * Math.cos(yaw) + z * Math.sin(yaw),
+      instance.p[1] - x * Math.sin(yaw) + z * Math.cos(yaw),
+    ];
+    return [local(x0, z0), local(x1, z0), local(x1, z1), local(x0, z1)];
+  };
+  const inArea = (id: string, point: Vec2) => {
+    const area = index.areas.get(id);
+    return area !== undefined && pointInPolygon(point, area.polygon);
+  };
+
+  it('has wooden bleachers from the atrium floor to the F2 gallery, facing the LED wall', () => {
+    const bleachers = map.connectors.filter((c) => c.kind === 'bleachers');
+    expect(bleachers).toHaveLength(1);
+    const [connector] = bleachers;
+    if (!connector) return;
+    expect([connector.lower.floor, connector.upper.floor]).toEqual(['F1', 'F2']);
+    const layout = bleacherLayout(connector, 0, 5);
+    expect(layout.rise).toBeLessThanOrEqual(BLEACHER_MAX_RISE);
+    expect(layout.depth).toBeGreaterThan(0.6);
+
+    const [wall] = instances('led_wall');
+    if (!wall) throw new Error('no LED wall');
+    // Downhill from the bleachers is the way the wall faces back from.
+    const downhill: Vec2 = [-layout.up[0], -layout.up[1]];
+    const toWall: Vec2 = [wall.p[0] - connector.lower.at[0], wall.p[1] - connector.lower.at[1]];
+    expect(toWall[0] * downhill[0] + toWall[1] * downhill[1]).toBeGreaterThan(8);
+    const beanbags = map.pois.filter((poi) => poi.meta?.furniture === 'beanbag');
+    expect(beanbags.length).toBeGreaterThanOrEqual(12);
+    for (const seat of beanbags) expect(seat.y, seat.id).toBeGreaterThan(0);
+  });
+
+  it('puts the speed gates between the entrance and the atrium, with lanes to walk through', () => {
+    const gates = instances('speed_gate').sort((a, b) => a.p[0] - b.p[0]);
+    expect(gates.length).toBeGreaterThanOrEqual(6);
+    for (const gate of gates) expect(inArea('area.lobby', gate.p), `${gate.p}`).toBe(true);
+    for (let i = 1; i < gates.length; i++) {
+      const lane = (gates[i]?.p[0] ?? 0) - (gates[i - 1]?.p[0] ?? 0) - 0.22;
+      expect(lane).toBeGreaterThan(0.9);
+    }
+  });
+
+  it('fills the canteen with long tables in front of the serving counters', () => {
+    const tables = instances('canteen_table');
+    expect(tables.length).toBeGreaterThanOrEqual(20);
+    for (const table of tables) {
+      for (const corner of outline('canteen_table', table)) {
+        expect(inArea('area.canteen', corner), `${table.p}`).toBe(true);
+      }
+    }
+    const counters = instances('food_counter');
+    expect(counters.length).toBeGreaterThanOrEqual(3);
+    const backRow = Math.min(...tables.map((t) => t.p[1]));
+    for (const counter of counters) expect(counter.p[1]).toBeLessThan(backRow);
+    const chairs = map.pois.filter((poi) => poi.id.startsWith('poi.seat.canteen_'));
+    expect(chairs).toHaveLength(tables.length * 8);
+  });
+
+  it('equips the gym inside the gym', () => {
+    for (const model of ['gym_rack', 'treadmill', 'rower', 'dumbbell_rack', 'mirror_wall']) {
+      expect(instances(model).length, model).toBeGreaterThan(0);
+      for (const instance of instances(model)) {
+        for (const corner of outline(model, instance)) {
+          expect(inArea('area.gym', corner), `${model} ${instance.p}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('gives each office floor booths, glass meeting rooms with seats, and a pantry', () => {
+    for (const floor of ['F2', 'F3'] as const) {
+      const on = (model: string) => instances(model).filter((i) => i.floor === floor);
+      expect(on('booth_house'), floor).toHaveLength(5);
+      expect(on('meeting_room'), floor).toHaveLength(4);
+      expect(on('pantry_counter'), floor).toHaveLength(1);
+      const key = floor.toLowerCase();
+      for (let i = 1; i <= 4; i++) {
+        const room = `area.meeting.${key}_0${i}`;
+        const seats = map.pois.filter((poi) => poi.id.startsWith(`poi.seat.meeting_${key}_0${i}_`));
+        expect(seats, room).toHaveLength(6);
+        for (const seat of seats) expect(inArea(room, seat.position), seat.id).toBe(true);
+      }
+    }
+  });
+
+  it('keeps desks out of rooms, and items out of all furniture', () => {
+    const rooms = map.areas.filter((area) => area.tags.includes('room'));
+    for (const desk of instances('desk_cluster')) {
+      const inside = rooms.find(
+        (room) =>
+          room.floor === desk.floor &&
+          outline('desk_cluster', desk).some((p) => pointInPolygon(p, room.polygon)),
+      );
+      expect(inside?.id, `desk at ${desk.p}`).toBeUndefined();
+    }
+    const furniture = map.props
+      .filter((group) => EXTENT[group.model])
+      .flatMap((group) =>
+        group.instances.map((i) => ({ floor: i.floor, outline: outline(group.model, i) })),
+      );
+    const items = map.pois.filter((poi) => poi.kind === 'item_spot');
+    for (const item of items) {
+      const hit = furniture.find(
+        (f) => f.floor === item.floor && pointInPolygon(item.position, f.outline),
+      );
+      expect(hit, item.id).toBeUndefined();
+    }
   });
 });

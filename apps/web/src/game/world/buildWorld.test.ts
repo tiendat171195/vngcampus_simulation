@@ -1,6 +1,8 @@
+import { poiHeight } from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import { DoubleSide, Ray, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
+import { CharacterMotor } from '../player/CharacterMotor';
 import { buildWorld } from './buildWorld';
 
 const world = buildWorld(campusMap);
@@ -49,9 +51,9 @@ describe('floors', () => {
     expect(floorBelow(0, 30, 2)).toBeCloseTo(0);
   });
 
-  it('puts a floor directly under every point of interest', () => {
+  it('puts a floor directly under every point of interest, or a bleacher tier under a seat', () => {
     const floating = campusMap.pois.filter((poi) => {
-      const level = campusIndex.floors.get(poi.floor)?.y ?? 0;
+      const level = poiHeight(campusIndex, poi);
       const y = floorBelow(poi.position[0], level + 1.6, poi.position[1]);
       return y === undefined || Math.abs(y - level) > 0.05;
     });
@@ -61,10 +63,10 @@ describe('floors', () => {
 
 describe('stairs', () => {
   it('are ramps rising evenly between floors', () => {
-    // North grand stair: ground at z = -2, F2 at z = -12.
-    expect(floorBelow(-8, 4, -4.5)).toBeCloseTo(1.25, 1);
-    expect(floorBelow(-8, 6, -7)).toBeCloseTo(2.5, 1);
-    expect(floorBelow(-8, 7, -11.9)).toBeCloseTo(4.95, 1);
+    // South grand stair: ground at z = 6, F2 at z = 16.
+    expect(floorBelow(8, 4, 8.5)).toBeCloseTo(1.25, 1);
+    expect(floorBelow(8, 6, 11)).toBeCloseTo(2.5, 1);
+    expect(floorBelow(8, 7, 15.9)).toBeCloseTo(4.95, 1);
   });
 
   it('cut their own well through the slab above', () => {
@@ -74,8 +76,61 @@ describe('stairs', () => {
   });
 
   it('are fenced in at the sides and around their well', () => {
-    expect(obstacle([-8, 3.2, -7], [-12, 3.2, -7])).toBeLessThan(2.2);
+    expect(obstacle([8, 3.2, 11], [12, 3.2, 11])).toBeLessThan(2.2);
     expect(obstacle([2, 10, -21], [5, 10, -21])).toBeLessThan(2.2);
+  });
+});
+
+describe('atrium bleachers', () => {
+  it('rise in tiers low enough to step onto, with half steps down the middle lane', () => {
+    expect(floorBelow(-10, 6, -0.2)).toBeCloseTo(0.3125, 3);
+    expect(floorBelow(-10, 6, -0.9)).toBeCloseTo(0.625, 3);
+    expect(floorBelow(-10, 7, -11.8)).toBeCloseTo(5, 3);
+    expect(floorBelow(-6, 6, -0.2)).toBeCloseTo(0.15625, 3);
+  });
+
+  it('can be walked up from the atrium floor to the F2 gallery without jumping', () => {
+    for (const x of [-10, -6, 0]) {
+      const motor = new CharacterMotor(world.bvh);
+      motor.teleport(x, 0, 3);
+      for (let i = 0; i < 60 * 8; i++) motor.step(1 / 60, { x: 0, z: -1, run: false, jump: false });
+      expect(motor.position.z, `x = ${x}`).toBeLessThan(-13);
+      expect(motor.position.y, `x = ${x}`).toBeCloseTo(5, 1);
+    }
+  });
+
+  it('have glass balustrades down their sides', () => {
+    expect(obstacle([-12, 3.3, -6], [-16, 3.3, -6])).toBeCloseTo(2, 0);
+  });
+
+  it('face the LED wall across the atrium floor', () => {
+    expect(obstacle([-6, 1.5, 10], [-6, 1.5, 16])).toBeCloseTo(3.2, 0);
+  });
+});
+
+describe('furniture', () => {
+  it('leaves lanes between the speed gates, but not through a cabinet', () => {
+    expect(obstacle([17.625, 0.5, 21], [17.625, 0.5, 16])).toBe(Number.POSITIVE_INFINITY);
+    expect(obstacle([18.25, 0.5, 21], [18.25, 0.5, 16])).toBeCloseTo(1.65, 1);
+  });
+
+  it('blocks the canteen tables and the gym racks', () => {
+    const table = campusMap.props.find((group) => group.model === 'canteen_table')?.instances[0];
+    if (!table) throw new Error('no canteen table');
+    const [x, z] = table.p;
+    expect(obstacle([x, 0.5, z + 3], [x, 0.5, z])).toBeCloseTo(2.55, 1);
+    expect(obstacle([-102.5, 1, -26], [-102.5, 1, -31])).toBeLessThan(4);
+  });
+
+  it('lets people into a meeting room through its door, not through its glass', () => {
+    expect(obstacle([-39, 6, -26], [-39, 6, -31])).toBe(Number.POSITIVE_INFINITY);
+    expect(obstacle([-41, 6, -26], [-41, 6, -31])).toBeCloseTo(2.9, 1);
+  });
+
+  it('lets people into a booth from the gallery', () => {
+    // The first booth on F2 opens west, towards the atrium.
+    expect(obstacle([19, 6, -6], [21.6, 6, -6])).toBe(Number.POSITIVE_INFINITY);
+    expect(obstacle([21.6, 6, -9], [21.6, 6, -6])).toBeLessThan(2);
   });
 });
 
@@ -93,8 +148,10 @@ describe('walls and doors', () => {
   });
 
   it('guards the edge of the atrium on upper floors, except where stairs land', () => {
-    expect(obstacle([0, 5.5, -14], [0, 5.5, -10])).toBeCloseTo(2, 0);
-    expect(obstacle([-8, 5.6, -14], [-8, 5.6, -11])).toBe(Number.POSITIVE_INFINITY);
+    expect(obstacle([8, 5.5, -14], [8, 5.5, -10])).toBeCloseTo(2, 0);
+    // The top of the bleachers is open onto the gallery.
+    expect(obstacle([-6, 5.6, -14], [-6, 5.6, -11])).toBe(Number.POSITIVE_INFINITY);
+    expect(obstacle([-12, 5.6, -14], [-12, 5.6, -11])).toBe(Number.POSITIVE_INFINITY);
     expect(obstacle([0, 10, -14], [0, 10, -10])).toBeCloseTo(2, 0);
   });
 });

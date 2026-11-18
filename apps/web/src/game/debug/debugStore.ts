@@ -1,7 +1,18 @@
 import { create } from 'zustand';
 import type { LevelId } from '../world/context';
 
-export type ViewpointId = 'overview' | 'gate' | 'atrium' | 'pool' | 'riverside' | 'forecourt';
+export type ViewpointId =
+  | 'overview'
+  | 'gate'
+  | 'lobby'
+  | 'atrium'
+  | 'bleachers'
+  | 'canteen'
+  | 'gym'
+  | 'office'
+  | 'pool'
+  | 'riverside'
+  | 'forecourt';
 
 interface DebugState {
   /** `follow` is the game camera behind the character; `free` detaches it for inspection. */

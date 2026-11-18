@@ -31,6 +31,75 @@ export function connectorFootprint(connector: Connector): Vec2[] {
   return stripPolygon(connector.lower.at, connector.upper.at, connector.width);
 }
 
+/**
+ * Tiers of bleachers rise at most this much, so people walk up them without jumping
+ * (the character controller steps over 0.35 m).
+ */
+export const BLEACHER_MAX_RISE = 0.32;
+/** Width of the lane of half steps down the middle of bleachers. */
+export const BLEACHER_LANE = 1.8;
+
+export interface BleacherLayout {
+  tiers: number;
+  /** Height of one tier. */
+  rise: number;
+  /** Depth of one tier, along the flight. */
+  depth: number;
+  /** Horizontal length of the flight. */
+  run: number;
+  /** Unit vector from the bottom of the flight to the top. */
+  up: Vec2;
+  /** Unit vector across the flight, to the right of someone walking up. */
+  across: Vec2;
+}
+
+export function bleacherLayout(
+  connector: Connector,
+  lowerY: number,
+  upperY: number,
+): BleacherLayout {
+  const { at: a } = connector.lower;
+  const { at: b } = connector.upper;
+  const run = distance(a, b);
+  const tiers = Math.ceil((upperY - lowerY) / BLEACHER_MAX_RISE - 1e-9);
+  const up: Vec2 = [(b[0] - a[0]) / run, (b[1] - a[1]) / run];
+  return {
+    tiers,
+    rise: (upperY - lowerY) / tiers,
+    depth: run / tiers,
+    run,
+    up,
+    across: [-up[1], up[0]],
+  };
+}
+
+/**
+ * Where on a flight of bleachers a point lies: `along` metres up the flight from its foot and
+ * `offset` metres to the side of its centre line. Null outside the flight.
+ */
+export function bleacherPosition(
+  connector: Connector,
+  layout: BleacherLayout,
+  point: ReadonlyVec2,
+): { along: number; offset: number } | null {
+  const { at: a } = connector.lower;
+  const dx = point[0] - a[0];
+  const dz = point[1] - a[1];
+  const along = dx * layout.up[0] + dz * layout.up[1];
+  const offset = dx * layout.across[0] + dz * layout.across[1];
+  if (along < 0 || along > layout.run || Math.abs(offset) > connector.width / 2) return null;
+  return { along, offset };
+}
+
+/** Height above the foot of the flight of the tier (or lane step) under a point. */
+export function bleacherHeight(layout: BleacherLayout, along: number, offset: number): number {
+  const inLane = Math.abs(offset) < BLEACHER_LANE / 2;
+  const step = inLane ? layout.depth / 2 : layout.depth;
+  const rise = inLane ? layout.rise / 2 : layout.rise;
+  const count = inLane ? layout.tiers * 2 : layout.tiers;
+  return Math.min(count, Math.floor(along / step) + 1) * rise;
+}
+
 export function createMapIndex(map: CampusMap): MapIndex {
   const areasByFloor = new Map<FloorId, Area[]>();
   const gapsByFloor = new Map<FloorId, Polygon[]>();

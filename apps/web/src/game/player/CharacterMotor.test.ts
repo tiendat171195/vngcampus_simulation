@@ -152,7 +152,7 @@ describe('walls, doors and edges', () => {
   });
 
   it('cannot leave an upper floor over the atrium railing', () => {
-    const motor = spawn(0, 5, -15);
+    const motor = spawn(10, 5, -15);
     expect(motor.grounded).toBe(true);
     wait(motor, 4, { x: 0, z: 1, run: true, jump: false });
     expect(motor.position.y).toBeCloseTo(5, 3);
@@ -162,11 +162,11 @@ describe('walls, doors and edges', () => {
 
 describe('stairs', () => {
   it('does not creep while standing on a flight', () => {
-    const motor = spawn(-8, 2.5, -7);
+    const motor = spawn(8, 2.5, 11);
     expect(motor.grounded).toBe(true);
     wait(motor, 3);
-    expect(motor.position.x).toBe(-8);
-    expect(motor.position.z).toBe(-7);
+    expect(motor.position.x).toBe(8);
+    expect(motor.position.z).toBe(11);
     expect(motor.position.y).toBeCloseTo(2.5, 1);
   });
 
@@ -174,10 +174,10 @@ describe('stairs', () => {
     const motor = spawn(0, 0, -52);
     const up: Waypoint[] = [
       [0, -30], // through the north door
-      [-3, -14], // into the atrium, east of the north stair
-      [-3, 0],
-      [-8, -0.5], // foot of the stair
-      [-8, -13.2], // up to the F2 gallery
+      [4, -14], // into the atrium, east of the bleachers
+      [4, 2.5],
+      [-10, 2.5], // in front of the bleachers
+      [-10, -13.2], // up them to the F2 gallery
     ];
     follow(motor, up);
     expect(motor.position.y).toBeCloseTo(5, 2);
@@ -193,19 +193,19 @@ describe('stairs', () => {
 
     follow(motor, [
       [6, -14.4],
-      [-8, -13.2],
-      [-8, -0.5],
+      [-10, -13.2],
+      [-10, 2.5],
     ]);
     expect(motor.position.y).toBeCloseTo(0, 2);
     expect(floorOf(motor)).toBe('F1');
   });
 
   it('survives the same climb at a run', () => {
-    const motor = spawn(-8, 0, 0);
+    const motor = spawn(-10, 0, 2.5);
     follow(
       motor,
       [
-        [-8, -13.2],
+        [-10, -13.2],
         [6, -14.4],
         [6, -27.5],
       ],

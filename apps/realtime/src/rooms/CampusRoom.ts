@@ -1,5 +1,13 @@
 import { maskProfanity, normaliseChat } from '@campus/core';
-import { areasAt, distance, floorAt, isWalkable, type Poi, poisOfSet } from '@campus/map-data';
+import {
+  areasAt,
+  distance,
+  floorAt,
+  isWalkable,
+  type Poi,
+  poiHeight,
+  poisOfSet,
+} from '@campus/map-data';
 import { campusIndex, campusMap } from '@campus/map-data/campus';
 import {
   afkSchema,
@@ -136,6 +144,8 @@ export interface ReportToFile extends ReportInput {
 }
 /** How close one must stand to sit down, and how far a seated player may drift before standing. */
 const SEAT_REACH = 2.5;
+/** Seats on the bleachers stand above the floor; somebody must be on about the same tier. */
+const SEAT_REACH_UP = 1.2;
 const SEAT_LEASH = 1.5;
 
 const LIMITS: WorldLimits = {
@@ -618,7 +628,11 @@ export class CampusRoom extends Room<{
     const notice = (text: string) => client.send(MSG.notice, { text } satisfies NoticeMessage);
     if (seat?.kind !== 'seat') return;
     const { x, y, z } = tracking.accepted;
-    if (floorAt(campusIndex, y) !== seat.floor || distance(seat.position, [x, z]) > SEAT_REACH) {
+    if (
+      floorAt(campusIndex, y) !== seat.floor ||
+      distance(seat.position, [x, z]) > SEAT_REACH ||
+      Math.abs(poiHeight(campusIndex, seat) - y) > SEAT_REACH_UP
+    ) {
       notice('Lại gần hơn để ngồi.');
       return;
     }
@@ -719,7 +733,7 @@ export class CampusRoom extends Room<{
   ): { x: number; y: number; z: number; yaw: number } {
     const fromPoi = (poi: Poi) => ({
       x: poi.position[0],
-      y: campusIndex.floors.get(poi.floor)?.y ?? 0,
+      y: poiHeight(campusIndex, poi),
       z: poi.position[1],
       yaw: ((poi.yawDeg ?? 0) * Math.PI) / 180,
     });

@@ -1,4 +1,12 @@
-import { areasAt, distance, findArea, floorAt, type Poi, poisOfSet } from '@campus/map-data';
+import {
+  areasAt,
+  distance,
+  findArea,
+  floorAt,
+  type Poi,
+  poiHeight,
+  poisOfSet,
+} from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
 import {
   ANIM,
@@ -33,6 +41,8 @@ const TURN_RATE = 12;
 const DOWN = new Vector3(0, -1, 0);
 /** A free seat is offered when the player stands this close to it. */
 const PROMPT_REACH = 1.6;
+/** ...and at most this far above or below it (one or two bleacher tiers). */
+const SEAT_STEP = 0.7;
 const SEATS: readonly Poi[] = [...campusIndex.pois.values()].filter((poi) => poi.kind === 'seat');
 
 /** Shortest signed difference between two angles. */
@@ -111,11 +121,7 @@ export function Player() {
       const seat = seatId ? campusIndex.pois.get(seatId) : undefined;
       if (!seat) return;
       // Settle onto the seat, facing the way it faces.
-      motor.teleport(
-        seat.position[0],
-        campusIndex.floors.get(seat.floor)?.y ?? 0,
-        seat.position[1],
-      );
+      motor.teleport(seat.position[0], poiHeight(campusIndex, seat), seat.position[1]);
       s.previous.copy(motor.position);
       s.yaw = ((seat.yawDeg ?? 0) * Math.PI) / 180;
       s.emote.until = 0;
@@ -251,7 +257,9 @@ export function Player() {
       if (!s.seatId && motor.grounded) {
         const floor = floorAt(campusIndex, motor.position.y);
         for (const seat of SEATS) {
+          // Bleacher tiers are close together: only seats about level with the feet count.
           if (seat.floor !== floor) continue;
+          if (Math.abs(poiHeight(campusIndex, seat) - motor.position.y) > SEAT_STEP) continue;
           const d = distance(seat.position, [motor.position.x, motor.position.z]);
           const holder = net.seats.get(seat.id);
           if (d < bestDistance && (!holder || holder === '')) {

@@ -81,12 +81,16 @@ export const pathSchema = z.object({
 const connectorEndSchema = z.object({ floor: floorIdSchema, at: vec2Schema });
 
 /**
- * A straight flight between two floors: a ramp surface from `lower.at` up to `upper.at`.
+ * A straight flight between two floors from `lower.at` up to `upper.at`, `width` metres wide.
  * The builder cuts the strip out of the upper slab so there is headroom.
+ *
+ * - `stairs` and `ramp`: a smooth ramp to walk on, with rails at both sides.
+ * - `bleachers`: tiers low enough to step onto and wide enough to sit on, with a lane of half
+ *   steps down the middle, like the wooden seating in the atrium. Seats on it carry their `y`.
  */
 export const connectorSchema = z.object({
   id: id('connector'),
-  kind: z.enum(['stairs', 'ramp']),
+  kind: z.enum(['stairs', 'ramp', 'bleachers']),
   structure: id('structure'),
   lower: connectorEndSchema,
   upper: connectorEndSchema,
@@ -115,7 +119,7 @@ export const poiSchema = z.object({
 });
 
 export const propGroupSchema = z.object({
-  /** Asset key; every instance is drawn with instancing. */
+  /** Asset key. Repeated models are instanced; fixed furniture is merged into its storey. */
   model: z.string().min(1),
   instances: z.array(
     z.object({

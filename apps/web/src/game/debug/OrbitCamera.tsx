@@ -8,7 +8,12 @@ type Triple = [x: number, y: number, z: number];
 const VIEWPOINTS: Record<ViewpointId, { position: Triple; target: Triple }> = {
   overview: { position: [-40, 150, 215], target: [-35, 0, 12] },
   gate: { position: [30, 12, 78], target: [18, 4, 36] },
-  atrium: { position: [0, 3.2, 14], target: [0, 5, -12] },
+  lobby: { position: [31, 3.2, 33], target: [20, 1.2, 18] },
+  atrium: { position: [7, 3.4, 11], target: [-6, 2.6, -6] },
+  bleachers: { position: [-9, 7.2, -11.5], target: [-6, 3, 13] },
+  canteen: { position: [44, 3, 8], target: [18, 0.8, -26] },
+  gym: { position: [-75, 3, -15], target: [-100, 0.8, -31] },
+  office: { position: [14, 7.8, 13], target: [21, 6, -6] },
   pool: { position: [78, 20, -62], target: [50, 0, -18] },
   riverside: { position: [-70, 9, 104], target: [-25, 2, 40] },
   forecourt: { position: [-92, 26, 84], target: [-55, 2, 18] },

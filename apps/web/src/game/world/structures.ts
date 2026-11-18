@@ -1,4 +1,6 @@
 import {
+  BLEACHER_LANE,
+  bleacherLayout,
   type Connector,
   closestPointOnSegment,
   connectorFootprint,
@@ -26,6 +28,8 @@ const LINTEL = 0.3;
 const SLAB_THICKNESS = 0.3;
 const RAIL_HEIGHT = 1.05;
 const RAIL_THICKNESS = 0.08;
+/** The steel top rail over the glass of a balustrade. */
+const TOP_RAIL = 0.06;
 const STEP_RISE = 0.18;
 
 const edgeKey = (a: ReadonlyVec2, b: ReadonlyVec2) => {
@@ -153,6 +157,7 @@ function buildSlabs(ctx: BuildContext, structure: Structure): void {
         SLAB_THICKNESS,
         PALETTE.floor,
         PALETTE.slabEdge,
+        structure.style === 'office' ? PALETTE.ceiling : PALETTE.slabEdge,
       );
     ctx.collider.slab(structure.footprint, holes, storey.y0, SLAB_THICKNESS, PALETTE.slab);
   }
@@ -173,6 +178,7 @@ function buildSlabs(ctx: BuildContext, structure: Structure): void {
       SLAB_THICKNESS,
       PALETTE.roof,
       PALETTE.slabEdge,
+      structure.style === 'office' ? PALETTE.ceiling : PALETTE.slabEdge,
     );
   ctx.collider.slab(structure.footprint, skylights, roofTop, SLAB_THICKNESS, PALETTE.roof);
   for (const skylight of skylights) {
@@ -180,10 +186,17 @@ function buildSlabs(ctx: BuildContext, structure: Structure): void {
   }
 }
 
+/** Floor finish of a room, from its tags: what the photos show, else a tint by importance. */
+function finishOf(tags: readonly string[]): string {
+  if (tags.includes('timber')) return PALETTE.timberFloor;
+  if (tags.includes('rubber')) return PALETTE.rubberFloor;
+  return tags.includes('landmark') ? PALETTE.landmark : PALETTE.room;
+}
+
 function buildRooms(ctx: BuildContext): void {
   for (const area of ctx.map.areas) {
     if (area.kind !== 'indoor' || area.tags.includes('base')) continue;
-    const colour = area.tags.includes('landmark') ? PALETTE.landmark : PALETTE.room;
+    const colour = finishOf(area.tags);
     const y = ctx.floorY(area.floor);
     if (y === 0) ctx.flat('room').polygon(area.polygon, LAYER.room, colour);
     else ctx.level(area.floor).solid.polygon(area.polygon, y + 0.02, colour);
@@ -198,9 +211,88 @@ function rail(
   atA: number,
   atB: number,
 ): void {
-  const heights = [[atA, atA + RAIL_HEIGHT] as const, [atB, atB + RAIL_HEIGHT] as const] as const;
-  ctx.level(level).solid.slopedWall(a, b, RAIL_THICKNESS, heights[0], heights[1], PALETTE.rail);
-  ctx.collider.slopedWall(a, b, RAIL_THICKNESS * 2, heights[0], heights[1], PALETTE.rail);
+  // Glass under a steel top rail, as around the atrium in the photos.
+  const { solid, glass } = ctx.level(level);
+  const top = RAIL_HEIGHT - TOP_RAIL;
+  glass.slopedWall(a, b, GLASS_THICKNESS, [atA, atA + top], [atB, atB + top], PALETTE.glass);
+  solid.slopedWall(
+    a,
+    b,
+    RAIL_THICKNESS,
+    [atA + top, atA + RAIL_HEIGHT],
+    [atB + top, atB + RAIL_HEIGHT],
+    PALETTE.handrail,
+  );
+  ctx.collider.slopedWall(
+    a,
+    b,
+    RAIL_THICKNESS * 2,
+    [atA, atA + RAIL_HEIGHT],
+    [atB, atB + RAIL_HEIGHT],
+    PALETTE.rail,
+  );
+}
+
+/**
+ * Bleachers: tiers people step up and sit on, with a lane of half steps down the middle. Unlike
+ * stairs, what is drawn is what is walked on, so seats sit right on the tiers.
+ */
+function buildBleachers(ctx: BuildContext, connector: Connector): void {
+  const level = connector.lower.floor;
+  const { solid } = ctx.level(level);
+  const y0 = ctx.floorY(connector.lower.floor);
+  const y1 = ctx.floorY(connector.upper.floor);
+  const { tiers, rise, depth, up, across } = bleacherLayout(connector, y0, y1);
+  const foot = connector.lower.at;
+  const yaw = Math.atan2(up[0], up[1]);
+  const half = connector.width / 2;
+  const lane = BLEACHER_LANE / 2;
+
+  const block = (
+    from: number,
+    to: number,
+    left: number,
+    right: number,
+    top: number,
+    colour: string,
+  ) => {
+    const along = (from + to) / 2;
+    const offset = (left + right) / 2;
+    const centre = [
+      foot[0] + up[0] * along + across[0] * offset,
+      (y0 + top) / 2,
+      foot[1] + up[1] * along + across[1] * offset,
+    ] as const;
+    const size = [right - left, top - y0, to - from] as const;
+    solid.box(centre, size, colour, yaw);
+    ctx.collider.box(centre, size, colour, yaw);
+  };
+
+  for (let i = 0; i < tiers; i++) {
+    const top = y0 + (i + 1) * rise;
+    block(i * depth, (i + 1) * depth, -half, -lane, top, PALETTE.timber);
+    block(i * depth, (i + 1) * depth, lane, half, top, PALETTE.timber);
+  }
+  for (let i = 0; i < tiers * 2; i++) {
+    block(
+      (i * depth) / 2,
+      ((i + 1) * depth) / 2,
+      -lane,
+      lane,
+      y0 + ((i + 1) * rise) / 2,
+      PALETTE.timberDark,
+    );
+  }
+
+  // Glass balustrades down both sides; the top is open onto the gallery.
+  const [sideA1, sideB1, sideB2, sideA2] = connectorFootprint(connector) as [
+    Vec2,
+    Vec2,
+    Vec2,
+    Vec2,
+  ];
+  rail(ctx, level, sideA1, sideB1, y0 + rise, y1);
+  rail(ctx, level, sideA2, sideB2, y0 + rise, y1);
 }
 
 function buildStairs(ctx: BuildContext, connector: Connector): void {
@@ -293,5 +385,8 @@ export function buildStructures(ctx: BuildContext): void {
     buildRailings(ctx, structure);
   }
   buildRooms(ctx);
-  for (const connector of ctx.map.connectors) buildStairs(ctx, connector);
+  for (const connector of ctx.map.connectors) {
+    if (connector.kind === 'bleachers') buildBleachers(ctx, connector);
+    else buildStairs(ctx, connector);
+  }
 }

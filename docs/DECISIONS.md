@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-18 — Bản đồ 0.3: nội thất theo ảnh báo chí; khán đài là loại connector mới; đồ cố định gộp vào lưới tầng
+
+- Gói việc: P6.2 (một phần)
+- Bối cảnh: chủ dự án yêu cầu tìm thêm ảnh để vẽ lại campus sát thực tế: gym, canteen, chỗ ngồi, Atrium… Ảnh báo chí và ảnh của VNG cho thấy đồ đạc và vật liệu từng khu, nhưng không cho biết vị trí phòng trong toà nhà.
+- Quyết định: (1) **Dựng đồ đạc theo ảnh, giữ vị trí phòng là giả định** (nhãn `placeholder`): khán đài gỗ và màn LED ở Atrium, cổng soát vé ở sảnh, bàn dài và quầy phục vụ ở canteen, rack/gương/máy chạy ở gym, hàng bàn có hộp cây, booth hình ngôi nhà, phòng họp kính, pantry, phòng yoga (03 §1.4). (2) **Khán đài là `Connector` loại `bleachers`**, không phải cầu thang: va chạm là chính các bậc (0,3125 m, thấp hơn bước 0,35 m của nhân vật) thay vì mặt dốc, để ghế bean bag đặt đúng mặt bậc (`Poi.y`). Bậc thấp hơn ảnh thật (~0,45 m) để đi bộ lên được không cần nhảy. Ghế có `y` phải nằm trên khán đài; client, spawn dev và server dùng `poiHeight`; server từ chối ngồi nếu lệch độ cao quá 1,2 m. Cầu thang bắc thẳng `main.north_1` được thay bằng khán đài. (3) **Đồ cố định ít bản sao được gộp thẳng vào lưới của tầng** (`bake: true` trong `props.ts`), phần kính vào lưới kính; va chạm có thể nhiều hộp. Nhờ vậy thêm ~20 model mà draw call chỉ tăng 33 → 39, tam giác 52k → 116k (ngân sách test 60 / 150k). (4) Ghế là một phần của đạo cụ khác (`furniture: 'built_in'`: bàn canteen, booth, phòng họp) không vẽ thêm ghế rời. (5) Bộ sinh bản đồ đặt đồ cố định trước POI, giữ item nhiệm vụ ra khỏi mọi đồ đạc, chừa lối đi giữa các hàng bàn (Atrium → cửa sang block 2, chân và đầu cầu thang), và báo lỗi nếu một POI không phải ghế đứng trong đồ đạc. (6) Lan can đổi thành kính tay vịn thép, mặt dưới sàn văn phòng tối màu như trần lộ kỹ thuật trong ảnh. Phiên bản bản đồ lên `0.3.0`; id khu và POI cũ giữ nguyên (riêng `seat.atrium_*` thành bean bag, `seat.canteen_*` thành ghế quanh bàn dài và nhiều hơn).
+- Khác plan ở đâu: sửa 03 §1.3, §1.4 (mới), §3, §4, §5.0, §9, §10; 04 §6 (khán đài); 10 (P6.2).
+- Hệ quả: khi có sơ đồ tầng thật, chỉ cần dời vị trí các phòng trong `campus-v0.ts`; đồ đạc đi theo. Kích thước footprint của đồ cố định khai báo ở `EXTENT` (map-tools) phải khớp model trong `apps/web/src/game/world/props.ts`. Tốc độ khung hình trên máy thật chưa đo (môi trường cloud dựng WebGL bằng phần mềm).
+
 ## 2026-11-18 — Dùng logo VNG chính thức; bản đồ 0.2 theo ảnh vệ tinh và ảnh công khai
 
 - Gói việc: P6.2 (một phần), thương hiệu (09 §9)

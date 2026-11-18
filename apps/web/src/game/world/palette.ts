@@ -34,6 +34,36 @@ export const PALETTE = {
 
   stairs: '#d3cbbb',
   rail: '#73808c',
+  /** Top rail of the glass balustrades around the atrium and along stairs (photos). */
+  handrail: '#3a3f45',
+  /** Exposed ceiling: the slabs are left dark with the services showing (photos). */
+  ceiling: '#5d636b',
+
+  // Interiors, from press and VNG photos (docs/03-world-and-assets.md §1.3).
+  /** The wooden bleachers and herringbone floor of the atrium. */
+  timber: '#c98a4b',
+  timberDark: '#a86a36',
+  /** Herringbone wood cladding: the LED wall, counter fronts, the coffee shop. */
+  herringbone: '#c27536',
+  timberFloor: '#d9a86e',
+  rubberFloor: '#4f545c',
+  screen: '#1b2330',
+  screenLight: '#e9eef5',
+  counterTop: '#e8e4dc',
+  steel: '#c3c9cf',
+  darkSteel: '#2a2d32',
+  menuBoard: '#2f3440',
+  canteenTable: '#c8935a',
+  /** Canteen chairs are teal-green (photos). */
+  canteenChair: '#2f7d6d',
+  slats: '#d4a061',
+  bulb: '#ffe7a3',
+  mirror: '#d3e6ee',
+  booth: '#b5a58c',
+  brick: '#a4553d',
+  white: '#f2f2ef',
+  gate: '#f4f4f2',
+  gateLight: '#39c56c',
 
   trunk: '#8a6a4a',
   leafA: '#5faa5c',
@@ -41,15 +71,16 @@ export const PALETTE = {
   lamp: '#4a5560',
   lampHead: '#fff3c4',
   planter: '#c9b48f',
-  desk: '#ead9b6',
-  chair: '#4a6fa5',
+  /** Open-plan desks are white with black mesh chairs (photos). */
+  desk: '#f1f1ee',
+  chair: '#2f3238',
   monitor: '#2b3038',
   shelf: '#c9a26b',
   carBody: '#ffffff',
   carGlass: '#2f3a45',
   carTyre: '#22262b',
   bench: '#b8875a',
-  sofa: '#d9795f',
+  sofa: '#c8452f',
   lounger: '#f2efe6',
 } as const;
 
@@ -63,3 +94,19 @@ export const CAR_COLOURS = [
   '#8fa3ad',
   '#3fa66b',
 ] as const;
+
+/** Bean bags on the atrium bleachers: magenta, royal blue, off-white, yellow, black, pink. */
+export const BEANBAG_COLOURS = [
+  '#b8174f',
+  '#2343a8',
+  '#ece9e1',
+  '#f0c419',
+  '#2b2e33',
+  '#e2589b',
+] as const;
+
+/** The house-shaped booths come in red, white, grey and black (photos). */
+export const BOOTH_COLOURS = ['#b8322a', '#ececea', '#9aa0a6', '#33363c'] as const;
+
+/** Yoga mats. */
+export const MAT_COLOURS = ['#7a5ea8', '#3f9c8f', '#d9704a', '#4f7fc2'] as const;

@@ -13,7 +13,12 @@ const CUTAWAYS: Array<{ level: LevelId; label: string }> = [
 const VIEWPOINTS: Array<{ id: ViewpointId; label: string }> = [
   { id: 'overview', label: 'Toàn cảnh' },
   { id: 'gate', label: 'Cổng' },
+  { id: 'lobby', label: 'Sảnh' },
   { id: 'atrium', label: 'Atrium' },
+  { id: 'canteen', label: 'Canteen' },
+  { id: 'gym', label: 'Gym' },
+  { id: 'bleachers', label: 'Khán đài' },
+  { id: 'office', label: 'Văn phòng' },
   { id: 'pool', label: 'Hồ bơi' },
   { id: 'riverside', label: 'Ven sông' },
   { id: 'forecourt', label: 'Sân vườn' },

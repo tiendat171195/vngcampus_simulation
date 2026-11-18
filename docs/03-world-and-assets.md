@@ -33,9 +33,27 @@
 |---|---|
 | Khớp | Footprint OSM của hai khối và hồ bơi trùng mái nhìn từ trên xuống (sai lệch 1–2 m); đường nội bộ vòng quanh hai khối; vòng xoay phía sông; ki-ốt cà phê góc đông nam; giếng trời Atrium nằm đúng ô giữa mái (khoảng X −14…4, Z −10…12) |
 | Đã sửa | **Cổng chính** ở mặt nam nhìn ra sông (trước cửa có mái che chữ V cam và đài phun nước giữa vòng xoay), không phải giữa mặt đường Tân Thuận — phía đường lớn chỉ có dải cây. **Sảnh lễ tân** ngay sau cửa chính, dẫn vào Atrium. **Bãi xe**: một hàng đỗ xe vuông góc dọc đường phía sông (X −74…6), không phải khu đất trống phía tây. **Hàng rào tây** theo hàng cây ở X ≈ −126; khu đất trống bên ngoài không thuộc campus. **Sân giữa hai khối** là sân vườn có bồn cây tròn (tâm X −52,5; Z 16) chứ không phải sân đón khách. Thêm biển chữ VNG trên mặt đứng nam |
-| Vẫn giả định | Chốt bảo vệ (đặt ở lối xe góc đông bắc), toàn bộ nội thất trừ Atrium và sảnh |
+| Vẫn giả định | Chốt bảo vệ (đặt ở lối xe góc đông bắc); vị trí các phòng trong nhà trừ Atrium và sảnh (đồ đạc bên trong đã dựng theo ảnh, xem §1.4) |
 
 Nguồn: [bài "VNG Campus – mô hình văn phòng thông minh quốc tế" trên vng.com.vn](https://vng.com.vn/news/enterprise/vng-campus-3906.html), [Techsignin](https://www.techsignin.com/chinh-thuc-khai-truong-tru-so-vng-campus-tai-quan-7/), [SGGP](https://www.sggp.org.vn/vng-campus-mo-hinh-van-phong-thong-minh-quoc-te-post537236.html), [Tatinta](https://tatinta.com/diem-den/vng-campus-tru-so-chinh-vng/9159), ảnh vệ tinh Esri World Imagery (© Esri, Maxar và các nguồn khác).
+
+### 1.4 Nội thất theo ảnh báo chí và ảnh của VNG (bản đồ 0.3, 18/11/2026)
+
+Ảnh cho biết một khu trông thế nào (đồ đạc, vật liệu, cách xếp), không cho biết nó nằm đâu trong toà nhà. Nên bản 0.3 dựng **đồ đạc** theo ảnh, còn **vị trí phòng** (canteen, gym, phòng họp, pantry, yoga) vẫn giả định và giữ nhãn `placeholder`. Như §1.3, ảnh chỉ để đối chiếu, không lưu vào repo.
+
+| Khu | Ảnh cho thấy | Đã dựng (0.3) |
+|---|---|---|
+| Atrium | Khán đài gỗ lớn từ sàn trệt lên hành lang tầng 2, lối bậc nhỏ chạy giữa, bean bag nhiều màu; màn LED trên khối ốp gỗ xương cá đối diện; hành lang kính tay vịn thép, thang bắc ngang; trần đen để lộ kỹ thuật | `connector.main.bleachers` loại `bleachers`: 16 bậc 0,31 m (bước lên được không cần nhảy), lối nửa bậc ở giữa, lan can kính hai bên; 16 bean bag là ghế ngồi được trên bậc; `led_wall`; sàn gỗ; lan can kính; mặt dưới sàn tối màu |
+| Sảnh | Cổng soát vé (speed gate) ngay trước chân khán đài | 10 tủ cổng, làn rộng ~1 m; quầy lễ tân đặt lệch sang bên để lối từ cửa vào thông thoáng; sofa đỏ |
+| Cà phê | The Coffee House "ngay sát trung tâm Campus", mặt ốp gỗ xương cá, băng ghế liền tường; tổng 12 điểm cà phê | Quầy bar ốp gỗ xương cá, kệ sau quầy, 6 ghế cao; tên chung "Quầy cà phê" |
+| Canteen | Sảnh lớn, bàn gỗ dài xếp hàng, ghế xanh rêu, quầy phục vụ ốp gỗ xương cá dọc tường, khung lam gỗ treo đèn bóng tròn; 800 chỗ, 3 bếp Á–Âu | 28 bàn dài × 8 ghế (224 ghế ngồi được), 4 quầy dọc tường bắc, khung lam gỗ trên mỗi bàn, sàn gỗ |
+| Gym (UPFIT) | Rack tạ trên sàn cao su, vách gương, máy chèo, máy chạy; phòng yoga "ở vị trí có view đẹp nhất" | 4 rack, 3 vách gương, 4 máy chèo, 2 giá tạ đơn, 8 máy chạy dọc cửa kính, sàn cao su; `area.yoga` ở đầu block 2 nhìn ra sông (tầng 3, giả định) |
+| Văn phòng | Hầu như không vách ngăn; hàng bàn trắng, ghế lưới đen, hộp cây gỗ cuối hàng; booth hình ngôi nhà (đỏ, trắng, xám, đen) dọc hành lang; phòng họp vách kính sàn gỗ, màn hình, đặt chỗ online | Hàng bàn 2 cụm × 4 chỗ + hộp cây, chừa lối đi (Atrium → cửa sang block 2, chân và đầu cầu thang); 5 booth mỗi tầng ở hành lang đông Atrium; 4 phòng họp kính mỗi tầng dọc tường bắc, mỗi phòng 6 ghế |
+| Pantry | Tường gạch, sofa và ghế bành đỏ, bàn cao ghế đôn cam | Mỗi tầng một pantry: quầy + tủ lạnh trên nền tường gạch, sofa đỏ, bàn cao 4 ghế |
+
+Nguồn: [VietNamNet/ICTnews — Văn phòng hoành tráng xịn xò của công ty công nghệ Việt Nam](https://vietnamnet.vn/van-phong-hoanh-trang-xin-xo-cua-cong-ty-cong-nghe-viet-nam-cay-xanh-bao-la-quan-ca-phe-ho-boi-phong-gym-tha-ho-tu-tap-i38897.html), [CafeF — VNG Campus, từ trụ sở trong mơ…](https://cafef.vn/vng-campus-tu-tru-so-trong-mo-den-xu-the-kho-dao-nguoc-cua-moi-truong-sang-tao-mo-20191216110608607.chn), [Người Quan Sát — Cận cảnh VNG Campus](https://nguoiquansat.vn/can-canh-vng-campus-tru-so-hien-dai-bac-nhat-viet-nam-cua-ky-lan-cong-nghe-vng-vnz-156589.html), [vng.com.vn — Ngắm trụ sở công ty VNG vào mỗi dịp đặc biệt](https://vng.com.vn/news/enterprise/tru-so-cong-ty-vng.html).
+
+Chưa dựng: hồ bơi có quán The Mojo, cửa hàng tiện lợi, khu giữ trẻ, máy bán hàng tự động, tủ đặt chỗ phòng họp, tường chữ "Embracing Challenges".
 
 ### 1.2 Sơ đồ nền từ OpenStreetMap
 
@@ -82,13 +100,18 @@ Mã khu (`area.*`) là khoá ổn định; nhiệm vụ và server tham chiếu 
 | | `area.river` sông Sài Gòn | F1 | OSM | Phông nền, không đi vào được |
 | Tầng trệt | `area.main.f1`, `area.block2.f1` | F1 | OSM | Toàn bộ mặt sàn của mỗi block |
 | | `area.lobby` sảnh lễ tân | F1 | Suy ra từ bài viết (0.2) | Ngay sau cửa chính phía nam, dẫn vào Atrium; kích thước vẫn giả định |
-| | `area.atrium` Atrium | F1 (thông tầng) | Giả định | Giữa block chính, 36 × 28 m, có hai cầu thang lớn |
-| | `area.canteen` canteen | F1 | Giả định | Góc đông bắc, cạnh hồ bơi |
-| | `area.koi` khu hồ Koi · `area.koi_pond` · `area.coffee_main` | F1 | Giả định | Phía nam Atrium; chỉ 8 ghế quanh hồ |
-| | `area.gym` phòng gym | F1 | Giả định | Trong block 2 |
-| Tầng trên | `area.office.f2.main`, `area.office.f2.block2`, `area.office.f3.*` | F2, F3 | OSM | Văn phòng mở quanh khoảng thông tầng |
+| | `area.atrium` Atrium · `area.atrium_bleachers` khán đài | F1 (thông tầng) | Vệ tinh + ảnh (0.3) | Giữa block chính, 36 × 28 m. Khán đài gỗ phía bắc lên thẳng hành lang tầng 2, màn LED phía nam; thêm một cầu thang lớn phía đông |
+| | `area.canteen` canteen | F1 | Vị trí giả định, đồ đạc theo ảnh (0.3) | Góc đông bắc, cạnh hồ bơi; bàn dài, quầy dọc tường bắc |
+| | `area.koi` khu hồ Koi · `area.koi_pond` · `area.coffee_main` | F1 | Giả định | Phía nam Atrium; chỉ 8 ghế quanh hồ; quầy cà phê ốp gỗ (0.3) |
+| | `area.gym` phòng gym | F1 | Vị trí giả định, đồ đạc theo ảnh (0.3) | Trong block 2; sàn cao su |
+| Tầng trên | `area.office.f2.main`, `area.office.f2.block2`, `area.office.f3.*` | F2, F3 | OSM | Văn phòng mở quanh khoảng thông tầng; booth dọc hành lang đông Atrium |
+| | `area.meeting.f2_01…04`, `area.meeting.f3_01…04` phòng họp | F2, F3 | Giả định (0.3) | Phòng kính dọc tường bắc block chính, đặt tên "Phòng họp 2.01"… vì chưa biết tên thật |
+| | `area.pantry.f2`, `area.pantry.f3` | F2, F3 | Giả định (0.3) | Góc đông block chính |
+| | `area.yoga` phòng yoga | F3 | Giả định (0.3) | Đầu block 2 phía sông |
 
-Chưa có trong v0 (thêm khi có tư liệu): cửa hàng tiện lợi, phòng chiếu phim, khu vui chơi trẻ em, các phòng họp đặt tên theo thành phố.
+Khu nhỏ trong nhà mang nhãn `room` (phòng họp, pantry, yoga): bộ sinh không đặt bàn làm việc vào đó. Nhãn `timber` và `rubber` chọn màu sàn (gỗ, cao su).
+
+Chưa có trong bản đồ (thêm khi có tư liệu): cửa hàng tiện lợi, phòng chiếu phim, khu vui chơi trẻ em, tên thật của các phòng họp.
 
 Xem bản đồ từng tầng, kèm toạ độ dưới con trỏ: chạy `pnpm dev` rồi mở `http://localhost:5173/debug/map`.
 
@@ -142,9 +165,9 @@ interface Structure {
 
 interface Path { id: string; kind: 'road' | 'walkway' | 'track'; floor: FloorId; points: Vec2[]; width: number; closed: boolean }
 
-interface Connector {              // một vế thang thẳng: mặt dốc từ lower.at lên upper.at
+interface Connector {              // một vế thang thẳng từ lower.at lên upper.at
   id: string;
-  kind: 'stairs' | 'ramp';
+  kind: 'stairs' | 'ramp' | 'bleachers'; // bleachers: bậc ngồi được, mỗi bậc ≤ 0,32 m, lối nửa bậc ở giữa
   structure: string;
   lower: { floor: FloorId; at: Vec2 };
   upper: { floor: FloorId; at: Vec2 };
@@ -157,14 +180,15 @@ interface Poi {
   name?: LocalizedText;
   floor: FloorId;
   position: Vec2;
-  y?: number;                      // mặc định = cao độ tầng
+  y?: number;                      // mặc định = cao độ tầng; ghế trên khán đài ghi độ cao bậc
   yawDeg?: number;                 // 0° nhìn về +Z (sông), 90° nhìn về +X
   radius?: number;
-  meta?: Record<string, unknown>;  // ghế: { furniture: 'bench' | 'chair' | 'stool' | 'lounger' | 'sofa' | 'step' }
+  meta?: Record<string, unknown>;  // ghế: { furniture: 'bench' | 'chair' | 'stool' | 'lounger' | 'sofa' | 'beanbag' | 'built_in' }
+                                   // built_in: ghế là một phần của đạo cụ khác (bàn canteen, booth, phòng họp)
 }
 
 interface PropGroup {
-  model: string;                   // 'tree_a', 'lamp', 'desk_cluster'…
+  model: string;                   // 'tree_a', 'lamp', 'desk_cluster', 'canteen_table', 'meeting_room'…
   instances: Array<{ p: Vec2; floor: FloorId; yawDeg?: number; s?: number }>;
 }
 ```
@@ -210,13 +234,14 @@ Nằm ở `apps/web/src/game/world`. `buildWorld(map)` là three.js thuần, kh�
 | Gộp lưới | `MeshBatch` gộp mọi hình đơn giản thành một lưới tô màu theo đỉnh cho mỗi **tầng hiển thị**: `ground` (ngoài trời), `F1`, `F2`, `F3`, `ROOF`. Mỗi tầng có một lưới đặc và một lưới kính |
 | Lớp phẳng trên mặt đất | Cỏ, lát nền, đường, lối đi, sàn trong nhà, phòng, mặt nước gần như đồng phẳng nên mỗi lớp là một lưới riêng vẽ với polygon offset. Chỉ chênh cao độ thì nhìn từ xa sẽ nhấp nháy |
 | Nhà | Mỗi tầng: tường có chân tường đặc, băng kính, dầm trên; cửa khoét theo `openings`. Sàn tầng trên khoét `voids` và giếng thang. Mái có giếng trời lợp kính. Tường chung giữa hai block chỉ dựng một lần |
-| Cầu thang | Vẽ thành bậc, nhưng va chạm là một mặt dốc nhẵn. Có lan can hai bên và quanh mọi lỗ sàn, chừa trống đúng chỗ thang đáp |
-| Đạo cụ | `InstancedMesh` cho từng model (cây, đèn, xe, chậu cây, cụm bàn, kệ cây) và cho đồ nội thất của từng ghế |
+| Cầu thang | Vẽ thành bậc, nhưng va chạm là một mặt dốc nhẵn. Lan can kính tay vịn thép hai bên và quanh mọi lỗ sàn, chừa trống đúng chỗ thang đáp |
+| Khán đài | Loại `bleachers`: va chạm chính là các bậc (0,31 m, thấp hơn bước 0,35 m của nhân vật), nên đi bộ lên được và ghế đặt đúng mặt bậc. Mép trên mở thẳng ra hành lang tầng 2 |
+| Đạo cụ | `InstancedMesh` cho model lặp nhiều (cây, đèn, xe, cụm bàn, hộp cây, kệ cây) và cho đồ nội thất của từng ghế. Đồ cố định ít bản sao (`bake: true`: màn LED, cổng soát vé, quầy, bàn canteen, máy tập, booth, phòng họp…) được gộp thẳng vào lưới của tầng, phần kính vào lưới kính, nên không tốn thêm draw call. Va chạm có thể gồm nhiều hộp (booth, phòng họp có cửa) |
 | Va chạm | Một lưới riêng, không vẽ: mặt đất, tường, sàn, dốc, lan can, đạo cụ đặc, cộng rào vô hình kín quanh khuôn viên và quanh mặt nước. Có BVH (three-mesh-bvh) |
 | Bảng tên khu | Sprite vẽ bằng canvas 2D (đúng dấu tiếng Việt), chỉ cho khu gắn nhãn `landmark` |
 | Cắt lớp | `world.showUpTo(tầng)` ẩn các tầng phía trên để nhìn vào trong nhà |
 
-Test (`buildWorld.test.ts`) bắn tia vào lưới va chạm: sàn đúng cao độ ở từng tầng, Atrium thông từ đất tới giếng trời, thang dốc đều, đi lọt qua cửa nhưng không lọt qua tường, và **dưới mọi POI đều có sàn**.
+Test (`buildWorld.test.ts`) bắn tia vào lưới va chạm: sàn đúng cao độ ở từng tầng, Atrium thông từ đất tới giếng trời, thang dốc đều, khán đài lên được bằng chính `CharacterMotor`, đi lọt qua cửa, làn cổng soát vé và cửa phòng họp nhưng không lọt qua tường hay vách kính, và **dưới mọi POI đều có sàn** (hoặc mặt bậc khán đài).
 
 ### 5.1 Quy ước Blender
 
@@ -315,11 +340,13 @@ Lưu ý: nếu repo để công khai thì **không commit ảnh và sơ đồ n�
 | Asset tự làm / AI tạo | — | Kiểm tra điều khoản của công cụ AI trước khi dùng cho mục đích chính thức |
 | Logo VNG | Nhãn hiệu của VNG | **Dùng từ 18/11/2026 theo yêu cầu của chủ dự án**: chỉ file gốc từ [thư viện của VNG](https://vng.com.vn/gallery/logo.1.html), không sửa, đúng tổ hợp màu và khoảng trống trong [hướng dẫn thương hiệu](https://vng.com.vn/guidelines/brand/logo.html) (xem `apps/web/src/assets/brand/README.md`) |
 | Thương hiệu đối tác (Phúc Long, Highlands…) | Thuộc chủ sở hữu | Cần được cho phép; khi chưa có thì dùng tên chung chung ("Quầy cà phê") |
-| Ảnh vệ tinh, ảnh báo chí và ảnh của VNG dùng để đối chiếu | Thuộc chủ ảnh | Chỉ dùng làm tham chiếu, không đưa vào repo; ghi nguồn ở §1.3 |
+| Ảnh vệ tinh, ảnh báo chí và ảnh của VNG dùng để đối chiếu | Thuộc chủ ảnh | Chỉ dùng làm tham chiếu, không đưa vào repo; ghi nguồn ở §1.3 và §1.4 |
 
 ## 10. Nguồn tham khảo
 
 - [vng.com.vn — Trụ sở công ty VNG ở đâu](https://vng.com.vn/news/enterprise2/cong-ty-vng-o-dau.html)
+- [vng.com.vn — Ngắm trụ sở công ty VNG vào mỗi dịp đặc biệt](https://vng.com.vn/news/enterprise/tru-so-cong-ty-vng.html)
+- [VietNamNet/ICTnews — Văn phòng hoành tráng xịn xò của công ty công nghệ Việt Nam](https://vietnamnet.vn/van-phong-hoanh-trang-xin-xo-cua-cong-ty-cong-nghe-viet-nam-cay-xanh-bao-la-quan-ca-phe-ho-boi-phong-gym-tha-ho-tu-tap-i38897.html)
 - [CafeF — VNG Campus, từ trụ sở trong mơ…](https://cafef.vn/vng-campus-tu-tru-so-trong-mo-den-xu-the-kho-dao-nguoc-cua-moi-truong-sang-tao-mo-20191216110608607.chn)
 - [Người Quan Sát — Cận cảnh VNG Campus](https://nguoiquansat.vn/can-canh-vng-campus-tru-so-hien-dai-bac-nhat-viet-nam-cua-ky-lan-cong-nghe-vng-vnz-156589.html)
 - [Hoa Học Trò — Khám phá từng ngóc ngách trụ sở VNG](https://hoahoctro.tienphong.vn/tphcm-kham-pha-tung-ngoc-ngach-trong-tru-so-sieu-to-khong-lo-cua-cong-ty-vng-post1215314.tpo)

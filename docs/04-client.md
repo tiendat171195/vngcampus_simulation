@@ -102,7 +102,7 @@ Bộ điều khiển mobile giống cách Niệm Phật Online đang dùng, ngư
 | Dốc tối đa | 45° |
 | Bước mô phỏng | Cố định 60 Hz, tối đa 5 bước con mỗi frame |
 
-- Va chạm: capsule so với lưới va chạm tĩnh qua three-mesh-bvh. **Cầu thang là mặt dốc trong lưới va chạm** (phần nhìn thấy vẫn là bậc thang) để đi mượt.
+- Va chạm: capsule so với lưới va chạm tĩnh qua three-mesh-bvh. **Cầu thang là mặt dốc trong lưới va chạm** (phần nhìn thấy vẫn là bậc thang) để đi mượt. Riêng **khán đài** Atrium (connector loại `bleachers`) va chạm theo đúng bậc, mỗi bậc 0,3125 m, thấp hơn bước 0,35 m của nhân vật nên vẫn đi lên được mà không cần nhảy, và người ngồi bean bag ngồi đúng mặt bậc (`Poi.y`).
 - An toàn: rơi khỏi thế giới (y < −10) thì đưa về vị trí an toàn gần nhất.
 - Các giá trị tốc độ là hằng số dùng chung trong `packages/shared` vì server dùng chúng để kiểm tra.
 

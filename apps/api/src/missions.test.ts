@@ -92,7 +92,7 @@ describe('mission store', () => {
       startsAt: running.startsAt,
       endsAt: running.endsAt,
       definition: running.definition,
-      mapVersion: '0.2.0',
+      mapVersion: '0.3.0',
     });
     const broken: string[] = [];
     await db.insert(missions).values({
@@ -104,7 +104,7 @@ describe('mission store', () => {
       startsAt: running.startsAt,
       endsAt: running.endsAt,
       definition: { objectives: [] },
-      mapVersion: '0.2.0',
+      mapVersion: '0.3.0',
     });
     const active = await loadActiveMissions(db, morningOf('2026-12-01'), (id) => broken.push(id));
     expect(active.map((mission) => mission.id)).toEqual([running.id]);

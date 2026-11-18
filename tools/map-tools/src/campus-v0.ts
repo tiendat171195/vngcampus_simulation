@@ -1,13 +1,18 @@
 /**
  * Builds the campus map: real footprints from OpenStreetMap, the outdoor layout checked against
- * satellite imagery and VNG's own photos (map 0.2, docs/03-world-and-assets.md §1.3), and an
- * assumed layout for what no public source shows yet (interiors, stairs, seats). Assumed pieces
- * carry the `placeholder` tag and get corrected against real floor plans later (P6.2).
+ * satellite imagery and VNG's own photos (map 0.2), and the interiors furnished after press and
+ * VNG photos (map 0.3, docs/03-world-and-assets.md §1.3): the atrium bleachers and LED wall, the
+ * speed gates, the canteen, the gym, the open-plan floors with their booths and meeting rooms.
+ * Photos show what a room looks like, not where it is: room positions stay assumed and carry
+ * the `placeholder` tag until real floor plans correct them (P6.2).
  *
  * The output is deterministic: the same extract always yields the same map.
  */
 import {
   type Area,
+  bleacherHeight,
+  bleacherLayout,
+  bleacherPosition,
   CAMPUS_FRAME,
   type CampusMap,
   type Connector,
@@ -33,6 +38,7 @@ import {
   rect,
   roundVec,
   type Structure,
+  stripPolygon,
   type Vec2,
   yawDegOf,
 } from '@campus/map-data';
@@ -63,15 +69,45 @@ const PROP_CLEARANCE: Record<string, number> = {
   lamp: 1,
   car: 2.8,
   planter: 1.6,
-  desk_cluster: 2.6,
-  plant_shelf: 1.8,
   // Overhead or on a wall: nothing on the ground to keep clear of.
   canopy_v: 0,
   logo_sign: 0,
   planter_round: 0,
 };
 
+/**
+ * Ground covered by each piece of fixed furniture, in its own frame (x to its right, z to its
+ * front): [left, back, right, front]. Matches the models in apps/web (world/props.ts).
+ */
+export const EXTENT: Record<string, readonly [number, number, number, number]> = {
+  led_wall: [-6, -0.4, 6, 0.4],
+  speed_gate: [-0.11, -0.75, 0.11, 0.75],
+  reception_desk: [-2.5, -0.45, 2.5, 0.45],
+  coffee_bar: [-2.25, -0.4, 2.25, 0.4],
+  back_bar: [-2.25, -0.2, 2.25, 0.2],
+  food_counter: [-3, -1.4, 3, 0.5],
+  canteen_table: [-2.4, -0.45, 2.4, 0.45],
+  gym_rack: [-1.05, -0.65, 1.05, 0.65],
+  treadmill: [-0.43, -0.95, 0.43, 0.95],
+  rower: [-0.28, -1.15, 0.28, 1.15],
+  dumbbell_rack: [-1.2, -0.3, 1.2, 0.3],
+  mirror_wall: [-5, -0.07, 5, 0.07],
+  yoga_mat: [-0.33, -0.9, 0.33, 0.9],
+  booth_house: [-1.25, -1.2, 1.25, 1.2],
+  meeting_room: [-3, -2.3, 3, 2.3],
+  pantry_counter: [-2.5, -0.45, 3.35, 0.35],
+  high_table: [-1.2, -0.4, 1.2, 0.4],
+  desk_cluster: [-1.7, -1.45, 1.7, 1.45],
+  planter_box: [-0.25, -0.8, 0.25, 0.8],
+  plant_shelf: [-1.2, -0.22, 1.2, 0.22],
+};
+
 const vi = (text: string) => ({ vi: text });
+/** A heading in (-180, 180]. */
+const normaliseYaw = (yawDeg: number) => {
+  const turned = ((yawDeg % 360) + 360) % 360;
+  return turned > 180 ? turned - 360 : turned;
+};
 const round = (points: Polygon) => points.map((point) => roundVec(point));
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -257,9 +293,19 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     width: 4,
   });
 
+  // The wooden bleachers rise from the atrium floor to the edge of the F2 gallery, facing the LED
+  // wall and the lobby, with a lane of half steps down the middle (photos, map 0.3).
+  const bleachers: Connector = {
+    id: 'connector.main.bleachers',
+    kind: 'bleachers',
+    structure: 'structure.main',
+    lower: { floor: 'F1', at: [-6, 0] },
+    upper: { floor: 'F2', at: [-6, -12] },
+    width: 16,
+  };
   const connectors: Connector[] = [
-    // Two grand stairs rising out of the atrium floor to the edge of the F2 gallery.
-    flight('main.north_1', 'structure.main', 'F1', [-8, -2], 'F2', [-8, -12]),
+    bleachers,
+    // A grand stair out of the atrium floor on the other side, to the edge of the F2 gallery.
     flight('main.south_1', 'structure.main', 'F1', [8, 6], 'F2', [8, 16]),
     // Continuing up behind the gallery.
     flight('main.north_2', 'structure.main', 'F2', [6, -16], 'F3', [6, -26]),
@@ -294,6 +340,17 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   const fountain = ellipse(fountainCentre, 2.8, 2.8, 16);
   /** The round planter in the middle of the garden between the blocks. */
   const gardenPlanter = ellipse([-52.5, 16], 4.2, 4.2, 16);
+  const canteenOutline: Vec2[] = [
+    [6, -32],
+    [34.7, -32],
+    [52, 10],
+    [22, 10],
+    [22, -14],
+    [6, -14],
+  ];
+  /** Glass meeting rooms along the north wall of the main block, on both office floors. */
+  const meetingRoomAt = (i: number): Vec2 => [-41 + i * 6.5, -31.2];
+  const pantryOutline = rect(28, -22, 38, -13);
   // The entrance plaza: between the south facade and the drive around the fountain.
   const entrancePlaza: Vec2[] = [
     [10, facadeZ(10) + 0.6],
@@ -378,7 +435,11 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     // Ground floor
     area('main.f1', 'Block chính — tầng trệt', 'F1', mainFootprint, 'indoor', ['base']),
     area('block2.f1', 'Block 2 — tầng trệt', 'F1', block2Footprint, 'indoor', ['base']),
-    area('atrium', 'Atrium', 'F1', atriumVoid, 'indoor', ['landmark', 'event']),
+    area('atrium', 'Atrium', 'F1', atriumVoid, 'indoor', ['landmark', 'event', 'timber']),
+    area('atrium_bleachers', 'Khán đài Atrium', 'F1', connectorFootprint(bleachers), 'indoor', [
+      'landmark',
+      'event',
+    ]),
     // Through the main entrance, past reception, into the atrium (articles, photos).
     area(
       'lobby',
@@ -393,21 +454,11 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       'indoor',
       ['landmark', 'placeholder'],
     ),
-    area(
-      'canteen',
-      'Canteen',
-      'F1',
-      [
-        [6, -32],
-        [34.7, -32],
-        [52, 10],
-        [22, 10],
-        [22, -14],
-        [6, -14],
-      ],
-      'indoor',
-      ['landmark', 'placeholder'],
-    ),
+    area('canteen', 'Canteen', 'F1', canteenOutline, 'indoor', [
+      'landmark',
+      'placeholder',
+      'timber',
+    ]),
     area(
       'koi',
       'Khu hồ Koi',
@@ -423,7 +474,13 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     ),
     area('koi_pond', 'Hồ cá Koi', 'F1', koiPond, 'water', ['landmark', 'placeholder']),
     area('coffee_main', 'Quầy cà phê', 'F1', rect(5, 22, 13.5, 30), 'indoor', ['placeholder']),
-    area('gym', 'Phòng gym', 'F1', rect(-113, -33, -72, -14), 'indoor', ['placeholder']),
+    area('gym', 'Phòng gym', 'F1', rect(-113, -33, -72, -14), 'indoor', ['placeholder', 'rubber']),
+    // The yoga room "has the best view in the building" (ictnews): the river end of block 2.
+    area('yoga', 'Phòng yoga', 'F3', rect(-115, 31, -103, 44), 'indoor', [
+      'room',
+      'timber',
+      'placeholder',
+    ]),
 
     // Upper floors: open-plan offices around the atrium.
     ...upperFloors.flatMap((floor) => {
@@ -446,6 +503,21 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
           'indoor',
           ['base'],
         ),
+        ...[0, 1, 2, 3].map((i) => {
+          const [x, z] = meetingRoomAt(i);
+          return area(
+            `meeting.${key}_${pad(i + 1)}`,
+            `Phòng họp ${n}.${pad(i + 1)}`,
+            floor,
+            rect(x - 3, z - 2.25, x + 3, z + 2.25),
+            'indoor',
+            ['room', 'placeholder'],
+          );
+        }),
+        area(`pantry.${key}`, `Pantry tầng ${n}`, floor, pantryOutline, 'indoor', [
+          'room',
+          'placeholder',
+        ]),
       ];
     }),
   ];
@@ -497,7 +569,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   // ---------------------------------------------------------------------------------------------
 
   const draft: CampusMap = {
-    version: '0.2.0',
+    version: '0.3.0',
     meta: {
       origin: CAMPUS_FRAME.origin,
       xAxisBearingDeg: CAMPUS_FRAME.xAxisBearingDeg,
@@ -515,15 +587,34 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   const index = createMapIndex(draft);
   const pois: Poi[] = [];
   const spawnSets: Record<string, string[]> = {};
+  const floorY = (floor: FloorId) => index.floors.get(floor)?.y ?? 0;
+
+  /** Height of the bleacher tier under a point, if there is one. */
+  const tierTopAt = (point: Vec2, floor: FloorId): number | undefined => {
+    for (const connector of connectors) {
+      if (connector.kind !== 'bleachers' || connector.lower.floor !== floor) continue;
+      const lowerY = floorY(connector.lower.floor);
+      const layout = bleacherLayout(connector, lowerY, floorY(connector.upper.floor));
+      const at = bleacherPosition(connector, layout, point);
+      if (at) return lowerY + bleacherHeight(layout, at.along, at.offset);
+    }
+    return undefined;
+  };
 
   const place = (
     kind: Poi['kind'],
     id: string,
     floor: FloorId,
     position: Vec2,
-    extra: Partial<Pick<Poi, 'name' | 'yawDeg' | 'radius' | 'meta'>> = {},
+    extra: Partial<Pick<Poi, 'name' | 'yawDeg' | 'radius' | 'meta' | 'y'>> = {},
   ): string => {
-    if (!isWalkable(index, position, floor)) {
+    if (extra.y !== undefined) {
+      // Only seats on bleachers stand above their floor.
+      const top = tierTopAt(position, floor);
+      if (kind !== 'seat' || top === undefined || Math.abs(top - extra.y) > 1e-6) {
+        throw new Error(`poi.${id} at ${position.join(', ')} is not on a bleacher tier`);
+      }
+    } else if (!isWalkable(index, position, floor)) {
       throw new Error(`poi.${id} at ${position.join(', ')} on ${floor} is not on walkable ground`);
     }
     // Things that stay put (furniture, kiosks, characters) must not stand in a roadway.
@@ -543,10 +634,117 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     }
     const poi: Poi = { id: `poi.${id}`, kind, floor, position: roundVec(position), ...extra };
     if (poi.yawDeg !== undefined) poi.yawDeg = Math.round(poi.yawDeg);
+    if (poi.y !== undefined) poi.y = Math.round(poi.y * 1000) / 1000;
     pois.push(poi);
     return poi.id;
   };
   const facing = (from: Vec2, to: Vec2) => yawDegOf([to[0] - from[0], to[1] - from[1]]);
+
+  // ---------------------------------------------------------------------------------------------
+  // Fixed furniture, from press and VNG photos of the interiors (map 0.3). Laid out before the
+  // points of interest so seats can be put on it and items kept off it.
+  // ---------------------------------------------------------------------------------------------
+
+  interface Fixture {
+    model: string;
+    floor: FloorId;
+    at: Vec2;
+    yawDeg: number;
+  }
+  const fixtures: Fixture[] = [];
+  /** A point given in a fixture's own frame (x to its right, z to its front), on the map. */
+  const local = (f: Fixture, x: number, z: number): Vec2 => {
+    const yaw = (f.yawDeg * Math.PI) / 180;
+    return [
+      f.at[0] + x * Math.cos(yaw) + z * Math.sin(yaw),
+      f.at[1] - x * Math.sin(yaw) + z * Math.cos(yaw),
+    ];
+  };
+  const outlineOf = (f: Fixture): Vec2[] => {
+    const extent = EXTENT[f.model];
+    if (!extent) throw new Error(`no extent for ${f.model}`);
+    const [x0, z0, x1, z1] = extent;
+    return [local(f, x0, z0), local(f, x1, z0), local(f, x1, z1), local(f, x0, z1)];
+  };
+  const fixture = (model: string, floor: FloorId, at: Vec2, yawDeg = 0): Fixture => {
+    const f: Fixture = { model, floor, at: roundVec(at), yawDeg: Math.round(yawDeg) };
+    for (const corner of outlineOf(f)) {
+      if (!isWalkable(index, corner, floor) && tierTopAt(corner, floor) === undefined) {
+        throw new Error(`${model} at ${at.join(', ')} on ${floor} sticks out of the floor`);
+      }
+    }
+    fixtures.push(f);
+    return f;
+  };
+  const fixturesOn = (floor: FloorId) => fixtures.filter((f) => f.floor === floor);
+  const WEST: Vec2 = [-1, 0];
+
+  // Atrium: the LED wall faces the bleachers across the atrium floor.
+  fixture('led_wall', 'F1', [-6, 13.6], 180);
+  // Lobby: speed gates between reception and the atrium (photos), the reception desk to one
+  // side so the way from the doors stays open.
+  for (let i = 0; i < 10; i++) fixture('speed_gate', 'F1', [17 + i * 1.25, 18.6]);
+  const receptionDesk = fixture('reception_desk', 'F1', [31, 26.5], yawDegOf(WEST));
+  // The coffee bar by the koi pond, its back bar towards the atrium.
+  const coffeeBar = fixture('coffee_bar', 'F1', [9.25, 27.4]);
+  fixture('back_bar', 'F1', local(coffeeBar, 0, -1.9), coffeeBar.yawDeg);
+
+  // Canteen: serving counters along the north wall (three kitchens and drinks, ictnews), long
+  // tables in rows in front of them.
+  for (const x of [10, 16.5, 23, 29.5]) fixture('food_counter', 'F1', [x, -30.9]);
+  // The canteen kiosk, the checkpoint at the entrance and a mascot hiding spot.
+  const canteenKeepClear: Vec2[] = [
+    [8, -20],
+    [10, -16],
+    [40, -8],
+  ];
+  const canteenTables: Fixture[] = [];
+  const insideCanteen = (p: Vec2) =>
+    pointInPolygon(p, canteenOutline) && distanceToOutline(p, canteenOutline) > 0.6;
+  for (let z = -27.6; z <= 8.2; z += 3.8) {
+    const firstX = z < -14 ? 12 : 25.2;
+    for (let x = firstX; x < 52; x += 6.2) {
+      const corners: Vec2[] = [
+        [x - 2.6, z - 1.25],
+        [x + 2.6, z - 1.25],
+        [x + 2.6, z + 1.25],
+        [x - 2.6, z + 1.25],
+      ];
+      if (!corners.every(insideCanteen)) continue;
+      if (canteenKeepClear.some((p) => distanceToOutline(p, corners) < 1.5)) continue;
+      canteenTables.push(fixture('canteen_table', 'F1', [x, z]));
+    }
+  }
+
+  // Gym (UPFIT): racks in front of a mirror wall, treadmills along the windows, rowers and
+  // dumbbells; the middle stays free for classes (photos of the gym).
+  for (const x of [-105, -95, -85]) fixture('mirror_wall', 'F1', [x, -32.4]);
+  for (const x of [-106.5, -102.5, -98.5, -94.5]) fixture('gym_rack', 'F1', [x, -30.3]);
+  for (const x of [-89, -87.8, -86.6, -85.4]) fixture('rower', 'F1', [x, -29.8], 180);
+  for (const z of [-26, -22.5]) fixture('dumbbell_rack', 'F1', [-73.4, z], yawDegOf(WEST));
+  for (let i = 0; i < 8; i++) fixture('treadmill', 'F1', [-111.3, -31 + i * 1.3], yawDegOf(WEST));
+  // Yoga room at the river end of block 2.
+  for (let row = 0; row < 3; row++) {
+    for (let column = 0; column < 5; column++) {
+      fixture('yoga_mat', 'F3', [-113 + column * 2.2, 33.5 + row * 3.2]);
+    }
+  }
+
+  // Office floors: house-shaped booths along the east gallery of the atrium, glass meeting rooms
+  // along the north wall, a pantry in the east corner.
+  const booths: Fixture[] = [];
+  const meetingRooms: Fixture[] = [];
+  const pantries: { counter: Fixture; table: Fixture; floor: FloorId }[] = [];
+  for (const floor of upperFloors) {
+    for (let i = 0; i < 5; i++)
+      booths.push(fixture('booth_house', floor, [21.6, -6 + i * 2.6], yawDegOf(WEST)));
+    for (let i = 0; i < 4; i++) meetingRooms.push(fixture('meeting_room', floor, meetingRoomAt(i)));
+    pantries.push({
+      floor,
+      counter: fixture('pantry_counter', floor, [33, -21.4]),
+      table: fixture('high_table', floor, [33, -16.4]),
+    });
+  }
 
   // Players arrive at the main entrance facing the doors, as people do off the shuttle bus.
   const entranceDoor = onWall(mainFootprint, [20, 35.9]);
@@ -582,8 +780,21 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     return place('checkpoint', `checkpoint.loop_${pad(i + 1)}`, 'F1', point, { radius: 4 });
   });
 
-  const seat = (id: string, floor: FloorId, at: Vec2, yawDeg: number, furniture: string) =>
-    place('seat', `seat.${id}`, floor, at, { yawDeg, meta: { furniture } });
+  /** Furniture drawn as part of another prop, like the chairs round a canteen table. */
+  const BUILT_IN = 'built_in';
+  const seat = (
+    id: string,
+    floor: FloorId,
+    at: Vec2,
+    yawDeg: number,
+    furniture: string,
+    y?: number,
+  ) =>
+    place('seat', `seat.${id}`, floor, at, {
+      yawDeg: normaliseYaw(yawDeg),
+      meta: { furniture },
+      ...(y === undefined ? {} : { y }),
+    });
 
   // Benches along the river, facing the water.
   for (let i = 0; i < 10; i++) {
@@ -594,15 +805,86 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   ellipse([-2, 30], 7.6, 5.1, 8).forEach((at, i) => {
     seat(`koi_${pad(i + 1)}`, 'F1', at, facing(at, [-2, 30]), 'bench');
   });
+  // Stools at the coffee bar, facing it.
   for (let i = 0; i < 6; i++)
-    seat(`coffee_${pad(i + 1)}`, 'F1', [6.5 + i * 1.2, 28.6], 180, 'stool');
-  for (let row = 0; row < 4; row++) {
-    for (let column = 0; column < 6; column++) {
-      const at: Vec2 = [10 + column * 4.2, -29 + row * 3.6];
-      seat(`canteen_${pad(row * 6 + column + 1)}`, 'F1', at, row % 2 === 0 ? 0 : 180, 'chair');
+    seat(`coffee_${pad(i + 1)}`, 'F1', [6.9 + i * 0.95, 28.6], 180, 'stool');
+  // Every chair of the canteen tables, facing the table.
+  let canteenSeat = 0;
+  for (const table of canteenTables) {
+    for (const x of [-1.8, -0.6, 0.6, 1.8]) {
+      for (const [z, yawDeg] of [
+        [-0.75, 0],
+        [0.75, 180],
+      ] as const) {
+        seat(`canteen_${pad(++canteenSeat)}`, 'F1', local(table, x, z), yawDeg, BUILT_IN);
+      }
     }
   }
-  for (let i = 0; i < 8; i++) seat(`atrium_${pad(i + 1)}`, 'F1', [-16.5, -6 + i * 2], 90, 'step');
+  // Bean bags here and there on the bleachers, facing the LED wall (photos). Not on the top
+  // tiers: from there a sitter would already count as being on the gallery floor above.
+  const tiers = bleacherLayout(bleachers, floorY('F1'), floorY('F2'));
+  const downTheBleachers = yawDegOf([-tiers.up[0], -tiers.up[1]]);
+  (
+    [
+      [1, -5.5],
+      [1, 3],
+      [2, -2.2],
+      [3, 6],
+      [3, -6.5],
+      [4, 2],
+      [5, -3.6],
+      [6, 4.6],
+      [7, -6],
+      [7, 2.2],
+      [8, -2],
+      [9, 5.8],
+      [10, -4.6],
+      [11, 2.6],
+      [12, -6.6],
+      [13, 6.4],
+    ] as const
+  ).forEach(([tier, offset], i) => {
+    const along = (tier + 0.5) * tiers.depth;
+    const at: Vec2 = [
+      bleachers.lower.at[0] + tiers.up[0] * along + tiers.across[0] * offset,
+      bleachers.lower.at[1] + tiers.up[1] * along + tiers.across[1] * offset,
+    ];
+    const y = floorY('F1') + bleacherHeight(tiers, along, offset);
+    seat(`atrium_${pad(i + 1)}`, 'F1', at, downTheBleachers, 'beanbag', y);
+  });
+  // The booths' sofas face each other across the table.
+  booths.forEach((booth, i) => {
+    const key = `${booth.floor.toLowerCase()}_${pad((i % 5) + 1)}`;
+    seat(`booth_${key}_a`, booth.floor, local(booth, -0.8, -0.1), booth.yawDeg + 90, BUILT_IN);
+    seat(`booth_${key}_b`, booth.floor, local(booth, 0.8, -0.1), booth.yawDeg - 90, BUILT_IN);
+  });
+  meetingRooms.forEach((room, i) => {
+    const key = `${room.floor.toLowerCase()}_${pad((i % 4) + 1)}`;
+    [-1.1, 0, 1.1].forEach((x, j) => {
+      seat(`meeting_${key}_${j + 1}`, room.floor, local(room, x, -1.2), room.yawDeg, BUILT_IN);
+      seat(`meeting_${key}_${j + 4}`, room.floor, local(room, x, 0.6), room.yawDeg + 180, BUILT_IN);
+    });
+  });
+  for (const { floor, table } of pantries) {
+    const key = floor.toLowerCase();
+    // A red sofa along the west wall of the pantry and stools at the high table (photos).
+    for (let i = 0; i < 3; i++)
+      seat(`pantry_${key}_sofa_${i + 1}`, floor, [28.9, -20.5 + i], 90, 'sofa');
+    [
+      [-0.7, -0.75, 0],
+      [0.7, -0.75, 0],
+      [-0.7, 0.75, 180],
+      [0.7, 0.75, 180],
+    ].forEach(([x, z, yawDeg], i) => {
+      seat(
+        `pantry_${key}_stool_${i + 1}`,
+        floor,
+        local(table, x as number, z as number),
+        table.yawDeg + (yawDeg as number),
+        'stool',
+      );
+    });
+  }
   // Two rows of loungers on the deck south of the pool, facing the water.
   for (const [i, at] of (
     [
@@ -620,17 +902,21 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     seat(`cafe_terrace_${pad(i + 1)}`, 'F1', [46 + i * 4, 56.5], 180, 'chair');
   for (let i = 0; i < 4; i++)
     seat(`cafe_terrace_${pad(i + 5)}`, 'F1', [44, 44 + i * 3.5], 90, 'chair');
-  for (let i = 0; i < 4; i++) seat(`lobby_${pad(i + 1)}`, 'F1', [32, 19.5 + i * 2.6], -90, 'sofa');
+  for (let i = 0; i < 4; i++) seat(`lobby_${pad(i + 1)}`, 'F1', [17.5, 21 + i * 2.4], 90, 'sofa');
 
-  place('npc_spot', 'npc.reception', 'F1', [21, 22], {
+  const receptionist = local(receptionDesk, 0, -1.1);
+  place('npc_spot', 'npc.reception', 'F1', receptionist, {
     name: vi('Lễ tân'),
-    yawDeg: facing([21, 22], entranceDoor),
+    yawDeg: receptionDesk.yawDeg,
   });
   place('npc_spot', 'npc.security', 'F1', [12, facadeZ(12) + 2], {
     name: vi('Bảo vệ'),
     yawDeg: facing([12, facadeZ(12) + 2], fountainCentre),
   });
-  place('npc_spot', 'npc.barista', 'F1', [9, 23.5], { name: vi('Nhân viên pha chế'), yawDeg: 0 });
+  place('npc_spot', 'npc.barista', 'F1', local(coffeeBar, 0, -0.95), {
+    name: vi('Nhân viên pha chế'),
+    yawDeg: coffeeBar.yawDeg,
+  });
 
   // Hiding places for a wandering mascot (objective type `find`).
   const mascotSpots: Vec2[] = [
@@ -670,7 +956,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     });
 
   photo('gate', 'Trước cổng chính', [21, 41], entranceDoor);
-  photo('atrium', 'Giữa Atrium', [0, 10], [0, -12]);
+  photo('atrium', 'Trước khán đài Atrium', [-6, 9], [-6, -6]);
   photo('riverside', 'Bờ sông', promenadeAt(21), [21, 110]);
   photo('pool', 'Bên hồ bơi', [57.6, -3.2], [47, -22]);
 
@@ -687,6 +973,8 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     /** Outlines to stay clear of (walls, water edges, stairwells) and by how much. */
     clearOf: readonly Polygon[];
     clearance: number;
+    /** Furniture to keep out of and the same distance away from. */
+    avoid?: readonly Polygon[];
   }
 
   const scatter = ({
@@ -696,6 +984,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     minSpacing,
     clearOf,
     clearance,
+    avoid = [],
   }: ScatterOptions): Vec2[] => {
     const weights = within.map((region) => polygonArea(region));
     const total = weights.reduce((sum, weight) => sum + weight, 0);
@@ -720,6 +1009,13 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       ];
       if (!pointInPolygon(candidate, region) || !isWalkable(index, candidate, floor)) continue;
       if (clearOf.some((outline) => distanceToOutline(candidate, outline) < clearance)) continue;
+      if (
+        avoid.some(
+          (outline) =>
+            pointInPolygon(candidate, outline) || distanceToOutline(candidate, outline) < clearance,
+        )
+      )
+        continue;
       if (picked.some((other) => distance(other, candidate) < minSpacing)) continue;
       if (pois.some((poi) => poi.floor === floor && distance(poi.position, candidate) < 1.5))
         continue;
@@ -730,6 +1026,85 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
 
   const footprints = structures.map((structure) => structure.footprint);
   const flights = connectors.map(connectorFootprint);
+
+  // Open-plan offices: rows of white desks, two blocks of four end to end with a wooden planter
+  // box at the end, and plant shelves here and there (photos). Rooms, booths, the gallery round
+  // the atrium and every point of interest are kept clear.
+  // Walkways kept free of desks: from the atrium to the doorway into block 2 and on along its
+  // spine, and round the top and bottom of every flight of stairs.
+  const walkways: Polygon[] = [
+    stripPolygon(blockLink, [-26, -20], 4),
+    stripPolygon([-26, -20], [-17, -9], 4),
+    stripPolygon(blockLink, [-110, -20], 4),
+  ];
+  const landingsOn = (floor: FloorId): Polygon[] =>
+    connectors.flatMap((c) => {
+      const run = distance(c.lower.at, c.upper.at);
+      const zones: Polygon[] = [];
+      if (c.upper.floor === floor)
+        zones.push(ellipse(lerp(c.lower.at, c.upper.at, 1 + 2 / run), 3.5, 3.5, 12));
+      if (c.lower.floor === floor)
+        zones.push(ellipse(lerp(c.lower.at, c.upper.at, -2 / run), 3.5, 3.5, 12));
+      return zones;
+    });
+  for (const floor of upperFloors) {
+    const rooms = areas.filter((a) => a.floor === floor && a.tags.includes('room'));
+    const keepOut = [
+      ...fixturesOn(floor).map(outlineOf),
+      ...rooms.map((room) => room.polygon),
+      ...walkways,
+      ...landingsOn(floor),
+    ];
+    const walls = [mainFootprint, block2Footprint, ...flights];
+    const nearby = pois.filter((poi) => poi.floor === floor).map((poi) => poi.position);
+    const clear = (footprint: Polygon, p: Vec2) =>
+      pointInPolygon(p, footprint) &&
+      isWalkable(index, p, floor) &&
+      walls.every((outline) => distanceToOutline(p, outline) > 1) &&
+      distanceToOutline(p, atriumVoid) > 3 &&
+      keepOut.every(
+        (outline) => !pointInPolygon(p, outline) && distanceToOutline(p, outline) > 1.2,
+      );
+    for (const footprint of [mainFootprint, block2Footprint]) {
+      const xs = footprint.map((p) => p[0]);
+      const zs = footprint.map((p) => p[1]);
+      let row = 0;
+      for (let z = Math.ceil(Math.min(...zs)) + 3; z < Math.max(...zs); z += 5.8) {
+        for (let x = Math.ceil(Math.min(...xs)) + 3; x < Math.max(...xs); x += 9.8) {
+          const reach: Vec2[] = [];
+          for (const dx of [-1.9, 1.75, 5.4, 5.9])
+            for (const dz of [-1.5, 0, 1.5]) reach.push([x + dx, z + dz]);
+          if (!reach.every((p) => clear(footprint, p))) continue;
+          if (nearby.some((p) => p[0] > x - 3.4 && p[0] < x + 7.4 && Math.abs(p[1] - z) < 3))
+            continue;
+          fixture('desk_cluster', floor, [x, z]);
+          fixture('desk_cluster', floor, [x + 3.4, z]);
+          fixture('planter_box', floor, [x + 5.4, z]);
+          row++;
+          const shelf: Vec2 = [x + 7.6, z];
+          if (
+            row % 3 === 0 &&
+            clear(footprint, [x + 7.6, z - 1.3]) &&
+            clear(footprint, [x + 7.6, z + 1.3])
+          )
+            fixture('plant_shelf', floor, shelf, 90);
+        }
+      }
+    }
+  }
+
+  // Nothing but its own seats may stand in a piece of furniture.
+  for (const poi of pois) {
+    if (poi.kind === 'seat') continue;
+    const blocked = fixturesOn(poi.floor).find(
+      (f) =>
+        pointInPolygon(poi.position, outlineOf(f)) ||
+        distanceToOutline(poi.position, outlineOf(f)) < 0.5,
+    );
+    if (blocked)
+      throw new Error(`${poi.id} stands in ${blocked.model} at ${blocked.at.join(', ')}`);
+  }
+  const furnitureOn = (floor: FloorId) => fixturesOn(floor).map(outlineOf);
   const itemSet = (name: string, options: ScatterOptions) => {
     spawnSets[name] = scatter(options).map((at, i) =>
       place('item_spot', `item.${name}_${pad(i + 1)}`, options.floor, at),
@@ -751,6 +1126,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     minSpacing: 7,
     clearOf: [mainFootprint, block2Footprint, koiPond, ...flights],
     clearance: 2,
+    avoid: furnitureOn('F1'),
   });
   for (const floor of upperFloors) {
     itemSet(`office_${floor.toLowerCase()}`, {
@@ -760,6 +1136,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       minSpacing: 9,
       clearOf: [mainFootprint, block2Footprint, atriumVoid, ...flights],
       clearance: 2,
+      avoid: furnitureOn(floor),
     });
   }
 
@@ -778,6 +1155,15 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     // Solid props stay off the spots where items, seats and characters are placed.
     const clearance = PROP_CLEARANCE[model] ?? 1.5;
     if (pois.some((poi) => poi.floor === floor && distance(poi.position, at) < clearance)) return;
+    add(model, floor, at, options);
+  };
+  /** Adds a prop without looking around: fixed furniture was checked when it was laid out. */
+  const add = (
+    model: string,
+    floor: FloorId,
+    at: Vec2,
+    options: { yawDeg?: number; s?: number },
+  ) => {
     const instance: Instance = { p: roundVec(at), floor };
     if (options.yawDeg !== undefined) instance.yawDeg = Math.round(options.yawDeg);
     if (options.s !== undefined) instance.s = Math.round(options.s * 100) / 100;
@@ -833,7 +1219,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   prop('logo_sign', 'F3', signAt, { yawDeg: yawDegOf(outward), s: 10 });
 
   for (const at of [
-    [-15, -9],
+    [-16, -9],
     [15, 13],
     [-15, 13],
     [11, -9],
@@ -841,29 +1227,9 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     prop('planter', 'F1', at, { s: 1.2 });
   }
 
-  // Open-plan offices: a grid of desk clusters with a plant shelf between some of them.
-  for (const floor of upperFloors) {
-    const obstacles = [mainFootprint, block2Footprint, atriumVoid, ...flights];
-    for (const footprint of [mainFootprint, block2Footprint]) {
-      const xs = footprint.map((p) => p[0]);
-      const zs = footprint.map((p) => p[1]);
-      let cell = 0;
-      for (let x = Math.ceil(Math.min(...xs)) + 5; x < Math.max(...xs); x += 9) {
-        for (let z = Math.ceil(Math.min(...zs)) + 5; z < Math.max(...zs); z += 7) {
-          cell++;
-          const at: Vec2 = [x, z];
-          const clear = (p: Vec2, margin: number) =>
-            pointInPolygon(p, footprint) &&
-            isWalkable(index, p, floor) &&
-            obstacles.every((outline) => distanceToOutline(p, outline) > margin);
-          if (clear(at, 4)) prop('desk_cluster', floor, at, { yawDeg: cell % 2 === 0 ? 0 : 90 });
-          const between: Vec2 = [x + 4.5, z + 3.5];
-          if (cell % 3 === 0 && clear(between, 3))
-            prop('plant_shelf', floor, between, { yawDeg: 90 });
-        }
-      }
-    }
-  }
+  for (const f of fixtures) add(f.model, f.floor, f.at, f.yawDeg === 0 ? {} : { yawDeg: f.yawDeg });
+  // Wooden slats with bare bulbs hang over every canteen table (photos).
+  for (const table of canteenTables) add('slat_ceiling', 'F1', table.at, {});
 
   const props: PropGroup[] = [...groups.entries()]
     .sort(([a], [b]) => a.localeCompare(b))

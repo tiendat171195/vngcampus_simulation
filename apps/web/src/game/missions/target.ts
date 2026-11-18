@@ -1,3 +1,4 @@
+import { poiHeight } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
 import type { MissionEntity, MissionView } from '@campus/shared';
 import { itemName } from './labels';
@@ -60,7 +61,7 @@ export function waypointTarget(
         if (poi)
           candidates.push({
             x: poi.position[0],
-            y: floorY(poi.floor),
+            y: poiHeight(campusIndex, poi),
             z: poi.position[1],
             label: poi.name?.vi ?? 'Điểm đến',
           });
