@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 604" width="1100" height="604" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<title>Khu chụp tầng 2</title>
+<rect width="1100" height="604" fill="#dde2d3"/>
+<polygon points="-29.9,-41.8 1261.4,-41.8 1261.4,823.6 1155.6,823.8 -29.9,853.9" fill="#eaf0dd" opacity="0.35"></polygon>
+<polygon points="-472.3,889 1155.6,847.7 1620.1,846.6 1620.1,956.5 -472.3,956.5" fill="#9fd3f0" opacity="0.35"></polygon>
+<polygon points="-17.9,711.4 1231.5,711.4 1231.5,823.6 -17.9,853.6" fill="#cfe6b9" opacity="0.35"></polygon>
+<polygon points="137.5,597.8 272,466.3 269,361.7 412.5,278 570.9,573.9 570.9,600.8" fill="#cfe6b9" opacity="0.35"></polygon>
+<polygon points="944,95.7 944,35.9 1100,35.9 1100,382.6 1062.3,382.6" fill="#ebe5d6" opacity="0.35"></polygon>
+<polygon points="281,639.7 759.2,639.7 759.2,699.5 281,699.5" fill="#ebe5d6" opacity="0.35"></polygon>
+<polygon points="974.5,526.1 1129.9,526.1 1129.9,645.7 974.5,645.7" fill="#ebe5d6" opacity="0.35"></polygon>
+<polygon points="1004.5,80.5 992,55.9 963.3,54.6 946.8,64.1 937.3,88.7 1005.1,252 1025.8,265.5 1043.7,266.5 1061.4,255.4 1069.1,238.9 1072,226.5 1044.2,169.8 1045.7,151.7 1057,152.6 1067.5,138.6 1065.8,126 1053.4,120 1044.6,119.5 1045.2,107.2 1059.1,108 1071.8,95.2 1073.3,78.3 1061.1,63.2 1043.3,60.7" fill="#9fd3f0" opacity="0.35"></polygon>
+<polygon points="783.2,532.3 914.7,498.7 914.7,553 783.2,559" fill="#ebe5d6" opacity="0.35"></polygon>
+<polygon points="1024.3,549.1 1038.6,556.9 1048.6,538.2 1106.9,570 1076.8,625.7 1004.3,586.2" fill="#cbbfae" opacity="0.35"></polygon>
+<polygon points="747.3,478.3 743.8,487.3 733.8,494.6 719.4,498.6 703.4,498.6 689.1,494.6 679.1,487.3 675.5,478.3 679.1,469.2 689.1,461.9 703.4,457.9 719.4,457.9 733.8,461.9 743.8,469.2" fill="#9fd3f0" opacity="0.35"></polygon>
+<polygon points="434.6,394.6 432.7,404.2 427.3,412.3 419.1,417.8 409.5,419.7 399.9,417.8 391.8,412.3 386.3,404.2 384.4,394.6 386.3,384.9 391.8,376.8 399.9,371.4 409.5,369.5 419.1,371.4 427.3,376.8 432.7,384.9" fill="#cbbfae" opacity="0.35"></polygon>
+<polygon points="868.6,591.8 867.4,598.2 863.7,603.7 858.3,607.3 851.9,608.6 845.5,607.3 840.1,603.7 836.4,598.2 835.2,591.8 836.4,585.5 840.1,580 845.5,576.4 851.9,575.1 858.3,576.4 863.7,580 867.4,585.5" fill="#9fd3f0" opacity="0.35"></polygon>
+<polygon points="1117.9,-35.9 1141.8,-35.9 1141.8,-12 1117.9,-12" fill="#cbbfae" opacity="0.35"></polygon>
+<path d="M-472.3 -82.6 L-71.1 -80.5 L1213.2 -121.6 L1335.1 -159.6" fill="none" stroke="#c5cad0" stroke-width="53.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M1335.1 -159.6 L1218.5 -210.4 L-70.8 -149.2 L-472.3 -151" fill="none" stroke="#c5cad0" stroke-width="53.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M-348.4 719.3 L-346.3 47.2" fill="none" stroke="#c5cad0" stroke-width="41.8" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M830.9 565.1 L672.3 606.7 L643.2 610.6 L574.9 613.8 L297.8 605 L127.3 599.6 L123.2 599.6 L39.2 597.2 L24.6 594.2 L16.1 587.4 L14.5 575.4 L17.6 71.6 L17.8 42.1 L23.2 30.6 L32.2 23 L43.9 18.3 L545.9 17.8 L1035.1 11.7 L1057.9 13.9 L1079.9 22.2 L1094.9 42.8 L1098.3 82.6 L1097 468.5 L1090.4 487 L1073.2 500.4 L1050.9 511.3 L873.8 564.9" fill="none" stroke="#c5cad0" stroke-width="35.9" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M830.9 565.1 L821.3 577.6 L818.3 593.2 L822.7 608.5 L833.4 620.2 L848.2 625.9 L863.9 624.5 L877.3 616 L885.4 602.5 L886.5 586.7 L880.5 572 L873.8 564.9 L865.5 560 L856.1 557.7 L847.1 557.9 L838.6 560.5 Z" fill="none" stroke="#c5cad0" stroke-width="29.9" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M297.8 605 L293.4 359" fill="none" stroke="#c5cad0" stroke-width="35.9" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M848.2 625.9 L848.3 636.9 L848.7 714.5 L848.9 807.7" fill="none" stroke="#e6dcc6" stroke-width="23.9" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<path d="M6 829.1 L484.2 816.9 L848.9 807.7 L1231.5 799.7" fill="none" stroke="#e6dcc6" stroke-width="23.9" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/>
+<polygon points="933.7,93 1082,452.3 585,579.4 416,263.9 325.8,95.6" fill="#fdf6e6" data-structure="structure.main"></polygon>
+<polygon points="325.8,95.6 317.3,77.2 30.1,76.5 22.6,562.3 28.9,583.6 46.1,589.2 124.5,591.5 265,457.5 260.5,355.3 416,263.9" fill="#fdf6e6" data-structure="structure.block2"></polygon>
+<polygon points="933.7,93 1082,452.3 585,579.4 416,263.9 325.8,95.6" fill="#fdf6e6" data-area="area.office.f2.main"><title>Văn phòng tầng 2 — block chính</title></polygon>
+<polygon points="325.8,95.6 317.3,77.2 30.1,76.5 22.6,562.3 28.9,583.6 46.1,589.2 124.5,591.5 265,457.5 260.5,355.3 416,263.9" fill="#fdf6e6" data-area="area.office.f2.block2"><title>Văn phòng tầng 2 — block 2</title></polygon>
+<polygon points="890.8,167.4 950.5,167.4 950.5,221.2 890.8,221.2" fill="#f7e3bd" data-area="area.pantry.f2"><title>Pantry tầng 2</title></polygon>
+<polygon points="460.3,98.9 496.2,98.9 496.2,125.8 460.3,125.8" fill="#f7e3bd" data-area="area.meeting.f2_01"><title>Phòng họp 2.01</title></polygon>
+<polygon points="538,98.9 573.9,98.9 573.9,125.8 538,125.8" fill="#f7e3bd" data-area="area.meeting.f2_03"><title>Phòng họp 2.03</title></polygon>
+<polygon points="576.9,98.9 612.8,98.9 612.8,125.8 576.9,125.8" fill="#f7e3bd" data-area="area.meeting.f2_04"><title>Phòng họp 2.04</title></polygon>
+<polygon points="499.2,98.9 535.1,98.9 535.1,125.8 499.2,125.8" fill="#f7e3bd" data-area="area.meeting.f2_02"><title>Phòng họp 2.02</title></polygon>
+<polygon points="639.7,227.2 807.1,227.2 831,251.1 831,370.7 807.1,394.6 639.7,394.6 615.8,370.7 615.8,251.1" fill="#dfeaf3" stroke="#6b5b45" stroke-width="1" stroke-dasharray="5 4"><title>Khoảng thông tầng</title></polygon>
+<polygon points="735.3,298.9 735.3,227.2 639.7,227.2 639.7,298.9" fill="#dfeaf3" stroke="#8a7a63" stroke-width="1"><title>Khán đài</title></polygon>
+<line x1="735.3" y1="293.8" x2="639.7" y2="293.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="288.7" x2="639.7" y2="288.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="283.5" x2="639.7" y2="283.5" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="278.4" x2="639.7" y2="278.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="273.3" x2="639.7" y2="273.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="268.2" x2="639.7" y2="268.2" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="263" x2="639.7" y2="263" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="257.9" x2="639.7" y2="257.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="252.8" x2="639.7" y2="252.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="247.7" x2="639.7" y2="247.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="242.5" x2="639.7" y2="242.5" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="237.4" x2="639.7" y2="237.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="735.3" y1="232.3" x2="639.7" y2="232.3" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="687.5" cy="227.2" r="16.7" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="759.2,334.8 759.2,394.6 783.2,394.6 783.2,334.8" fill="#dfeaf3" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="759.2" y1="339.8" x2="783.2" y2="339.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="344.7" x2="783.2" y2="344.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="349.7" x2="783.2" y2="349.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="354.7" x2="783.2" y2="354.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="359.7" x2="783.2" y2="359.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="364.7" x2="783.2" y2="364.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="369.7" x2="783.2" y2="369.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="374.6" x2="783.2" y2="374.6" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="379.6" x2="783.2" y2="379.6" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="384.6" x2="783.2" y2="384.6" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="759.2" y1="389.6" x2="783.2" y2="389.6" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="771.2" cy="394.6" r="4.2" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="771.2,203.3 771.2,143.5 747.3,143.5 747.3,203.3" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="771.2" y1="198.3" x2="747.3" y2="198.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="193.3" x2="747.3" y2="193.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="188.3" x2="747.3" y2="188.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="183.3" x2="747.3" y2="183.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="178.4" x2="747.3" y2="178.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="173.4" x2="747.3" y2="173.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="168.4" x2="747.3" y2="168.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="163.4" x2="747.3" y2="163.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="158.4" x2="747.3" y2="158.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="153.4" x2="747.3" y2="153.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="771.2" y1="148.5" x2="747.3" y2="148.5" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="759.2" cy="143.5" r="4.2" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="675.5,418.5 675.5,478.3 699.5,478.3 699.5,418.5" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="675.5" y1="423.5" x2="699.5" y2="423.5" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="428.4" x2="699.5" y2="428.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="433.4" x2="699.5" y2="433.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="438.4" x2="699.5" y2="438.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="443.4" x2="699.5" y2="443.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="448.4" x2="699.5" y2="448.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="453.4" x2="699.5" y2="453.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="458.3" x2="699.5" y2="458.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="463.3" x2="699.5" y2="463.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="468.3" x2="699.5" y2="468.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="675.5" y1="473.3" x2="699.5" y2="473.3" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="687.5" cy="478.3" r="4.2" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="167.4,298.9 167.4,239.1 143.5,239.1 143.5,298.9" fill="#dfeaf3" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="167.4" y1="293.9" x2="143.5" y2="293.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="288.9" x2="143.5" y2="288.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="284" x2="143.5" y2="284" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="279" x2="143.5" y2="279" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="274" x2="143.5" y2="274" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="269" x2="143.5" y2="269" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="264" x2="143.5" y2="264" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="259.1" x2="143.5" y2="259.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="254.1" x2="143.5" y2="254.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="249.1" x2="143.5" y2="249.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="167.4" y1="244.1" x2="143.5" y2="244.1" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="155.4" cy="239.1" r="4.2" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="179.3,239.1 179.3,298.9 203.3,298.9 203.3,239.1" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="179.3" y1="244.1" x2="203.3" y2="244.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="249.1" x2="203.3" y2="249.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="254.1" x2="203.3" y2="254.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="259.1" x2="203.3" y2="259.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="264" x2="203.3" y2="264" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="269" x2="203.3" y2="269" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="274" x2="203.3" y2="274" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="279" x2="203.3" y2="279" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="284" x2="203.3" y2="284" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="288.9" x2="203.3" y2="288.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="179.3" y1="293.9" x2="203.3" y2="293.9" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="191.3" cy="298.9" r="4.2" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="933.7,93 1082,452.3 585,579.4 416,263.9 325.8,95.6" fill="none" stroke="#6b5b45" stroke-width="3" stroke-linejoin="round"><title>Block chính</title></polygon>
+<line x1="385" y1="206.1" x2="356.8" y2="153.4" stroke="#e8590c" stroke-width="5.4" stroke-linecap="round" data-door="door.main.link_f2"><title>door.main.link_f2</title></line>
+<polygon points="325.8,95.6 317.3,77.2 30.1,76.5 22.6,562.3 28.9,583.6 46.1,589.2 124.5,591.5 265,457.5 260.5,355.3 416,263.9" fill="none" stroke="#6b5b45" stroke-width="3" stroke-linejoin="round"><title>Block 2</title></polygon>
+<line x1="385" y1="206.1" x2="356.8" y2="153.4" stroke="#e8590c" stroke-width="5.4" stroke-linecap="round" data-door="door.block2.link_f2"><title>door.block2.link_f2</title></line>
+<defs><marker id="survey-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f2328"/></marker></defs>
+<polygon points="627.7,197.3 819,197.3 860.9,239.1 860.9,382.6 819,424.5 627.7,424.5 585.9,382.6 585.9,239.1" fill="#d9480f" fill-opacity="0.16" stroke="#d9480f" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-01"><title>T2-01 · Hành lang quanh Atrium và booth (tầng 2)</title></polygon>
+<polygon points="328.8,98.6 932.6,96.3 974.5,197.3 382.6,197.3" fill="#1c7ed6" fill-opacity="0.16" stroke="#1c7ed6" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-02"><title>T2-02 · Văn phòng mở block chính — phía bắc (tầng 2)</title></polygon>
+<polygon points="382.6,197.3 585.9,197.3 585.9,418.5 962.5,418.5 962.5,478.3 588.9,575.7 416.1,262.4" fill="#9c36b5" fill-opacity="0.16" stroke="#9c36b5" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-03"><title>T2-03 · Văn phòng mở block chính — phía tây và nam (tầng 2)</title></polygon>
+<polygon points="860.9,197.3 976.3,197.3 1064.1,415.5 860.9,415.5" fill="#2b8a3e" fill-opacity="0.16" stroke="#2b8a3e" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-04"><title>T2-04 · Văn phòng mở block chính — phía đông (tầng 2)</title></polygon>
+<polygon points="457.3,95.7 612.8,95.7 612.8,149.5 457.3,149.5" fill="#e67700" fill-opacity="0.16" stroke="#e67700" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-05"><title>T2-05 · Phòng họp (tầng 2)</title></polygon>
+<polygon points="890.8,167.4 950.5,167.4 950.5,221.2 890.8,221.2" fill="#5f3dc4" fill-opacity="0.16" stroke="#5f3dc4" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-06"><title>T2-06 · Pantry (tầng 2)</title></polygon>
+<polygon points="325.8,95.6 317.3,77.2 30.1,76.5 22.6,562.3 28.9,583.6 46.1,589.2 124.5,591.5 265,457.5 260.5,355.3 416,263.9" fill="#c2255c" fill-opacity="0.16" stroke="#c2255c" stroke-width="2.2" stroke-linejoin="round" data-zone="T2-07"><title>T2-07 · Văn phòng block 2 (tầng 2)</title></polygon>
+<line x1="687.5" y1="218.2" x2="687.5" y2="248.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="687.5" cy="218.2" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T2-01.S1 · Đỉnh khán đài, quay lưng vào văn phòng, nhìn xuống Atrium</title></circle>
+<text x="687.5" y="218.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="840.5" y1="245.1" x2="840.5" y2="275.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="840.5" cy="245.1" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T2-01.S2 · Hành lang phía đông, nhìn dọc dãy booth</title></circle>
+<text x="840.5" y="245.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="723.4" y1="409.5" x2="723.4" y2="379.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="723.4" cy="409.5" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T2-01.S3 · Hành lang phía nam, nhìn qua Atrium sang phía bắc</title></circle>
+<text x="723.4" y="410" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="600.8" y1="310.9" x2="630.8" y2="310.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="600.8" cy="310.9" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T2-01.S4 · Hành lang phía tây, nhìn qua Atrium sang phía đông</title></circle>
+<text x="600.8" y="311.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
+<line x1="424.5" y1="179.3" x2="454.3" y2="176.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="424.5" cy="179.3" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T2-02.S1 · Đầu tây khu làm việc, nhìn dọc về phía đông</title></circle>
+<text x="424.5" y="179.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="902.7" y1="119.6" x2="873.1" y2="124.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="902.7" cy="119.6" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T2-02.S2 · Đầu đông, nhìn ngược về phía tây</title></circle>
+<text x="902.7" y="120.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="454.3" y1="298.9" x2="469.2" y2="325" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="454.3" cy="298.9" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>T2-03.S1 · Phía tây bắc khu, nhìn về phía nam</title></circle>
+<text x="454.3" y="299.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="783.2" y1="454.3" x2="753.4" y2="458.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="783.2" cy="454.3" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>T2-03.S2 · Phía nam gần mặt kính hướng sông, nhìn về phía tây</title></circle>
+<text x="783.2" y="454.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="878.8" y1="215.2" x2="897.9" y2="238.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="878.8" cy="215.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T2-04.S1 · Góc tây bắc khu, nhìn chéo về phía đông nam</title></circle>
+<text x="878.8" y="215.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="1034.2" y1="382.6" x2="1013.9" y2="360.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="1034.2" cy="382.6" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T2-04.S2 · Góc đông nam, nhìn ngược lại</title></circle>
+<text x="1034.2" y="383.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="538" y1="143.5" x2="538" y2="113.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="538" cy="143.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>T2-05.S1 · Trước dãy phòng họp, nhìn thẳng vào</title></circle>
+<text x="538" y="144" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="902.7" y1="218.2" x2="919.4" y2="193.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="902.7" cy="218.2" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>T2-06.S1 · Lối vào pantry, nhìn vào trong</title></circle>
+<text x="902.7" y="218.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="340.8" y1="173.4" x2="310.8" y2="173.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="340.8" cy="173.4" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>T2-07.S1 · Vừa qua cửa nối từ block chính, nhìn vào block 2</title></circle>
+<text x="340.8" y="173.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="155.4" y1="221.2" x2="155.4" y2="251.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="155.4" cy="221.2" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>T2-07.S2 · Đầu cầu thang block 2, nhìn về phía nam</title></circle>
+<text x="155.4" y="221.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="77.7" y1="538" x2="83.6" y2="508.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="77.7" cy="538" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>T2-07.S3 · Đầu phía nam block 2, nhìn ngược về phía bắc</title></circle>
+<text x="77.7" y="538.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<text x="723.4" y="296.9" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#d9480f" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-01</text>
+<text x="655.7" y="133.2" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#1c7ed6" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-02</text>
+<text x="496.2" y="416.4" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#9c36b5" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-03</text>
+<text x="942.5" y="302.4" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#2b8a3e" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-04</text>
+<text x="535.1" y="108.6" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#e67700" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-05</text>
+<text x="920.7" y="180.3" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#5f3dc4" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-06</text>
+<text x="172.5" y="284.1" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#c2255c" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T2-07</text>
+<text x="848.9" y="591.8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#495057" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">↓ ra sông</text>
+<text x="16" y="28" font-size="20" font-weight="700" fill="#1f2328" stroke="#ffffff" stroke-width="4" paint-order="stroke">Khu chụp tầng 2</text>
+<text x="16" y="50" font-size="13" fill="#495057" stroke="#ffffff" stroke-width="3" paint-order="stroke">Bản đồ 0.3.0 · số trong vòng tròn là điểm đứng chụp (S1, S2…), mũi tên là hướng chụp</text>
+<g transform="translate(1060 44) rotate(52)"><circle r="20" fill="#ffffff" fill-opacity="0.85" stroke="#495057"/><path d="M0 -15L6 4L0 0L-6 4z" fill="#c92a2a"/></g>
+<text x="1060" y="80" font-size="12" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="#ffffff" stroke-width="3" paint-order="stroke">Bắc</text>
+</svg>

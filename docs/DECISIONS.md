@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-18 — Khảo sát ảnh thực tế theo khu, điểm đứng nằm trong map-data
+
+- Gói việc: P6.2
+- Bối cảnh: chủ dự án muốn dựng campus y hệt thực tế, sẽ tự đi chụp; cần chia campus thành khu để chụp và để ghép ảnh với bản đồ ảo.
+- Quyết định: (1) Khu chụp là dữ liệu trong `packages/map-data/src/survey.ts` (`@campus/map-data/survey`), vì là địa lý: mã khu (`NT-01`, `T1-02`…), đường bao vẽ trên bản đồ hiện tại, điểm đứng `S1…` có hướng chụp, việc cần chụp, đếm, xác nhận, mức ưu tiên và trạng thái. (2) `pnpm map:survey` sinh bản đồ từng tầng (`docs/survey/*.svg`) và phần danh sách khu trong [12](12-photo-survey.md); test báo lỗi khi chúng cũ, khi một điểm đứng nằm ngoài khu hoặc ngoài chỗ đứng được, và khi một khu có tên trên bản đồ không thuộc khu chụp nào. (3) Camera debug đứng được đúng điểm đứng (`?station=T1-02.S1`, ô "Điểm chụp") để so ảnh thật với bản đồ ảo. (4) Repo công khai nên ảnh không bao giờ vào repo; chỉ ghi tên file trong bảng đối chiếu.
+- Khác plan ở đâu: thêm tài liệu 12, sửa 03 §8, 10 (P6.2).
+- Hệ quả: khi dời một khu trên bản đồ, chạy lại `pnpm map:survey`; điểm đứng nào không còn hợp lệ thì test chỉ ra.
+
 ## 2026-11-18 — Bản đồ 0.3: nội thất theo ảnh báo chí; khán đài là loại connector mới; đồ cố định gộp vào lưới tầng
 
 - Gói việc: P6.2 (một phần)

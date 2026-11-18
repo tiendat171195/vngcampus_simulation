@@ -318,7 +318,7 @@ assets-src/*.blend
 
 ## 8. Tư liệu cần bạn cung cấp
 
-Càng nhiều càng tốt, nhưng **A và B là đủ để bắt đầu hiệu chỉnh**.
+Càng nhiều càng tốt, nhưng **A và B là đủ để bắt đầu hiệu chỉnh**. Danh sách chụp chi tiết theo từng khu, kèm bản đồ điểm đứng, ở [12-photo-survey.md](12-photo-survey.md).
 
 | Nhóm | Cần gì | Ghi chú |
 |---|---|---|

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   BLEACHER_MAX_RISE,
   bleacherHeight,
@@ -20,7 +21,8 @@ import { describe, expect, it } from 'vitest';
 import { buildCampusV0, EXTENT } from './campus-v0';
 import { formatCampusMap } from './format';
 import { loadOsmExtract } from './osm';
-import { CAMPUS_JSON, OSM_EXTRACT } from './paths';
+import { CAMPUS_JSON, OSM_EXTRACT, SURVEY_DIR, SURVEY_DOC } from './paths';
+import { renderSurveySheet, SURVEY_SHEETS, updateSurveyDoc } from './survey-docs';
 
 const build = () => buildCampusV0(loadOsmExtract(OSM_EXTRACT));
 const map = build();
@@ -332,5 +334,17 @@ describe('interiors furnished after public photos (map 0.3)', () => {
       );
       expect(hit, item.id).toBeUndefined();
     }
+  });
+});
+
+describe('photo survey documents', () => {
+  it('are what is committed — run `pnpm map:survey` after changing the survey or the map', () => {
+    for (const sheet of SURVEY_SHEETS) {
+      expect(readFileSync(join(SURVEY_DIR, sheet.file), 'utf8'), sheet.file).toBe(
+        renderSurveySheet(sheet),
+      );
+    }
+    const doc = readFileSync(SURVEY_DOC, 'utf8');
+    expect(updateSurveyDoc(doc)).toBe(doc);
   });
 });

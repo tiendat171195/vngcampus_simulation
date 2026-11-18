@@ -6,7 +6,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./campus": "./src/campus.ts"
+    "./campus": "./src/campus.ts",
+    "./survey": "./src/survey.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

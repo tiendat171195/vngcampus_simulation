@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build:campus": "tsx src/build-campus.ts",
+    "build:survey": "tsx src/build-survey.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

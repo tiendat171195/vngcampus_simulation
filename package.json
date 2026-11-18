@@ -20,6 +20,7 @@
     "e2e": "pnpm --filter @campus/e2e e2e",
     "load": "pnpm --filter @campus/loadtest load",
     "map:build": "pnpm --filter @campus/map-tools build:campus",
+    "map:survey": "pnpm --filter @campus/map-tools build:survey",
     "db:generate": "pnpm --filter @campus/db generate",
     "db:migrate": "pnpm --filter @campus/db migrate",
     "db:import-departments": "pnpm --filter @campus/db import:departments",

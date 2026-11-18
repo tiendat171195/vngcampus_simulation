@@ -1,3 +1,5 @@
+import { campusIndex } from '@campus/map-data/campus';
+import { findSurveyStation, SURVEY_EYE_HEIGHT } from '@campus/map-data/survey';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { MapControls } from 'three/addons/controls/MapControls.js';
@@ -24,6 +26,7 @@ export function OrbitCamera() {
   const camera = useThree((state) => state.camera);
   const domElement = useThree((state) => state.gl.domElement);
   const viewpoint = useDebugStore((state) => state.viewpoint);
+  const station = useDebugStore((state) => state.station);
 
   const controls = useMemo(() => {
     const instance = new MapControls(camera, domElement);
@@ -43,6 +46,16 @@ export function OrbitCamera() {
     controls.target.set(...target);
     controls.update();
   }, [camera, controls, viewpoint]);
+
+  // Standing where a survey photo was taken, looking the way it was taken.
+  useEffect(() => {
+    const found = station && findSurveyStation(station.id);
+    if (!found) return;
+    const eye = (campusIndex.floors.get(found.zone.floor)?.y ?? 0) + SURVEY_EYE_HEIGHT;
+    camera.position.set(found.station.at[0], eye, found.station.at[1]);
+    controls.target.set(found.station.look[0], eye - 0.1, found.station.look[1]);
+    controls.update();
+  }, [camera, controls, station]);
 
   useFrame(() => {
     controls.update();

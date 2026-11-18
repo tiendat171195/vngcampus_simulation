@@ -24,16 +24,25 @@ interface DebugState {
   bots: number;
   /** The viewpoint last asked for. `seq` changes on every request, so asking twice works. */
   viewpoint: { id: ViewpointId; seq: number };
+  /**
+   * A standing point of the photo survey (`T1-02.S1`, docs/12-photo-survey.md) to put the free
+   * camera at, at eye height, to compare the map with the photo taken there. `?station=` sets it.
+   */
+  station: { id: string; seq: number } | null;
   setCameraMode(mode: 'follow' | 'free'): void;
   setCutaway(level: LevelId): void;
   setShowCollider(value: boolean): void;
   setBots(count: number): void;
   /** Detaches the camera and moves it to a preset viewpoint. */
   goTo(id: ViewpointId): void;
+  /** Detaches the camera and stands it at a survey station. */
+  goToStation(id: string): void;
 }
 
+const requestedStation = new URLSearchParams(window.location.search).get('station');
+
 export const useDebugStore = create<DebugState>((set) => ({
-  cameraMode: 'follow',
+  cameraMode: requestedStation ? 'free' : 'follow',
   cutaway: 'ROOF',
   showCollider: false,
   bots: Math.max(
@@ -41,12 +50,18 @@ export const useDebugStore = create<DebugState>((set) => ({
     Math.min(300, Number(new URLSearchParams(window.location.search).get('bots')) || 0),
   ),
   viewpoint: { id: 'overview', seq: 0 },
+  station: requestedStation ? { id: requestedStation, seq: 0 } : null,
   setCameraMode: (cameraMode) => set({ cameraMode }),
   setCutaway: (cutaway) => set({ cutaway }),
   setShowCollider: (showCollider) => set({ showCollider }),
   setBots: (bots) => set({ bots }),
   goTo: (id) =>
     set((state) => ({ cameraMode: 'free', viewpoint: { id, seq: state.viewpoint.seq + 1 } })),
+  goToStation: (id) =>
+    set((state) => ({
+      cameraMode: 'free',
+      station: { id, seq: (state.station?.seq ?? 0) + 1 },
+    })),
 }));
 
 /**

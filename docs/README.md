@@ -42,6 +42,7 @@ Chi tiết và các phương án đã cân nhắc nằm ở [02-architecture.md]
 | 09 | [Hạ tầng, bảo mật & pháp lý](09-infra-security.md) | Môi trường, các bậc triển khai, CI/CD, giám sát, bảo mật, dữ liệu cá nhân |
 | 10 | [Roadmap](10-roadmap.md) | Các phase P0 → P8, gói việc, tiêu chí nghiệm thu, cách gọi implement |
 | 11 | [Rủi ro & câu hỏi mở](11-risks-open-questions.md) | Quyết định cần chốt, sổ rủi ro, danh sách thứ cần bạn cung cấp |
+| 12 | [Khảo sát ảnh thực tế](12-photo-survey.md) | Chia campus thành khu chụp, điểm đứng, việc cần chụp; quy trình ghép ảnh với bản đồ ảo |
 | — | [reference/](reference/) | Sơ đồ nền từ OpenStreetMap ([SVG](reference/site-osm-reference.svg), [GeoJSON](reference/osm-campus.geojson)) |
 
 ## 4. Các quyết định cần bạn chốt (đã có mặc định đề xuất)

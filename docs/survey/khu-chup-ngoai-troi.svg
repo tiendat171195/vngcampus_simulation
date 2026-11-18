@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 852" width="1100" height="852" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<title>Khu chụp ngoài trời</title>
+<rect width="1100" height="852" fill="#dde2d3"/>
+<polygon points="19.8,84.2 1090.1,84.2 1090.1,801.5 1002.4,801.7 19.8,826.6" fill="#eaf0dd" data-area="area.site"><title>Khuôn viên</title></polygon>
+<polygon points="-346.8,855.8 1002.4,821.5 1387.4,820.6 1387.4,911.7 -346.8,911.7" fill="#9fd3f0" data-area="area.river"><title>Sông Sài Gòn</title></polygon>
+<polygon points="29.7,708.6 1065.3,708.6 1065.3,801.6 29.7,826.4" fill="#cfe6b9" data-area="area.riverside"><title>Công viên ven sông</title></polygon>
+<polygon points="158.6,614.4 270,505.4 267.6,418.7 386.5,349.3 517.8,594.6 517.8,616.9" fill="#cfe6b9" data-area="area.forecourt"><title>Sân vườn</title></polygon>
+<polygon points="827,198.2 827,148.6 956.3,148.6 956.3,436 925.1,436" fill="#ebe5d6" data-area="area.pool_deck"><title>Khu hồ bơi</title></polygon>
+<polygon points="277.5,649.1 673.9,649.1 673.9,698.6 277.5,698.6" fill="#ebe5d6" data-area="area.parking"><title>Bãi xe</title></polygon>
+<polygon points="852.3,555 981.1,555 981.1,654.1 852.3,654.1" fill="#ebe5d6" data-area="area.cafe_terrace"><title>Sân cà phê ngoài trời</title></polygon>
+<polygon points="877.2,185.6 866.8,165.2 843,164.2 829.4,172 821.5,192.5 877.7,327.8 894.8,339 909.6,339.8 924.3,330.6 930.7,316.9 933.1,306.6 910,259.7 911.3,244.6 920.7,245.4 929.4,233.8 928,223.3 917.7,218.4 910.4,218 910.9,207.8 922.4,208.5 932.9,197.9 934.2,183.8 924,171.3 909.3,169.2" fill="#9fd3f0" data-area="area.pool"><title>Hồ bơi</title></polygon>
+<polygon points="693.7,560.1 802.7,532.3 802.7,577.3 693.7,582.2" fill="#ebe5d6" data-area="area.gate_main"><title>Cổng chính</title></polygon>
+<polygon points="764.5,609.5 763.5,614.8 760.5,619.3 756,622.3 750.7,623.3 745.4,622.3 740.9,619.3 737.8,614.8 736.8,609.5 737.8,604.2 740.9,599.6 745.4,596.6 750.7,595.6 756,596.6 760.5,599.6 763.5,604.2" fill="#9fd3f0" data-area="area.fountain"><title>Đài phun nước</title></polygon>
+<path d="M-346.8 50.4 L-14.4 52.2 L1050.2 18.1 L1151.2 -13.4" fill="none" stroke="#c5cad0" stroke-width="44.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M1151.2 -13.4 L1054.5 -55.4 L-14.1 -4.7 L-346.8 -6.2" fill="none" stroke="#c5cad0" stroke-width="44.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M-244.2 715.1 L-242.4 158.1" fill="none" stroke="#c5cad0" stroke-width="34.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M733.3 587.3 L601.8 621.8 L577.7 625 L521.1 627.6 L291.4 620.4 L150.1 615.9 L146.7 615.9 L77.1 613.9 L65 611.4 L58 605.8 L56.6 595.8 L59.2 178.2 L59.3 153.8 L63.8 144.3 L71.3 138 L81 134.1 L497.1 133.7 L902.5 128.6 L921.4 130.5 L939.7 137.4 L952.1 154.4 L954.9 187.3 L953.8 507.2 L948.4 522.5 L934.1 533.6 L915.6 542.7 L768.9 587.2" fill="none" stroke="#c5cad0" stroke-width="29.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M733.3 587.3 L725.3 597.6 L722.8 610.6 L726.4 623.2 L735.3 632.9 L747.6 637.7 L760.6 636.5 L771.7 629.5 L778.4 618.3 L779.4 605.2 L774.4 593 L768.9 587.2 L761.9 583.1 L754.1 581.2 L746.7 581.3 L739.6 583.4 Z" fill="none" stroke="#c5cad0" stroke-width="24.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M291.4 620.4 L287.8 416.5" fill="none" stroke="#c5cad0" stroke-width="29.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M747.6 637.7 L747.7 646.8 L748 711.1 L748.2 788.3" fill="none" stroke="#e6dcc6" stroke-width="19.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M49.5 806.1 L445.9 796 L748.2 788.3 L1065.3 781.7" fill="none" stroke="#e6dcc6" stroke-width="19.8" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="893.5,574 905.4,580.5 913.7,565 962,591.3 937.1,637.5 877,604.8" fill="#cbbfae" data-area="area.cafe_kiosk"><title>Quầy cà phê ngoài trời</title></polygon>
+<polygon points="404.8,445.9 403.2,453.9 398.7,460.7 392,465.2 384,466.8 376,465.2 369.3,460.7 364.8,453.9 363.2,445.9 364.8,438 369.3,431.2 376,426.7 384,425.1 392,426.7 398.7,431.2 403.2,438" fill="#cbbfae" data-area="area.garden_planter"><title>Bồn cây tròn</title></polygon>
+<polygon points="971.2,89.2 991,89.2 991,109 971.2,109" fill="#cbbfae" data-area="area.gatehouse"><title>Chốt bảo vệ</title></polygon>
+<polygon points="818.5,196 941.4,493.8 529.5,599.2 389.4,337.7 314.6,198.1" fill="#fdf6e6" data-structure="structure.main"></polygon>
+<polygon points="314.6,198.1 307.6,182.9 69.6,182.3 63.3,584.9 68.6,602.6 82.8,607.2 147.8,609.2 264.2,498.1 260.5,413.4 389.4,337.7" fill="#fdf6e6" data-structure="structure.block2"></polygon>
+<polygon points="893.5,574 905.4,580.5 913.7,565 962,591.3 937.1,637.5 877,604.8" fill="#fdf6e6" data-structure="structure.cafe_kiosk"></polygon>
+<polygon points="971.2,89.2 991,89.2 991,109 971.2,109" fill="#fdf6e6" data-structure="structure.gatehouse"></polygon>
+<polygon points="818.5,196 941.4,493.8 529.5,599.2 389.4,337.7 314.6,198.1" fill="#fdf6e6" data-area="area.main.f1"><title>Block chính — tầng trệt</title></polygon>
+<polygon points="314.6,198.1 307.6,182.9 69.6,182.3 63.3,584.9 68.6,602.6 82.8,607.2 147.8,609.2 264.2,498.1 260.5,413.4 389.4,337.7" fill="#fdf6e6" data-area="area.block2.f1"><title>Block 2 — tầng trệt</title></polygon>
+<polygon points="673.9,208.1 816.1,208.1 901.8,416.2 753.2,416.2 753.2,297.3 673.9,297.3" fill="#ffd39b" data-area="area.canteen"><title>Canteen</title></polygon>
+<polygon points="574.8,307.2 713.5,307.2 733.3,327 733.3,426.1 713.5,445.9 574.8,445.9 555,426.1 555,327" fill="#ffd39b" data-area="area.atrium"><title>Atrium</title></polygon>
+<polygon points="84.2,203.2 287.4,203.2 287.4,297.3 84.2,297.3" fill="#f7e3bd" data-area="area.gym"><title>Phòng gym</title></polygon>
+<polygon points="574.8,470.7 713.5,470.7 713.5,542.6 574.8,577.3" fill="#ffd39b" data-area="area.koi"><title>Khu hồ Koi</title></polygon>
+<polygon points="723.4,455.9 812.6,455.9 812.6,523.8 723.4,546.6" fill="#ffd39b" data-area="area.lobby"><title>Sảnh lễ tân</title></polygon>
+<polygon points="654.1,366.7 654.1,307.2 574.8,307.2 574.8,366.7" fill="#ffd39b" data-area="area.atrium_bleachers"><title>Khán đài Atrium</title></polygon>
+<polygon points="668.9,475.7 711,475.7 711,515.3 668.9,515.3" fill="#f7e3bd" data-area="area.coffee_main"><title>Quầy cà phê</title></polygon>
+<polygon points="664,515.3 661,522.8 652.8,528.9 640.9,532.2 627.6,532.2 615.7,528.9 607.4,522.8 604.5,515.3 607.4,507.8 615.7,501.7 627.6,498.4 640.9,498.4 652.8,501.7 661,507.8" fill="#9fd3f0" data-area="area.koi_pond"><title>Hồ cá Koi</title></polygon>
+<polygon points="654.1,366.7 654.1,307.2 574.8,307.2 574.8,366.7" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Khán đài</title></polygon>
+<line x1="654.1" y1="361.7" x2="574.8" y2="361.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="356.8" x2="574.8" y2="356.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="351.8" x2="574.8" y2="351.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="346.8" x2="574.8" y2="346.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="341.9" x2="574.8" y2="341.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="336.9" x2="574.8" y2="336.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="332" x2="574.8" y2="332" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="327" x2="574.8" y2="327" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="322.1" x2="574.8" y2="322.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="317.1" x2="574.8" y2="317.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="654.1" y1="312.2" x2="574.8" y2="312.2" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="614.4" cy="307.2" r="13.9" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="673.9,396.4 673.9,445.9 693.7,445.9 693.7,396.4" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="673.9" y1="401.4" x2="693.7" y2="401.4" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="406.3" x2="693.7" y2="406.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="411.3" x2="693.7" y2="411.3" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="416.2" x2="693.7" y2="416.2" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="421.2" x2="693.7" y2="421.2" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="426.1" x2="693.7" y2="426.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="431.1" x2="693.7" y2="431.1" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="436" x2="693.7" y2="436" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="673.9" y1="441" x2="693.7" y2="441" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="683.8" cy="445.9" r="3.5" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="183.3,366.7 183.3,317.1 163.5,317.1 163.5,366.7" fill="#f7e3bd" stroke="#8a7a63" stroke-width="1"><title>Cầu thang</title></polygon>
+<line x1="183.3" y1="361.7" x2="163.5" y2="361.7" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="356.8" x2="163.5" y2="356.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="351.8" x2="163.5" y2="351.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="346.8" x2="163.5" y2="346.8" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="341.9" x2="163.5" y2="341.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="336.9" x2="163.5" y2="336.9" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="332" x2="163.5" y2="332" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="327" x2="163.5" y2="327" stroke="#8a7a63" stroke-width="0.8"/>
+<line x1="183.3" y1="322.1" x2="163.5" y2="322.1" stroke="#8a7a63" stroke-width="0.8"/>
+<circle cx="173.4" cy="317.1" r="3.5" fill="#8a7a63"><title>Đầu trên của cầu thang</title></circle>
+<polygon points="818.5,196 941.4,493.8 529.5,599.2 389.4,337.7 314.6,198.1" fill="none" stroke="#6b5b45" stroke-width="2.5" stroke-linejoin="round"><title>Block chính</title></polygon>
+<line x1="629.3" y1="196.8" x2="659" y2="196.7" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.main.north"><title>door.main.north</title></line>
+<line x1="461.8" y1="472.8" x2="443.1" y2="437.8" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.main.west"><title>door.main.west</title></line>
+<line x1="767.2" y1="538.4" x2="719.2" y2="550.6" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.main.south"><title>door.main.south</title></line>
+<line x1="906" y1="408.2" x2="915.5" y2="431.1" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.main.east"><title>door.main.east</title></line>
+<line x1="363.7" y1="289.7" x2="340.3" y2="246" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.main.link_f1"><title>door.main.link_f1</title></line>
+<polygon points="314.6,198.1 307.6,182.9 69.6,182.3 63.3,584.9 68.6,602.6 82.8,607.2 147.8,609.2 264.2,498.1 260.5,413.4 389.4,337.7" fill="none" stroke="#6b5b45" stroke-width="2.5" stroke-linejoin="round"><title>Block 2</title></polygon>
+<line x1="195.3" y1="563.9" x2="216.8" y2="543.4" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.block2.forecourt"><title>door.block2.forecourt</title></line>
+<line x1="200.7" y1="182.6" x2="175.9" y2="182.6" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.block2.north"><title>door.block2.north</title></line>
+<line x1="66.5" y1="379.1" x2="66.2" y2="403.8" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.block2.west"><title>door.block2.west</title></line>
+<line x1="363.7" y1="289.7" x2="340.3" y2="246" stroke="#e8590c" stroke-width="4.5" stroke-linecap="round" data-door="door.block2.link_f1"><title>door.block2.link_f1</title></line>
+<polygon points="893.5,574 905.4,580.5 913.7,565 962,591.3 937.1,637.5 877,604.8" fill="none" stroke="#6b5b45" stroke-width="2.5" stroke-linejoin="round"><title>Quầy cà phê ngoài trời</title></polygon>
+<polygon points="971.2,89.2 991,89.2 991,109 971.2,109" fill="none" stroke="#6b5b45" stroke-width="2.5" stroke-linejoin="round"><title>Chốt bảo vệ</title></polygon>
+<defs><marker id="survey-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f2328"/></marker></defs>
+<polygon points="673.9,564.9 812.6,530.2 842.3,545 842.3,654.1 664,654.1" fill="#d9480f" fill-opacity="0.16" stroke="#d9480f" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-01"><title>NT-01 · Cổng chính, mái che chữ V, đài phun nước</title></polygon>
+<polygon points="525.2,602 673.9,564.9 673.9,649.1 515.3,649.1" fill="#1c7ed6" fill-opacity="0.16" stroke="#1c7ed6" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-02"><title>NT-02 · Mặt đứng phía sông và biển chữ VNG</title></polygon>
+<polygon points="267.6,639.2 683.8,639.2 683.8,708.6 267.6,708.6" fill="#9c36b5" fill-opacity="0.16" stroke="#9c36b5" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-03"><title>NT-03 · Bãi xe dọc đường phía sông</title></polygon>
+<polygon points="29.7,708.6 1065.3,708.6 1065.3,801.6 29.7,826.4" fill="#2b8a3e" fill-opacity="0.16" stroke="#2b8a3e" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-04"><title>NT-04 · Công viên ven sông, lối dạo, bờ kè</title></polygon>
+<polygon points="158.6,614.4 270,505.4 267.6,418.7 386.5,349.3 517.8,594.6 517.8,616.9" fill="#e67700" fill-opacity="0.16" stroke="#e67700" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-05"><title>NT-05 · Sân vườn giữa hai block</title></polygon>
+<polygon points="817.6,143.7 961.3,143.7 961.3,441 916.7,441 817.6,198.2" fill="#5f3dc4" fill-opacity="0.16" stroke="#5f3dc4" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-06"><title>NT-06 · Hồ bơi và quán The Mojo</title></polygon>
+<polygon points="847.3,522.7 991,522.7 991,664 847.3,664" fill="#c2255c" fill-opacity="0.16" stroke="#c2255c" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-07"><title>NT-07 · Ki-ốt cà phê ngoài trời và góc đông nam</title></polygon>
+<polygon points="19.8,84.2 1090.1,84.2 1090.1,178.4 19.8,178.4" fill="#0b7285" fill-opacity="0.16" stroke="#0b7285" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-08"><title>NT-08 · Phía đường Tân Thuận: đường nội bộ, cổng xe, chốt bảo vệ</title></polygon>
+<polygon points="19.8,168.5 61.9,168.5 61.9,654.1 19.8,654.1" fill="#5c940d" fill-opacity="0.16" stroke="#5c940d" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-09"><title>NT-09 · Phía tây block 2 và hàng rào tây</title></polygon>
+<line x1="750.7" y1="641.7" x2="748.4" y2="611.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="750.7" cy="641.7" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S1 · Bên kia đài phun nước, nhìn thẳng vào cửa chính, lấy trọn mái che</title></circle>
+<text x="750.7" y="642.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="748.2" y1="567.3" x2="750" y2="597.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="748.2" cy="567.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S2 · Dưới mép mái che, quay lưng vào cửa, nhìn ra đài phun nước</title></circle>
+<text x="748.2" y="567.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="683.8" y1="572.3" x2="712.6" y2="564" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="683.8" cy="572.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S3 · Góc tây sân trước, nhìn dọc mặt kính về phía đông</title></circle>
+<text x="683.8" y="572.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="832.4" y1="555" x2="802.6" y2="557.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="832.4" cy="555" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S4 · Góc đông sân trước, nhìn dọc mặt kính về phía tây</title></circle>
+<text x="832.4" y="555.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
+<line x1="614.4" y1="644.1" x2="614.4" y2="614.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="614.4" cy="644.1" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>NT-02.S1 · Mép bãi xe, nhìn thẳng vào biển chữ VNG</title></circle>
+<text x="614.4" y="644.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="535.1" y1="634.2" x2="562.9" y2="623" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="535.1" cy="634.2" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>NT-02.S2 · Góc tây nam, nhìn chéo cả mặt đứng phía sông</title></circle>
+<text x="535.1" y="634.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="282.4" y1="664" x2="312.4" y2="664.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="282.4" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S1 · Đầu tây bãi xe, nhìn dọc hàng xe</title></circle>
+<text x="282.4" y="664.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="668.9" y1="664" x2="638.9" y2="664.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="668.9" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S2 · Đầu đông, nhìn ngược lại</title></circle>
+<text x="668.9" y="664.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="475.7" y1="703.6" x2="475.7" y2="673.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="475.7" cy="703.6" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S3 · Giữa bãi, quay lưng ra sông, nhìn vào toà nhà</title></circle>
+<text x="475.7" y="704.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="148.6" y1="792.8" x2="148.6" y2="822.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="148.6" cy="792.8" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S1 · Phía tây lối dạo, nhìn ra sông</title></circle>
+<text x="148.6" y="793.3" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="445.9" y1="763.1" x2="445.9" y2="733.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="445.9" cy="763.1" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S2 · Giữa công viên, quay lưng ra sông, nhìn về toà nhà</title></circle>
+<text x="445.9" y="763.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="748.2" y1="782.9" x2="748.2" y2="812.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="748.2" cy="782.9" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S3 · Cuối lối đi từ cổng ra sông, nhìn ra sông</title></circle>
+<text x="748.2" y="783.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="991" y1="753.2" x2="961" y2="754.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="991" cy="753.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S4 · Đầu đông, nhìn dọc lối dạo về phía tây</title></circle>
+<text x="991" y="753.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
+<line x1="384" y1="500.5" x2="384" y2="470.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="384" cy="500.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S1 · Phía nam bồn cây tròn, nhìn vào bồn</title></circle>
+<text x="384" y="501" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="287.4" y1="584.7" x2="305.5" y2="560.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="287.4" cy="584.7" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S2 · Góc tây nam sân, nhìn chéo về chỗ hai block giáp nhau</title></circle>
+<text x="287.4" y="585.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="396.4" y1="381.5" x2="392.4" y2="411.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="396.4" cy="381.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S3 · Chỗ hai block giáp nhau, quay lưng vào nhà, nhìn ra sân</title></circle>
+<text x="396.4" y="382" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="941.4" y1="158.6" x2="924.5" y2="183.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="941.4" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S1 · Góc đông bắc sàn hồ bơi, nhìn chéo cả hồ</title></circle>
+<text x="941.4" y="159.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="936.5" y1="416.2" x2="926" y2="388.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="936.5" cy="416.2" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S2 · Góc nam, nhìn ngược lên</title></circle>
+<text x="936.5" y="416.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="842.3" y1="158.6" x2="850.8" y2="187.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="842.3" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S3 · Góc tây bắc, nhìn chéo</title></circle>
+<text x="842.3" y="159.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="867.1" y1="649.1" x2="888.3" y2="627.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="867.1" cy="649.1" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>NT-07.S1 · Từ phía sông, nhìn vào ki-ốt</title></circle>
+<text x="867.1" y="649.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="976.1" y1="564.9" x2="948.5" y2="553.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="976.1" cy="564.9" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>NT-07.S2 · Góc đông nam, nhìn mặt đứng phía đông nam</title></circle>
+<text x="976.1" y="565.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="1000.9" y1="118.9" x2="979.7" y2="97.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="1000.9" cy="118.9" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S1 · Cạnh chốt bảo vệ, nhìn về cổng xe</title></circle>
+<text x="1000.9" y="119.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="644.1" y1="148.6" x2="644.1" y2="178.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="644.1" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S2 · Đối diện cửa phía bắc block chính</title></circle>
+<text x="644.1" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="445.9" y1="148.6" x2="475.9" y2="148.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="445.9" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S3 · Giữa đường nội bộ phía bắc, nhìn về phía đông</title></circle>
+<text x="445.9" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<line x1="148.6" y1="148.6" x2="171.2" y2="168.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="148.6" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S4 · Trước cửa phía bắc block 2</title></circle>
+<text x="148.6" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
+<line x1="44.6" y1="203.2" x2="44.6" y2="233.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="44.6" cy="203.2" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S1 · Góc tây bắc, nhìn dọc mặt tây về phía sông</title></circle>
+<text x="44.6" y="203.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
+<line x1="44.6" y1="391.4" x2="74.6" y2="391.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="44.6" cy="391.4" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S2 · Giữa mặt tây, nhìn vào cửa phía tây</title></circle>
+<text x="44.6" y="391.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
+<line x1="44.6" y1="624.3" x2="44.6" y2="594.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
+<circle cx="44.6" cy="624.3" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S3 · Góc tây nam, nhìn ngược lên</title></circle>
+<text x="44.6" y="624.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
+<text x="760.1" y="614" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#d9480f" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-01</text>
+<text x="604.6" y="601.8" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#1c7ed6" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-02</text>
+<text x="475.7" y="659.9" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#9c36b5" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-03</text>
+<text x="527.2" y="747.5" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#2b8a3e" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-04</text>
+<text x="356.7" y="532.1" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#e67700" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-05</text>
+<text x="904.6" y="251.8" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#5f3dc4" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-06</text>
+<text x="919.1" y="579.4" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#c2255c" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-07</text>
+<text x="555" y="117.3" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#0b7285" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-08</text>
+<text x="40.9" y="425.3" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#5c940d" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-09</text>
+<text x="545" y="842.3" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#495057" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">Sông Sài Gòn</text>
+<text x="545" y="19.8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#495057" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">Đường Tân Thuận</text>
+<text x="644.1" y="391.4" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#495057" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">Block chính</text>
+<text x="168.5" y="366.7" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#495057" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">Block 2</text>
+<text x="16" y="28" font-size="20" font-weight="700" fill="#1f2328" stroke="#ffffff" stroke-width="4" paint-order="stroke">Khu chụp ngoài trời</text>
+<text x="16" y="50" font-size="13" fill="#495057" stroke="#ffffff" stroke-width="3" paint-order="stroke">Bản đồ 0.3.0 · số trong vòng tròn là điểm đứng chụp (S1, S2…), mũi tên là hướng chụp</text>
+<g transform="translate(1060 44) rotate(52)"><circle r="20" fill="#ffffff" fill-opacity="0.85" stroke="#495057"/><path d="M0 -15L6 4L0 0L-6 4z" fill="#c92a2a"/></g>
+<text x="1060" y="80" font-size="12" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="#ffffff" stroke-width="3" paint-order="stroke">Bắc</text>
+</svg>

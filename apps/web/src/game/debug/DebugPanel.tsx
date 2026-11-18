@@ -1,3 +1,4 @@
+import { SURVEY_ZONES } from '@campus/map-data/survey';
 import { type ServiceState, useServiceStatus } from '../../useServiceStatus';
 import { useSession } from '../core/session';
 import type { LevelId } from '../world/context';
@@ -41,7 +42,9 @@ export function DebugPanel({ hidden }: { hidden: boolean }) {
   const cutaway = useDebugStore((state) => state.cutaway);
   const showCollider = useDebugStore((state) => state.showCollider);
   const bots = useDebugStore((state) => state.bots);
-  const { setCameraMode, setCutaway, setShowCollider, setBots, goTo } = useDebugStore.getState();
+  const station = useDebugStore((state) => state.station);
+  const { setCameraMode, setCutaway, setShowCollider, setBots, goTo, goToStation } =
+    useDebugStore.getState();
   const readyMs = useSession((state) => state.worldReadyMs);
   const status = useServiceStatus();
 
@@ -76,6 +79,30 @@ export function DebugPanel({ hidden }: { hidden: boolean }) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="group">
+        <label className="group-label" htmlFor="debug-station">
+          Điểm chụp (docs/12)
+        </label>
+        <select
+          id="debug-station"
+          value={station?.id ?? ''}
+          onChange={(event) => {
+            if (event.target.value) goToStation(event.target.value);
+          }}
+        >
+          <option value="">Chọn điểm đứng…</option>
+          {SURVEY_ZONES.filter((zone) => zone.stations.length > 0).map((zone) => (
+            <optgroup key={zone.code} label={`${zone.code} · ${zone.name}`}>
+              {zone.stations.map((s) => (
+                <option key={s.id} value={`${zone.code}.${s.id}`}>
+                  {zone.code}.{s.id} — {s.hint}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
       </div>
 
       <div className="group">
