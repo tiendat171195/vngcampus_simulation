@@ -137,7 +137,7 @@ export function renderSurveySheet(sheet: SurveySheet, width = 1100): string {
       const reach = 30;
       out.push(
         `<line x1="${n(x)}" y1="${n(y)}" x2="${n(x + ((lx - x) / length) * reach)}" y2="${n(y + ((ly - y) / length) * reach)}" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>`,
-        `<circle cx="${n(x)}" cy="${n(y)}" r="9" fill="${colour}" stroke="#ffffff" stroke-width="2"><title>${xml(`${zone.code}.${station.id} · ${station.hint}`)}</title></circle>`,
+        `<circle cx="${n(x)}" cy="${n(y)}" r="9" fill="${colour}" stroke="#ffffff" stroke-width="2" data-station="${zone.code}.${station.id}"><title>${xml(`${zone.code}.${station.id} · ${station.hint}`)}</title></circle>`,
         `<text x="${n(x)}" y="${n(y + 0.5)}" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">${station.id.slice(1)}</text>`,
       );
     }

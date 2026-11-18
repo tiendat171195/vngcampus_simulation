@@ -101,85 +101,85 @@
 <polygon points="47.8,101.6 292.9,101.6 292.9,215.2 47.8,215.2" fill="#0b7285" fill-opacity="0.16" stroke="#0b7285" stroke-width="2.2" stroke-linejoin="round" data-zone="B1-01"><title>B1-01 · Phòng gym UPFIT</title></polygon>
 <polygon points="26.3,218.2 391.6,218.2 413.7,262.4 263,353.9 263.6,456.1 123.8,588.3 46.6,585.9 29.9,581.1 24.5,562" fill="#5c940d" fill-opacity="0.16" stroke="#5c940d" stroke-width="2.2" stroke-linejoin="round" data-zone="B1-02"><title>B1-02 · Block 2 tầng trệt — phần còn lại</title></polygon>
 <line x1="842.9" y1="502.2" x2="842.9" y2="472.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="842.9" cy="502.2" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T1-01.S1 · Vừa bước qua cửa chính, nhìn thẳng vào trong</title></circle>
+<circle cx="842.9" cy="502.2" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="T1-01.S1"><title>T1-01.S1 · Vừa bước qua cửa chính, nhìn thẳng vào trong</title></circle>
 <text x="842.9" y="502.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="914.7" y1="424.5" x2="884.7" y2="422.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="914.7" cy="424.5" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T1-01.S2 · Đầu đông hàng cổng soát vé, nhìn dọc hàng cổng</title></circle>
+<circle cx="914.7" cy="424.5" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="T1-01.S2"><title>T1-01.S2 · Đầu đông hàng cổng soát vé, nhìn dọc hàng cổng</title></circle>
 <text x="914.7" y="425" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="837" y1="418.5" x2="859.9" y2="437.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="837" cy="418.5" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>T1-01.S3 · Phía trong cổng, quay lại nhìn về quầy lễ tân và cửa</title></circle>
+<circle cx="837" cy="418.5" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="T1-01.S3"><title>T1-01.S3 · Phía trong cổng, quay lại nhìn về quầy lễ tân và cửa</title></circle>
 <text x="837" y="419" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="687.5" y1="352.7" x2="687.5" y2="322.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="687.5" cy="352.7" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T1-02.S1 · Trước màn LED, nhìn thẳng lên khán đài</title></circle>
+<circle cx="687.5" cy="352.7" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="T1-02.S1"><title>T1-02.S1 · Trước màn LED, nhìn thẳng lên khán đài</title></circle>
 <text x="687.5" y="353.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="795.1" y1="310.9" x2="765.2" y2="308.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="795.1" cy="310.9" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T1-02.S2 · Phía đông Atrium, nhìn ngang qua khán đài</title></circle>
+<circle cx="795.1" cy="310.9" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="T1-02.S2"><title>T1-02.S2 · Phía đông Atrium, nhìn ngang qua khán đài</title></circle>
 <text x="795.1" y="311.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="627.7" y1="370.7" x2="652.1" y2="353.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="627.7" cy="370.7" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T1-02.S3 · Góc tây nam Atrium, nhìn chéo</title></circle>
+<circle cx="627.7" cy="370.7" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="T1-02.S3"><title>T1-02.S3 · Góc tây nam Atrium, nhìn chéo</title></circle>
 <text x="627.7" y="371.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="723.4" y1="310.9" x2="723.4" y2="280.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="723.4" cy="310.9" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>T1-02.S4 · Giữa Atrium: một ảnh như mũi tên, rồi một ảnh ngước thẳng lên giếng trời</title></circle>
+<circle cx="723.4" cy="310.9" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="T1-02.S4"><title>T1-02.S4 · Giữa Atrium: một ảnh như mũi tên, rồi một ảnh ngước thẳng lên giếng trời</title></circle>
 <text x="723.4" y="311.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
 <line x1="711.4" y1="445.4" x2="711.4" y2="475.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="711.4" cy="445.4" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>T1-03.S1 · Mép bắc hồ Koi, nhìn qua hồ</title></circle>
+<circle cx="711.4" cy="445.4" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="T1-03.S1"><title>T1-03.S1 · Mép bắc hồ Koi, nhìn qua hồ</title></circle>
 <text x="711.4" y="445.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="783.2" y1="496.2" x2="779.2" y2="466.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="783.2" cy="496.2" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>T1-03.S2 · Trước quầy cà phê, nhìn thẳng vào quầy</title></circle>
+<circle cx="783.2" cy="496.2" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="T1-03.S2"><title>T1-03.S2 · Trước quầy cà phê, nhìn thẳng vào quầy</title></circle>
 <text x="783.2" y="496.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="651.6" y1="538" x2="675.3" y2="519.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="651.6" cy="538" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>T1-03.S3 · Góc tây nam khu, nhìn chéo về quầy</title></circle>
+<circle cx="651.6" cy="538" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="T1-03.S3"><title>T1-03.S3 · Góc tây nam khu, nhìn chéo về quầy</title></circle>
 <text x="651.6" y="538.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="783.2" y1="203.3" x2="808.9" y2="187.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="783.2" cy="203.3" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T1-04.S1 · Lối vào canteen, nhìn chéo vào trong</title></circle>
+<circle cx="783.2" cy="203.3" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="T1-04.S1"><title>T1-04.S1 · Lối vào canteen, nhìn chéo vào trong</title></circle>
 <text x="783.2" y="203.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="842.9" y1="146.5" x2="842.9" y2="116.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="842.9" cy="146.5" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T1-04.S2 · Trước dãy quầy, nhìn thẳng vào quầy</title></circle>
+<circle cx="842.9" cy="146.5" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="T1-04.S2"><title>T1-04.S2 · Trước dãy quầy, nhìn thẳng vào quầy</title></circle>
 <text x="842.9" y="147" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="986.4" y1="334.8" x2="966.3" y2="312.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="986.4" cy="334.8" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T1-04.S3 · Góc đông nam canteen, nhìn chéo cả sảnh</title></circle>
+<circle cx="986.4" cy="334.8" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="T1-04.S3"><title>T1-04.S3 · Góc đông nam canteen, nhìn chéo cả sảnh</title></circle>
 <text x="986.4" y="335.3" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="962.5" y1="215.2" x2="933" y2="209.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="962.5" cy="215.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>T1-04.S4 · Phía đông, nhìn về phía tây</title></circle>
+<circle cx="962.5" cy="215.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="T1-04.S4"><title>T1-04.S4 · Phía đông, nhìn về phía tây</title></circle>
 <text x="962.5" y="215.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
 <line x1="723.4" y1="107.6" x2="723.4" y2="137.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="723.4" cy="107.6" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>T1-05.S1 · Ngay trong cửa phía bắc, nhìn vào</title></circle>
+<circle cx="723.4" cy="107.6" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="T1-05.S1"><title>T1-05.S1 · Ngay trong cửa phía bắc, nhìn vào</title></circle>
 <text x="723.4" y="108.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="484.2" y1="155.4" x2="514.2" y2="155.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="484.2" cy="155.4" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>T1-05.S2 · Giữa khu, nhìn về phía đông</title></circle>
+<circle cx="484.2" cy="155.4" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="T1-05.S2"><title>T1-05.S2 · Giữa khu, nhìn về phía đông</title></circle>
 <text x="484.2" y="155.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="394.6" y1="185.3" x2="366.4" y2="175.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="394.6" cy="185.3" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>T1-05.S3 · Trước cửa nối sang block 2</title></circle>
+<circle cx="394.6" cy="185.3" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="T1-05.S3"><title>T1-05.S3 · Trước cửa nối sang block 2</title></circle>
 <text x="394.6" y="185.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="508.2" y1="394.6" x2="534.4" y2="380" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="508.2" cy="394.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>T1-06.S1 · Trong cửa phía tây, nhìn về Atrium</title></circle>
+<circle cx="508.2" cy="394.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2" data-station="T1-06.S1"><title>T1-06.S1 · Trong cửa phía tây, nhìn về Atrium</title></circle>
 <text x="508.2" y="395.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="544" y1="251.1" x2="544" y2="281.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="544" cy="251.1" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>T1-06.S2 · Phía bắc khu, nhìn về phía nam</title></circle>
+<circle cx="544" cy="251.1" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2" data-station="T1-06.S2"><title>T1-06.S2 · Phía bắc khu, nhìn về phía nam</title></circle>
 <text x="544" y="251.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="1022.3" y1="376.6" x2="992.3" y2="376.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="1022.3" cy="376.6" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>T1-07.S1 · Trong cửa phía đông, nhìn vào</title></circle>
+<circle cx="1022.3" cy="376.6" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2" data-station="T1-07.S1"><title>T1-07.S1 · Trong cửa phía đông, nhìn vào</title></circle>
 <text x="1022.3" y="377.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="878.8" y1="388.6" x2="908.8" y2="389.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="878.8" cy="388.6" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>T1-07.S2 · Giữa khu, nhìn về cửa phía đông</title></circle>
+<circle cx="878.8" cy="388.6" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2" data-station="T1-07.S2"><title>T1-07.S2 · Giữa khu, nhìn về cửa phía đông</title></circle>
 <text x="878.8" y="389.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="275" y1="206.3" x2="249.5" y2="190.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="275" cy="206.3" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>B1-01.S1 · Góc đông nam phòng gym, nhìn chéo</title></circle>
+<circle cx="275" cy="206.3" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="B1-01.S1"><title>B1-01.S1 · Góc đông nam phòng gym, nhìn chéo</title></circle>
 <text x="275" y="206.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="65.8" y1="203.3" x2="92.6" y2="189.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="65.8" cy="203.3" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>B1-01.S2 · Góc tây nam, nhìn chéo ngược lại</title></circle>
+<circle cx="65.8" cy="203.3" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="B1-01.S2"><title>B1-01.S2 · Góc tây nam, nhìn chéo ngược lại</title></circle>
 <text x="65.8" y="203.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="173.4" y1="173.4" x2="173.4" y2="143.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="173.4" cy="173.4" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>B1-01.S3 · Giữa phòng, nhìn về vách gương</title></circle>
+<circle cx="173.4" cy="173.4" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="B1-01.S3"><title>B1-01.S3 · Giữa phòng, nhìn về vách gương</title></circle>
 <text x="173.4" y="173.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="197.3" y1="508.2" x2="191.4" y2="478.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="197.3" cy="508.2" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>B1-02.S1 · Trong cửa phía sân vườn, nhìn vào</title></circle>
+<circle cx="197.3" cy="508.2" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="B1-02.S1"><title>B1-02.S1 · Trong cửa phía sân vườn, nhìn vào</title></circle>
 <text x="197.3" y="508.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="155.4" y1="322.8" x2="155.4" y2="292.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="155.4" cy="322.8" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>B1-02.S2 · Chân cầu thang block 2</title></circle>
+<circle cx="155.4" cy="322.8" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="B1-02.S2"><title>B1-02.S2 · Chân cầu thang block 2</title></circle>
 <text x="155.4" y="323.3" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="53.8" y1="328.8" x2="83.8" y2="328.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="53.8" cy="328.8" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>B1-02.S3 · Trong cửa phía tây, nhìn sang phía đông</title></circle>
+<circle cx="53.8" cy="328.8" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="B1-02.S3"><title>B1-02.S3 · Trong cửa phía tây, nhìn sang phía đông</title></circle>
 <text x="53.8" y="329.3" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <text x="870.2" y="440.7" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#d9480f" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T1-01</text>
 <text x="723.4" y="274.9" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#1c7ed6" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">T1-02</text>

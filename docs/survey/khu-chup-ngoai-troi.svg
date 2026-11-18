@@ -95,88 +95,88 @@
 <polygon points="19.8,84.2 1090.1,84.2 1090.1,178.4 19.8,178.4" fill="#0b7285" fill-opacity="0.16" stroke="#0b7285" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-08"><title>NT-08 · Phía đường Tân Thuận: đường nội bộ, cổng xe, chốt bảo vệ</title></polygon>
 <polygon points="19.8,168.5 61.9,168.5 61.9,654.1 19.8,654.1" fill="#5c940d" fill-opacity="0.16" stroke="#5c940d" stroke-width="2.2" stroke-linejoin="round" data-zone="NT-09"><title>NT-09 · Phía tây block 2 và hàng rào tây</title></polygon>
 <line x1="750.7" y1="641.7" x2="748.4" y2="611.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="750.7" cy="641.7" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S1 · Bên kia đài phun nước, nhìn thẳng vào cửa chính, lấy trọn mái che</title></circle>
+<circle cx="750.7" cy="641.7" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="NT-01.S1"><title>NT-01.S1 · Bên kia đài phun nước, nhìn thẳng vào cửa chính, lấy trọn mái che</title></circle>
 <text x="750.7" y="642.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="748.2" y1="567.3" x2="750" y2="597.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="748.2" cy="567.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S2 · Dưới mép mái che, quay lưng vào cửa, nhìn ra đài phun nước</title></circle>
+<circle cx="748.2" cy="567.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="NT-01.S2"><title>NT-01.S2 · Dưới mép mái che, quay lưng vào cửa, nhìn ra đài phun nước</title></circle>
 <text x="748.2" y="567.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="683.8" y1="572.3" x2="712.6" y2="564" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="683.8" cy="572.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S3 · Góc tây sân trước, nhìn dọc mặt kính về phía đông</title></circle>
+<circle cx="683.8" cy="572.3" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="NT-01.S3"><title>NT-01.S3 · Góc tây sân trước, nhìn dọc mặt kính về phía đông</title></circle>
 <text x="683.8" y="572.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="832.4" y1="555" x2="802.6" y2="557.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="832.4" cy="555" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2"><title>NT-01.S4 · Góc đông sân trước, nhìn dọc mặt kính về phía tây</title></circle>
+<circle cx="832.4" cy="555" r="9" fill="#d9480f" stroke="#ffffff" stroke-width="2" data-station="NT-01.S4"><title>NT-01.S4 · Góc đông sân trước, nhìn dọc mặt kính về phía tây</title></circle>
 <text x="832.4" y="555.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
 <line x1="614.4" y1="644.1" x2="614.4" y2="614.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="614.4" cy="644.1" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>NT-02.S1 · Mép bãi xe, nhìn thẳng vào biển chữ VNG</title></circle>
+<circle cx="614.4" cy="644.1" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="NT-02.S1"><title>NT-02.S1 · Mép bãi xe, nhìn thẳng vào biển chữ VNG</title></circle>
 <text x="614.4" y="644.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="535.1" y1="634.2" x2="562.9" y2="623" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="535.1" cy="634.2" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2"><title>NT-02.S2 · Góc tây nam, nhìn chéo cả mặt đứng phía sông</title></circle>
+<circle cx="535.1" cy="634.2" r="9" fill="#1c7ed6" stroke="#ffffff" stroke-width="2" data-station="NT-02.S2"><title>NT-02.S2 · Góc tây nam, nhìn chéo cả mặt đứng phía sông</title></circle>
 <text x="535.1" y="634.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="282.4" y1="664" x2="312.4" y2="664.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="282.4" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S1 · Đầu tây bãi xe, nhìn dọc hàng xe</title></circle>
+<circle cx="282.4" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="NT-03.S1"><title>NT-03.S1 · Đầu tây bãi xe, nhìn dọc hàng xe</title></circle>
 <text x="282.4" y="664.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="668.9" y1="664" x2="638.9" y2="664.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="668.9" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S2 · Đầu đông, nhìn ngược lại</title></circle>
+<circle cx="668.9" cy="664" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="NT-03.S2"><title>NT-03.S2 · Đầu đông, nhìn ngược lại</title></circle>
 <text x="668.9" y="664.5" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="475.7" y1="703.6" x2="475.7" y2="673.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="475.7" cy="703.6" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2"><title>NT-03.S3 · Giữa bãi, quay lưng ra sông, nhìn vào toà nhà</title></circle>
+<circle cx="475.7" cy="703.6" r="9" fill="#9c36b5" stroke="#ffffff" stroke-width="2" data-station="NT-03.S3"><title>NT-03.S3 · Giữa bãi, quay lưng ra sông, nhìn vào toà nhà</title></circle>
 <text x="475.7" y="704.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="148.6" y1="792.8" x2="148.6" y2="822.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="148.6" cy="792.8" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S1 · Phía tây lối dạo, nhìn ra sông</title></circle>
+<circle cx="148.6" cy="792.8" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="NT-04.S1"><title>NT-04.S1 · Phía tây lối dạo, nhìn ra sông</title></circle>
 <text x="148.6" y="793.3" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="445.9" y1="763.1" x2="445.9" y2="733.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="445.9" cy="763.1" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S2 · Giữa công viên, quay lưng ra sông, nhìn về toà nhà</title></circle>
+<circle cx="445.9" cy="763.1" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="NT-04.S2"><title>NT-04.S2 · Giữa công viên, quay lưng ra sông, nhìn về toà nhà</title></circle>
 <text x="445.9" y="763.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="748.2" y1="782.9" x2="748.2" y2="812.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="748.2" cy="782.9" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S3 · Cuối lối đi từ cổng ra sông, nhìn ra sông</title></circle>
+<circle cx="748.2" cy="782.9" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="NT-04.S3"><title>NT-04.S3 · Cuối lối đi từ cổng ra sông, nhìn ra sông</title></circle>
 <text x="748.2" y="783.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="991" y1="753.2" x2="961" y2="754.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="991" cy="753.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2"><title>NT-04.S4 · Đầu đông, nhìn dọc lối dạo về phía tây</title></circle>
+<circle cx="991" cy="753.2" r="9" fill="#2b8a3e" stroke="#ffffff" stroke-width="2" data-station="NT-04.S4"><title>NT-04.S4 · Đầu đông, nhìn dọc lối dạo về phía tây</title></circle>
 <text x="991" y="753.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
 <line x1="384" y1="500.5" x2="384" y2="470.5" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="384" cy="500.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S1 · Phía nam bồn cây tròn, nhìn vào bồn</title></circle>
+<circle cx="384" cy="500.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="NT-05.S1"><title>NT-05.S1 · Phía nam bồn cây tròn, nhìn vào bồn</title></circle>
 <text x="384" y="501" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="287.4" y1="584.7" x2="305.5" y2="560.8" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="287.4" cy="584.7" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S2 · Góc tây nam sân, nhìn chéo về chỗ hai block giáp nhau</title></circle>
+<circle cx="287.4" cy="584.7" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="NT-05.S2"><title>NT-05.S2 · Góc tây nam sân, nhìn chéo về chỗ hai block giáp nhau</title></circle>
 <text x="287.4" y="585.2" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="396.4" y1="381.5" x2="392.4" y2="411.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="396.4" cy="381.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2"><title>NT-05.S3 · Chỗ hai block giáp nhau, quay lưng vào nhà, nhìn ra sân</title></circle>
+<circle cx="396.4" cy="381.5" r="9" fill="#e67700" stroke="#ffffff" stroke-width="2" data-station="NT-05.S3"><title>NT-05.S3 · Chỗ hai block giáp nhau, quay lưng vào nhà, nhìn ra sân</title></circle>
 <text x="396.4" y="382" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="941.4" y1="158.6" x2="924.5" y2="183.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="941.4" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S1 · Góc đông bắc sàn hồ bơi, nhìn chéo cả hồ</title></circle>
+<circle cx="941.4" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2" data-station="NT-06.S1"><title>NT-06.S1 · Góc đông bắc sàn hồ bơi, nhìn chéo cả hồ</title></circle>
 <text x="941.4" y="159.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="936.5" y1="416.2" x2="926" y2="388.1" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="936.5" cy="416.2" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S2 · Góc nam, nhìn ngược lên</title></circle>
+<circle cx="936.5" cy="416.2" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2" data-station="NT-06.S2"><title>NT-06.S2 · Góc nam, nhìn ngược lên</title></circle>
 <text x="936.5" y="416.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="842.3" y1="158.6" x2="850.8" y2="187.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="842.3" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2"><title>NT-06.S3 · Góc tây bắc, nhìn chéo</title></circle>
+<circle cx="842.3" cy="158.6" r="9" fill="#5f3dc4" stroke="#ffffff" stroke-width="2" data-station="NT-06.S3"><title>NT-06.S3 · Góc tây bắc, nhìn chéo</title></circle>
 <text x="842.3" y="159.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="867.1" y1="649.1" x2="888.3" y2="627.9" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="867.1" cy="649.1" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>NT-07.S1 · Từ phía sông, nhìn vào ki-ốt</title></circle>
+<circle cx="867.1" cy="649.1" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2" data-station="NT-07.S1"><title>NT-07.S1 · Từ phía sông, nhìn vào ki-ốt</title></circle>
 <text x="867.1" y="649.6" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="976.1" y1="564.9" x2="948.5" y2="553.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="976.1" cy="564.9" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2"><title>NT-07.S2 · Góc đông nam, nhìn mặt đứng phía đông nam</title></circle>
+<circle cx="976.1" cy="564.9" r="9" fill="#c2255c" stroke="#ffffff" stroke-width="2" data-station="NT-07.S2"><title>NT-07.S2 · Góc đông nam, nhìn mặt đứng phía đông nam</title></circle>
 <text x="976.1" y="565.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="1000.9" y1="118.9" x2="979.7" y2="97.7" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="1000.9" cy="118.9" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S1 · Cạnh chốt bảo vệ, nhìn về cổng xe</title></circle>
+<circle cx="1000.9" cy="118.9" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="NT-08.S1"><title>NT-08.S1 · Cạnh chốt bảo vệ, nhìn về cổng xe</title></circle>
 <text x="1000.9" y="119.4" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="644.1" y1="148.6" x2="644.1" y2="178.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="644.1" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S2 · Đối diện cửa phía bắc block chính</title></circle>
+<circle cx="644.1" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="NT-08.S2"><title>NT-08.S2 · Đối diện cửa phía bắc block chính</title></circle>
 <text x="644.1" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="445.9" y1="148.6" x2="475.9" y2="148.6" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="445.9" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S3 · Giữa đường nội bộ phía bắc, nhìn về phía đông</title></circle>
+<circle cx="445.9" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="NT-08.S3"><title>NT-08.S3 · Giữa đường nội bộ phía bắc, nhìn về phía đông</title></circle>
 <text x="445.9" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <line x1="148.6" y1="148.6" x2="171.2" y2="168.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="148.6" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2"><title>NT-08.S4 · Trước cửa phía bắc block 2</title></circle>
+<circle cx="148.6" cy="148.6" r="9" fill="#0b7285" stroke="#ffffff" stroke-width="2" data-station="NT-08.S4"><title>NT-08.S4 · Trước cửa phía bắc block 2</title></circle>
 <text x="148.6" y="149.1" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">4</text>
 <line x1="44.6" y1="203.2" x2="44.6" y2="233.2" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="44.6" cy="203.2" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S1 · Góc tây bắc, nhìn dọc mặt tây về phía sông</title></circle>
+<circle cx="44.6" cy="203.2" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="NT-09.S1"><title>NT-09.S1 · Góc tây bắc, nhìn dọc mặt tây về phía sông</title></circle>
 <text x="44.6" y="203.7" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">1</text>
 <line x1="44.6" y1="391.4" x2="74.6" y2="391.4" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="44.6" cy="391.4" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S2 · Giữa mặt tây, nhìn vào cửa phía tây</title></circle>
+<circle cx="44.6" cy="391.4" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="NT-09.S2"><title>NT-09.S2 · Giữa mặt tây, nhìn vào cửa phía tây</title></circle>
 <text x="44.6" y="391.9" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">2</text>
 <line x1="44.6" y1="624.3" x2="44.6" y2="594.3" stroke="#1f2328" stroke-width="2.2" marker-end="url(#survey-arrow)"/>
-<circle cx="44.6" cy="624.3" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2"><title>NT-09.S3 · Góc tây nam, nhìn ngược lên</title></circle>
+<circle cx="44.6" cy="624.3" r="9" fill="#5c940d" stroke="#ffffff" stroke-width="2" data-station="NT-09.S3"><title>NT-09.S3 · Góc tây nam, nhìn ngược lên</title></circle>
 <text x="44.6" y="624.8" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" pointer-events="none">3</text>
 <text x="760.1" y="614" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#d9480f" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-01</text>
 <text x="604.6" y="601.8" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#1c7ed6" stroke="#ffffff" stroke-width="3.5" paint-order="stroke">NT-02</text>
