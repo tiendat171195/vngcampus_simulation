@@ -3,6 +3,7 @@ import { createContext, type ReactNode, useContext, useEffect, useMemo } from 'r
 import { useDebugStore } from '../debug/debugStore';
 import { buildWorld, type World } from './buildWorld';
 import { createAreaLabels, disposeLabels } from './labels';
+import { createLogoSigns } from './logoSigns';
 
 const WorldContext = createContext<World | null>(null);
 
@@ -23,6 +24,15 @@ export function CampusWorld({ children }: { children?: ReactNode }) {
     const labels = createAreaLabels(campusMap, campusIndex);
     for (const { level, sprite } of labels) world.levels.get(level)?.add(sprite);
     return () => disposeLabels(labels);
+  }, [world]);
+
+  useEffect(() => {
+    const { signs, dispose } = createLogoSigns(campusMap);
+    for (const { level, mesh } of signs) world.levels.get(level)?.add(mesh);
+    return () => {
+      for (const { mesh } of signs) mesh.removeFromParent();
+      dispose();
+    };
   }, [world]);
 
   useEffect(() => () => world.dispose(), [world]);

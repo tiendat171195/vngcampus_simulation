@@ -1,7 +1,8 @@
 /**
- * Builds map v0: real footprints from OpenStreetMap plus an assumed layout for everything that has
- * no public source yet (gate, interiors, stairs, seats). Assumed pieces carry the `placeholder`
- * tag and get corrected against real floor plans in P6.2 (docs/03-world-and-assets.md §5).
+ * Builds the campus map: real footprints from OpenStreetMap, the outdoor layout checked against
+ * satellite imagery and VNG's own photos (map 0.2, docs/03-world-and-assets.md §1.3), and an
+ * assumed layout for what no public source shows yet (interiors, stairs, seats). Assumed pieces
+ * carry the `placeholder` tag and get corrected against real floor plans later (P6.2).
  *
  * The output is deterministic: the same extract always yields the same map.
  */
@@ -64,6 +65,10 @@ const PROP_CLEARANCE: Record<string, number> = {
   planter: 1.6,
   desk_cluster: 2.6,
   plant_shelf: 1.8,
+  // Overhead or on a wall: nothing on the ground to keep clear of.
+  canopy_v: 0,
+  logo_sign: 0,
+  planter_round: 0,
 };
 
 const vi = (text: string) => ({ vi: text });
@@ -136,7 +141,27 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   // The two blocks share one wall; the same doorway is cut into both of them on every floor.
   const blockLink = onWall(mainFootprint, [-58.95, -19.95]);
 
-  const gatehouseFootprint = rect(-14, -56, -10, -52);
+  // The security booth stands by the vehicle entrance in the north-east corner (assumed spot).
+  const gatehouseFootprint = rect(66, -56, 70, -52);
+
+  /** The south facade of the main block, where the main entrance faces the river. */
+  const southEdge = nearestEdge([20, 36], mainFootprint).edge;
+  const southFacade = {
+    a: mainFootprint[southEdge] as Vec2,
+    b: mainFootprint[(southEdge + 1) % mainFootprint.length] as Vec2,
+  };
+  const facadeZ = (x: number) => {
+    const { a, b } = southFacade;
+    return lerp(a, b, (x - a[0]) / (b[0] - a[0]))[1];
+  };
+  const outward: Vec2 = (() => {
+    const d: Vec2 = [southFacade.b[0] - southFacade.a[0], southFacade.b[1] - southFacade.a[1]];
+    const length = Math.hypot(d[0], d[1]);
+    const n: Vec2 = [-d[1] / length, d[0] / length];
+    return n[1] > 0 ? n : [-n[0], -n[1]];
+  })();
+  /** The roundabout in front of the entrance has a fountain in its middle (photos, satellite). */
+  const fountainCentre: Vec2 = [21.5, 49];
 
   const structures: Structure[] = [
     {
@@ -146,9 +171,11 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       floors: ['F1', 'F2', 'F3'],
       voids: [{ id: 'atrium', polygon: atriumVoid, floors: ['F2', 'F3', 'ROOF'] }],
       openings: [
-        { id: 'door.main.north', floor: 'F1', at: onWall(mainFootprint, [0, -34.3]), width: 12 },
+        // A service door to the garden strip along the main road.
+        { id: 'door.main.north', floor: 'F1', at: onWall(mainFootprint, [0, -34.3]), width: 6 },
         { id: 'door.main.west', floor: 'F1', at: onWall(mainFootprint, [-38.7, 17.9]), width: 8 },
-        { id: 'door.main.south', floor: 'F1', at: onWall(mainFootprint, [20, 35.9]), width: 6 },
+        // The main entrance, under the orange V-shaped canopy, facing the fountain and the river.
+        { id: 'door.main.south', floor: 'F1', at: onWall(mainFootprint, [20, 35.9]), width: 10 },
         { id: 'door.main.east', floor: 'F1', at: onWall(mainFootprint, [53.8, 10.7]), width: 5 },
         ...(['F1', 'F2', 'F3'] as const).map((floor) => ({
           id: `door.main.link_${floor.toLowerCase()}`,
@@ -246,13 +273,15 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   // Areas
   // ---------------------------------------------------------------------------------------------
 
-  // Fence line: the road side, the east and west ends, and four metres back from the river bank.
+  // Fence line: the road side, the east end, the hedge west of block 2 (the open lot beyond it is
+  // not part of the campus, satellite imagery), and four metres back from the river bank.
+  const WEST_FENCE = -126;
   const site: Vec2[] = [
-    [-172, -57],
+    [WEST_FENCE, -57],
     [90, -57],
     [90, bankZ(90) - 4],
     [72.3, bankZ(72.3) - 4],
-    [-172, bankZ(-172) - 4],
+    [WEST_FENCE, bankZ(WEST_FENCE) - 4],
   ];
   const river: Vec2[] = [
     [BOUNDS.min[0], bankZ(BOUNDS.min[0])],
@@ -262,6 +291,16 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     [BOUNDS.min[0], BOUNDS.max[1]],
   ];
   const koiPond = ellipse([-2, 30], 6, 3.5, 14);
+  const fountain = ellipse(fountainCentre, 2.8, 2.8, 16);
+  /** The round planter in the middle of the garden between the blocks. */
+  const gardenPlanter = ellipse([-52.5, 16], 4.2, 4.2, 16);
+  // The entrance plaza: between the south facade and the drive around the fountain.
+  const entrancePlaza: Vec2[] = [
+    [10, facadeZ(10) + 0.6],
+    [32, facadeZ(32) + 0.6],
+    [32, 42.5],
+    [10, 43.5],
+  ];
 
   const area = (
     id: string,
@@ -284,14 +323,13 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     // Outdoors
     area('site', 'Khuôn viên', 'F1', site, 'outdoor', ['base']),
     area('river', 'Sông Sài Gòn', 'F1', river, 'water'),
-    area('gate_main', 'Cổng chính', 'F1', rect(-8, -57, 8, -47), 'outdoor', [
-      'landmark',
-      'placeholder',
-    ]),
-    area('parking', 'Bãi xe', 'F1', rect(-168, -40, -124, 46), 'outdoor', ['placeholder']),
+    area('gate_main', 'Cổng chính', 'F1', entrancePlaza, 'outdoor', ['landmark']),
+    area('fountain', 'Đài phun nước', 'F1', fountain, 'water', ['landmark']),
+    // Nose-in bays along the drive on the river side (cars in the satellite imagery).
+    area('parking', 'Bãi xe', 'F1', rect(-74, 57, 6, 67), 'outdoor'),
     area(
       'forecourt',
-      'Sân đón khách',
+      'Sân vườn',
       'F1',
       [
         [-98, 50],
@@ -302,8 +340,9 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
         [-25.5, 50.5],
       ],
       'outdoor',
-      ['landmark'],
+      ['landmark', 'green'],
     ),
+    area('garden_planter', 'Bồn cây tròn', 'F1', gardenPlanter, 'restricted', ['landmark']),
     area(
       'pool_deck',
       'Khu hồ bơi',
@@ -324,10 +363,10 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       'Công viên ven sông',
       'F1',
       [
-        [-165, 58],
-        [85, 58],
+        [WEST_FENCE + 2, 69],
+        [85, 69],
         [85, bankZ(85) - 4],
-        [-165, bankZ(-165) - 4],
+        [WEST_FENCE + 2, bankZ(WEST_FENCE + 2) - 4],
       ],
       'outdoor',
       ['landmark', 'green'],
@@ -340,15 +379,16 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     area('main.f1', 'Block chính — tầng trệt', 'F1', mainFootprint, 'indoor', ['base']),
     area('block2.f1', 'Block 2 — tầng trệt', 'F1', block2Footprint, 'indoor', ['base']),
     area('atrium', 'Atrium', 'F1', atriumVoid, 'indoor', ['landmark', 'event']),
+    // Through the main entrance, past reception, into the atrium (articles, photos).
     area(
       'lobby',
       'Sảnh lễ tân',
       'F1',
       [
-        [-46.5, 2],
-        [-22, 2],
-        [-22, 30],
-        [-31.3, 30],
+        [16, 18],
+        [34, 18],
+        [34, facadeZ(34) - 0.6],
+        [16, facadeZ(16) - 0.6],
       ],
       'indoor',
       ['landmark', 'placeholder'],
@@ -415,7 +455,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   // ---------------------------------------------------------------------------------------------
 
   const promenadeAt = (x: number): Vec2 => [x, bankZ(x) - 8];
-  const promenade = [-165, -100, -40, 21, 85].map(promenadeAt);
+  const promenade = [WEST_FENCE + 6, -40, 21, 85].map(promenadeAt);
   const loop = osm.way(WAY.loop);
 
   const path = (
@@ -444,15 +484,6 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     path('road.roundabout', 'road', osm.way(WAY.roundabout).slice(0, -1), 5, true),
     path('road.forecourt_drive', 'road', osm.way(WAY.forecourtDrive), 6),
     path(
-      'walk.gate',
-      'walkway',
-      [
-        [0, -64],
-        [0, -35],
-      ],
-      8,
-    ),
-    path(
       'walk.river_spur',
       'walkway',
       [...osm.way(WAY.riverSpur).toReversed(), promenadeAt(21)],
@@ -466,7 +497,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   // ---------------------------------------------------------------------------------------------
 
   const draft: CampusMap = {
-    version: '0.1.0',
+    version: '0.2.0',
     meta: {
       origin: CAMPUS_FRAME.origin,
       xAxisBearingDeg: CAMPUS_FRAME.xAxisBearingDeg,
@@ -517,24 +548,28 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   };
   const facing = (from: Vec2, to: Vec2) => yawDegOf([to[0] - from[0], to[1] - from[1]]);
 
-  // Players arrive at the gate facing the building.
-  spawnSets.players_gate = [-4.5, -1.5, 1.5, 4.5].flatMap((x, column) =>
-    [-54, -51.5].map((z, row) =>
-      place('spawn', `spawn.gate_${pad(column * 2 + row + 1)}`, 'F1', [x, z], { yawDeg: 0 }),
-    ),
+  // Players arrive at the main entrance facing the doors, as people do off the shuttle bus.
+  const entranceDoor = onWall(mainFootprint, [20, 35.9]);
+  spawnSets.players_gate = [15.5, 18.5, 21.5, 24.5].flatMap((x, column) =>
+    [2, 4].map((back, row) => {
+      const at: Vec2 = [x, facadeZ(x) + back];
+      return place('spawn', `spawn.gate_${pad(column * 2 + row + 1)}`, 'F1', at, {
+        yawDeg: facing(at, entranceDoor),
+      });
+    }),
   );
 
   const checkpoint = (id: string, name: string, floor: FloorId, at: Vec2, radius = 3) =>
     place('checkpoint', `checkpoint.${id}`, floor, at, { name: vi(name), radius });
 
-  checkpoint('gate', 'Cửa kiểm soát cổng chính', 'F1', [0, -46]);
+  checkpoint('gate', 'Cổng chính', 'F1', [21, facadeZ(21) + 3]);
   checkpoint('atrium', 'Giữa Atrium', 'F1', [0, 2], 5);
-  checkpoint('lobby', 'Sảnh lễ tân', 'F1', [-30, 14]);
+  checkpoint('lobby', 'Sảnh lễ tân', 'F1', [26, 24]);
   checkpoint('canteen', 'Lối vào canteen', 'F1', [10, -16]);
   checkpoint('koi', 'Bên hồ Koi', 'F1', [-2, 24.5]);
   checkpoint('pool', 'Hồ bơi', 'F1', [56.5, 7]);
-  checkpoint('forecourt', 'Sân đón khách', 'F1', [-60, 30], 4);
-  checkpoint('parking', 'Bãi xe', 'F1', [-146, 0], 4);
+  checkpoint('forecourt', 'Sân vườn', 'F1', [-60, 30], 4);
+  checkpoint('parking', 'Bãi xe', 'F1', [-34, 62], 4);
   checkpoint('riverside', 'Giữa công viên ven sông', 'F1', promenadeAt(-40), 4);
   checkpoint('gym', 'Phòng gym', 'F1', [-92, -24]);
   checkpoint('office_f2', 'Hành lang tầng 2', 'F2', [0, -22]);
@@ -552,7 +587,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
 
   // Benches along the river, facing the water.
   for (let i = 0; i < 10; i++) {
-    const x = -150 + i * 25;
+    const x = -112 + i * 21;
     seat(`riverside_${pad(i + 1)}`, 'F1', [x, bankZ(x) - 5.5], 0, 'bench');
   }
   // Around the koi pond, facing it. Only eight: these are meant to be contested.
@@ -585,21 +620,23 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     seat(`cafe_terrace_${pad(i + 1)}`, 'F1', [46 + i * 4, 56.5], 180, 'chair');
   for (let i = 0; i < 4; i++)
     seat(`cafe_terrace_${pad(i + 5)}`, 'F1', [44, 44 + i * 3.5], 90, 'chair');
-  for (let i = 0; i < 4; i++) seat(`lobby_${pad(i + 1)}`, 'F1', [-24, 12 + i * 3], -90, 'sofa');
+  for (let i = 0; i < 4; i++) seat(`lobby_${pad(i + 1)}`, 'F1', [32, 19.5 + i * 2.6], -90, 'sofa');
 
-  const westDoor = structures[0]?.openings[1]?.at as Vec2;
-  place('npc_spot', 'npc.reception', 'F1', [-30, 6], {
+  place('npc_spot', 'npc.reception', 'F1', [21, 22], {
     name: vi('Lễ tân'),
-    yawDeg: facing([-30, 6], westDoor),
+    yawDeg: facing([21, 22], entranceDoor),
   });
-  place('npc_spot', 'npc.security', 'F1', [-6, -51], { name: vi('Bảo vệ'), yawDeg: 90 });
+  place('npc_spot', 'npc.security', 'F1', [12, facadeZ(12) + 2], {
+    name: vi('Bảo vệ'),
+    yawDeg: facing([12, facadeZ(12) + 2], fountainCentre),
+  });
   place('npc_spot', 'npc.barista', 'F1', [9, 23.5], { name: vi('Nhân viên pha chế'), yawDeg: 0 });
 
   // Hiding places for a wandering mascot (objective type `find`).
   const mascotSpots: Vec2[] = [
     [66, 54],
-    [-165, 40],
-    [-160, bankZ(-160) - 6],
+    [WEST_FENCE + 2.5, -20],
+    [WEST_FENCE + 12, bankZ(WEST_FENCE + 12) - 6],
     [50, -42.6],
     [-18, -52],
     [-100, -43],
@@ -615,12 +652,12 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   const kiosk = (id: string, name: string, floor: FloorId, at: Vec2, lookAt: Vec2) =>
     place('kiosk_spot', `kiosk.${id}`, floor, at, { name: vi(name), yawDeg: facing(at, lookAt) });
 
-  kiosk('lobby', 'Kiosk sảnh lễ tân', 'F1', [-27, 24], westDoor);
+  kiosk('lobby', 'Kiosk sảnh lễ tân', 'F1', [28, 28], entranceDoor);
   kiosk('atrium', 'Kiosk Atrium', 'F1', [15, -9], [0, 2]);
   kiosk('canteen', 'Kiosk canteen', 'F1', [8, -20], [20, -20]);
   kiosk('pool', 'Kiosk hồ bơi', 'F1', [58.2, 11.5], [50, -10]);
   kiosk('riverside', 'Kiosk ven sông', 'F1', [-90, bankZ(-90) - 11], [-90, 40]);
-  kiosk('parking', 'Kiosk bãi xe', 'F1', [-146, -30], [-146, 0]);
+  kiosk('parking', 'Kiosk bãi xe', 'F1', [-71, 62], [-34, 62]);
   kiosk('block2', 'Kiosk block 2', 'F1', [-86, 30], [-70, 40]);
   kiosk('office_f2', 'Kiosk tầng 2', 'F2', [-30, -22], [0, -22]);
   kiosk('office_f3', 'Kiosk tầng 3', 'F3', [30, 24], [0, 24]);
@@ -632,7 +669,7 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
       radius: 4,
     });
 
-  photo('gate', 'Trước cổng chính', [0, -49], [0, -34]);
+  photo('gate', 'Trước cổng chính', [21, 41], entranceDoor);
   photo('atrium', 'Giữa Atrium', [0, 10], [0, -12]);
   photo('riverside', 'Bờ sông', promenadeAt(21), [21, 110]);
   photo('pool', 'Bên hồ bơi', [57.6, -3.2], [47, -22]);
@@ -750,13 +787,11 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
   };
   const variation = () => ({ yawDeg: random() * 360, s: 0.85 + random() * 0.35 });
 
-  // A row of trees inside the road-side fence, leaving the gate clear.
-  for (let x = -166; x <= 86; x += 9) {
-    if (Math.abs(x) > 13)
-      prop('tree_a', 'F1', [x + (random() - 0.5) * 2, -54 + random()], variation());
-  }
+  // A row of trees inside the road-side fence: the campus turns its back to the main road.
+  for (let x = WEST_FENCE + 4; x <= 86; x += 9)
+    prop('tree_a', 'F1', [x + (random() - 0.5) * 2, -54 + random()], variation());
   // Two staggered rows in the riverside park.
-  for (let x = -158; x <= 80; x += 12) {
+  for (let x = WEST_FENCE + 8; x <= 80; x += 12) {
     for (const [offset, shift] of [
       [14, 0],
       [22, 6],
@@ -766,7 +801,11 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
         prop('tree_b', 'F1', at, variation());
     }
   }
-  for (let z = -34; z <= 40; z += 12) prop('tree_a', 'F1', [-146, z], variation());
+  // The hedge line along the west fence.
+  for (let z = -40; z <= 46; z += 8) prop('tree_b', 'F1', [WEST_FENCE + 1.6, z], variation());
+  prop('planter_round', 'F1', [-52.5, 16]);
+  // Trees around the round planter in the garden.
+  for (const at of ellipse([-52.5, 16], 9.5, 9.5, 7)) prop('tree_b', 'F1', at, variation());
 
   // Street lamps on the outer side of the internal road.
   const campusCentre: Vec2 = [-30, 5];
@@ -781,12 +820,17 @@ export function buildCampusV0(osm: OsmExtract): CampusMap {
     if (isWalkable(index, at, 'F1')) prop('lamp', 'F1', at, { yawDeg: yawDegOf(direction) });
   }
 
-  // Parked cars, with a few empty bays.
-  for (const x of [-160, -132]) {
-    for (let z = -32; z <= 40; z += 6) {
-      if (random() < 0.7) prop('car', 'F1', [x, z], { yawDeg: x < -146 ? 90 : -90 });
-    }
+  // Parked cars, nose-in along the river-side drive, with a few empty bays.
+  for (let x = -66; x <= 4; x += 2.8) {
+    if (random() < 0.7) prop('car', 'F1', [x, 62.5], { yawDeg: random() < 0.5 ? 0 : 180 });
   }
+
+  // The main entrance: the orange V-shaped canopy over the doors, and the VNG sign high on the
+  // south facade (both in VNG's photos).
+  const canopyAt: Vec2 = [entranceDoor[0] + outward[0] * 3.2, entranceDoor[1] + outward[1] * 3.2];
+  prop('canopy_v', 'F1', canopyAt, { yawDeg: yawDegOf(outward) });
+  const signAt: Vec2 = [-6 + outward[0] * 0.3, facadeZ(-6) + outward[1] * 0.3];
+  prop('logo_sign', 'F3', signAt, { yawDeg: yawDegOf(outward), s: 10 });
 
   for (const at of [
     [-15, -9],

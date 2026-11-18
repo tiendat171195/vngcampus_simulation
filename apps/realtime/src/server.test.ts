@@ -1,3 +1,4 @@
+import { findArea } from '@campus/map-data';
 import { campusIndex } from '@campus/map-data/campus';
 import {
   ANIM,
@@ -55,7 +56,7 @@ const gateMission = {
     description: { vi: 'Có mặt ở cổng chính.' },
     startsAt: new Date(Date.now() - 3_600_000).toISOString(),
     endsAt: new Date(Date.now() + 3_600_000).toISOString(),
-    mapVersion: '0.1.0',
+    mapVersion: '0.2.0',
     objectives: [
       {
         id: 'o1',
@@ -182,9 +183,12 @@ describe('joining', () => {
     await settle();
     const seenByA = [...a.state.players.values()].map((p) => p.name).sort();
     expect(seenByA).toEqual(['An', 'Bình']);
-    const gate = campusIndex.areas.get('area.gate_main');
     const position = me(b);
-    expect(position && gate && decodePosition(position.z)).toBeLessThan(-46);
+    const at: [number, number] = [
+      decodePosition(position?.x ?? 0),
+      decodePosition(position?.z ?? 0),
+    ];
+    expect(findArea(campusIndex, at, 'F1')?.id).toBe('area.gate_main');
     expect(position?.status).toBe(PLAYER_STATUS.active);
   });
 
@@ -518,7 +522,11 @@ describe('presence', () => {
     expect(decodePosition(me(mover)?.x ?? 0)).toBeCloseTo(10, 1);
     expect(decodePosition(me(mover)?.z ?? 0)).toBeCloseTo(-20, 1);
     const swimmer = await join(guest(), { resume: { x: -2, y: 0, z: 30 } });
-    expect(decodePosition(me(swimmer)?.z ?? 0)).toBeLessThan(-45);
+    const at: [number, number] = [
+      decodePosition(me(swimmer)?.x ?? 0),
+      decodePosition(me(swimmer)?.z ?? 0),
+    ];
+    expect(findArea(campusIndex, at, 'F1')?.id).toBe('area.gate_main');
   });
 });
 

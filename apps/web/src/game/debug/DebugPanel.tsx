@@ -16,7 +16,7 @@ const VIEWPOINTS: Array<{ id: ViewpointId; label: string }> = [
   { id: 'atrium', label: 'Atrium' },
   { id: 'pool', label: 'Hồ bơi' },
   { id: 'riverside', label: 'Ven sông' },
-  { id: 'forecourt', label: 'Sân đón khách' },
+  { id: 'forecourt', label: 'Sân vườn' },
 ];
 
 const CROWDS = [0, 25, 50, 100, 200];

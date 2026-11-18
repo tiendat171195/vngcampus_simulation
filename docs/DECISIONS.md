@@ -15,6 +15,14 @@ Mỗi mục mới thêm vào **đầu** danh sách, theo mẫu:
 
 ---
 
+## 2026-11-18 — Dùng logo VNG chính thức; bản đồ 0.2 theo ảnh vệ tinh và ảnh công khai
+
+- Gói việc: P6.2 (một phần), thương hiệu (09 §9)
+- Bối cảnh: chủ dự án yêu cầu dùng logo VNG thay biểu tượng tự vẽ ("dùng đúng logo còn hơn dùng sai logo"), và tìm ảnh trên internet để dựng đúng bố cục campus.
+- Quyết định: (1) **Logo:** chỉ dùng file gốc từ thư viện của VNG (wordmark rút gọn cam và trắng), không sửa. Biểu tượng app: logo trắng trên nền cam VNG `#ED5A26` (tổ hợp được phép), giữ khoảng trống ≥ 2 lần nét chữ V; màn hình chào: logo trắng trên thẻ tối (bản đơn sắc); admin: logo cam trên nền trắng; trong thế giới 3D: biển chữ VNG cam trên mặt đứng phía nam như ảnh thật. Bỏ biểu tượng khối nhà tự vẽ. (2) **Bản đồ 0.2:** chiếu ảnh vệ tinh sang hệ toạ độ campus và đối chiếu với ảnh của VNG: cổng chính chuyển xuống mặt nam (mái che chữ V cam, đài phun nước giữa vòng xoay), sảnh lễ tân ngay sau cửa chính, bãi xe là hàng đỗ dọc đường phía sông, hàng rào tây theo hàng cây X ≈ −126 (khu đất trống bên ngoài không thuộc campus), sân giữa hai khối là sân vườn có bồn cây tròn. Id các khu và POI giữ nguyên nên nhiệm vụ cũ vẫn chạy; phiên bản bản đồ lên `0.2.0`. (3) Ảnh dùng để đối chiếu không lưu vào repo, chỉ ghi nguồn.
+- Khác plan ở đâu: đã sửa `03-world-and-assets.md` §1, §2, §3, §9; `09-infra-security.md` §9; roadmap P6.2.
+- Hệ quả: nhiệm vụ soạn với bản đồ `0.1.0` chỉ còn cảnh báo khác phiên bản khi xuất bản. Nội thất (canteen, hồ Koi, gym, cầu thang) vẫn giả định cho tới khi có sơ đồ tầng. Biểu tượng tab 48 px nhỏ hơn cỡ tối thiểu của hướng dẫn thương hiệu, cần CBC xác nhận.
+
 ## 2026-11-15 — PWA viết tay; loadtest qua stack production
 
 - Gói việc: P7.3

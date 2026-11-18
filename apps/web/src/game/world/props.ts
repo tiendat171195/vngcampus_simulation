@@ -1,5 +1,6 @@
 import type { Poi } from '@campus/map-data';
 import {
+  BoxGeometry,
   type BufferGeometry,
   Color,
   CylinderGeometry,
@@ -25,6 +26,22 @@ interface PropModel {
 
 const at = (x: number, y: number, z: number, scale: Vec3 = [1, 1, 1]) =>
   new Matrix4().compose(new Vector3(x, y, z), new Quaternion(), new Vector3(...scale));
+/** A beam from one point to another (a strut, a slanted column). */
+const beam = (batch: MeshBatch, from: Vec3, to: Vec3, thickness: number, colour: string) => {
+  const a = new Vector3(...from);
+  const b = new Vector3(...to);
+  const length = a.distanceTo(b);
+  const rotation = new Quaternion().setFromUnitVectors(
+    new Vector3(0, 1, 0),
+    b.clone().sub(a).normalize(),
+  );
+  const matrix = new Matrix4().compose(
+    a.add(b).multiplyScalar(0.5),
+    rotation,
+    new Vector3(1, 1, 1),
+  );
+  batch.merge(new BoxGeometry(thickness, length, thickness), matrix, colour);
+};
 const blob = (radius: number) => new IcosahedronGeometry(radius, 0);
 const pole = (top: number, bottom: number, height: number, sides = 6) =>
   new CylinderGeometry(top, bottom, height, sides);
@@ -94,6 +111,37 @@ const MODELS: Record<string, PropModel> = {
       }
     },
   },
+  /**
+   * The canopy over the main entrance: a light roof on orange V-shaped columns, open at the
+   * sides (VNG's photos). Faces +Z, away from the doors; overhead only, so nothing collides.
+   */
+  canopy_v: {
+    build(batch) {
+      batch.box([0, 4.6, 0], [14, 0.35, 7], PALETTE.canopy);
+      batch.box([0, 4.35, 3.4], [14, 0.25, 0.3], PALETTE.brandOrange);
+      // A V at each end, out of the way of people walking to the doors.
+      for (const x of [-6.2, 6.2]) {
+        beam(batch, [x, 0, 2.6], [x - 1.2, 4.4, 2.6], 0.3, PALETTE.brandOrange);
+        beam(batch, [x, 0, 2.6], [x + 1.2, 4.4, 2.6], 0.3, PALETTE.brandOrange);
+      }
+    },
+  },
+  /** The round planter in the garden between the blocks. */
+  planter_round: {
+    collider: [6.4, 0.8, 6.4],
+    build(batch) {
+      batch.merge(pole(4.2, 4.3, 0.6, 20), at(0, 0.3, 0), PALETTE.planter);
+      batch.merge(pole(3.9, 3.9, 0.1, 20), at(0, 0.62, 0), PALETTE.park);
+      for (const [x, z, r] of [
+        [0, 0, 1.6],
+        [-2, 1.4, 1],
+        [2.1, -1, 1.1],
+        [1.2, 2.2, 0.8],
+      ] as const) {
+        batch.merge(blob(r), at(x, 0.6 + r * 0.7, z), r > 1.2 ? PALETTE.leafA : PALETTE.leafB);
+      }
+    },
+  },
   plant_shelf: {
     collider: [2.4, 1.4, 0.45],
     build(batch) {
@@ -104,6 +152,9 @@ const MODELS: Record<string, PropModel> = {
     },
   },
 };
+
+/** Props drawn elsewhere because they need a texture rather than vertex colours. */
+export const TEXTURED = new Set(['logo_sign']);
 
 /** Furniture drawn for seat POIs, keyed by their `meta.furniture`. */
 const FURNITURE: Record<string, PropModel> = {
@@ -226,6 +277,8 @@ export function buildProps(ctx: BuildContext, material: Material): BuiltProps[] 
   };
 
   for (const props of ctx.map.props) {
+    // Signs carry the official artwork as a texture; LogoSigns draws them.
+    if (TEXTURED.has(props.model)) continue;
     emit(
       props.model,
       MODELS[props.model],

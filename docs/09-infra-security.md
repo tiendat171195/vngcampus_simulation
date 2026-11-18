@@ -165,7 +165,7 @@ Dự án dựng lại một trụ sở có thật, nên có vài việc cần l�
 
 | Vấn đề | Việc cần làm |
 |---|---|
-| Tên và logo VNG, hình ảnh campus | Xin phép bộ phận phụ trách thương hiệu/truyền thông. Trong lúc chờ, giữ quyền truy cập ở phạm vi nhóm nhỏ |
+| Tên và logo VNG, hình ảnh campus | Xin phép bộ phận phụ trách thương hiệu/truyền thông. Trong lúc chờ, giữ quyền truy cập ở phạm vi nhóm nhỏ. **18/11/2026:** chủ dự án quyết định dùng logo VNG chính thức (file gốc của VNG, theo hướng dẫn thương hiệu). Biểu tượng tab trình duyệt 48 px nhỏ hơn cỡ tối thiểu trong hướng dẫn (cao 10 mm) — cần nhóm CBC xác nhận trước khi mở rộng |
 | An ninh vật lý | **Không dựng** vị trí camera, phòng kỹ thuật, phòng máy chủ, chi tiết hệ thống kiểm soát ra vào. Khu văn phòng dựng cách điệu, không theo đúng sơ đồ chỗ ngồi |
 | Sơ đồ và ảnh nội bộ dùng làm tham chiếu | Không đưa vào repo công khai; lưu ở kho riêng tư |
 | Thương hiệu đối tác (các quầy cà phê…) | Dùng tên chung cho tới khi được phép |

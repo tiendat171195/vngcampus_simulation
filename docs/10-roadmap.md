@@ -199,7 +199,7 @@ Ngoài nghiệm thu: thông báo ba mức (phát ngay/hẹn giờ), công tắc 
 | Mã | Gói việc | Phạm vi | Cần từ bạn | Cỡ | Trạng thái |
 |---|---|---|---|:-:|---|
 | P6.1 | Pipeline asset | Quy ước xuất từ Blender, script gltf-transform, KTX2, manifest, trình tải zone theo khoảng cách, kiểm tra ngân sách trong CI | — | M | Chưa làm |
-| P6.2 | Hiệu chỉnh bản đồ | Chỉnh map-data theo sơ đồ và ảnh thật → v1. Công cụ dev đặt POI, xuất JSON | Nhóm A, B ở [03](03-world-and-assets.md#8-tư-liệu-cần-bạn-cung-cấp) | M | Chưa làm |
+| P6.2 | Hiệu chỉnh bản đồ | Chỉnh map-data theo sơ đồ và ảnh thật → v1. Công cụ dev đặt POI, xuất JSON | Nhóm A, B ở [03](03-world-and-assets.md#8-tư-liệu-cần-bạn-cung-cấp) | M | Một phần: ngoại cảnh theo ảnh vệ tinh và ảnh công khai → bản đồ 0.2 ([03 §1.3](03-world-and-assets.md#13-đối-chiếu-với-ảnh-vệ-tinh-và-ảnh-chính-thức-bản-đồ-02-18112026)); nội thất còn chờ sơ đồ tầng |
 | P6.3 | Ngoại cảnh | Vỏ nhà và mặt đứng, cảnh quan, hồ bơi, ven sông, cổng, biển hiệu, bầu trời, ánh sáng bake, âm thanh môi trường | Nhóm B, D | L | Chưa làm |
 | P6.4 | Nội thất chính | Sảnh, Atrium, canteen, hồ Koi + cà phê, một tầng văn phòng tiêu biểu (bàn ghế và kệ cây sinh theo quy tắc), phòng họp | Nhóm C, E | L | Chưa làm |
 | P6.5 | Nhân vật hoàn chỉnh | Nhân vật theo phong cách riêng, tủ đồ, bộ emote, phụ kiện thẻ nhân viên | Góp ý phong cách | L | Chưa làm |

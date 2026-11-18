@@ -33,7 +33,7 @@ describe('world budgets', () => {
 
 describe('floors', () => {
   it('has ground at the gate and inside the atrium', () => {
-    expect(floorBelow(0, 2, -52)).toBeCloseTo(0);
+    expect(floorBelow(21, 2, 39.5)).toBeCloseTo(0);
     expect(floorBelow(0, 2, 2)).toBeCloseTo(0);
   });
 
@@ -100,9 +100,16 @@ describe('walls and doors', () => {
 });
 
 describe('edges of the world', () => {
-  it('stops people at the fence even where the gate is open', () => {
+  it('stops people at the fence on every side', () => {
     expect(obstacle([0, 1, -50], [0, 1, -70])).toBeCloseTo(7, 0);
-    expect(obstacle([-160, 1, 0], [-190, 1, 0])).toBeCloseTo(12, 0);
+    // The west fence follows the hedge line beyond block 2 (map 0.2).
+    expect(obstacle([-122, 1, 4], [-140, 1, 4])).toBeCloseTo(4, 0);
+  });
+
+  it('keeps people out of the fountain and the round planter, and lets them under the canopy', () => {
+    expect(obstacle([21.5, 1, 42], [21.5, 1, 49])).toBeLessThan(5);
+    expect(obstacle([-52.5, 0.5, 26], [-52.5, 0.5, 16])).toBeLessThan(8);
+    expect(obstacle([21, 1.5, 41.5], [20.5, 1.5, 37.5])).toBe(Number.POSITIVE_INFINITY);
   });
 
   it('keeps people out of the pool and the koi pond', () => {

@@ -63,7 +63,9 @@ describe('areas', () => {
       'area.site',
     ]);
     expect(findArea(campusIndex, [-2, 30], 'F1')?.id).toBe('area.koi_pond');
-    expect(findArea(campusIndex, [0, -52], 'F1')?.id).toBe('area.gate_main');
+    // The main entrance faces the river, in front of the south facade (map 0.2).
+    expect(findArea(campusIndex, [21, 39], 'F1')?.id).toBe('area.gate_main');
+    expect(findArea(campusIndex, [-34, 62], 'F1')?.id).toBe('area.parking');
   });
 
   it('keeps floors apart', () => {
@@ -88,7 +90,11 @@ describe('isWalkable', () => {
   it('rejects water, solid kiosks and anything beyond the fence', () => {
     expect(isWalkable(campusIndex, [-2, 30], 'F1')).toBe(false);
     expect(isWalkable(campusIndex, [0, 105], 'F1')).toBe(false);
-    expect(isWalkable(campusIndex, [-12, -54], 'F1')).toBe(false);
+    expect(isWalkable(campusIndex, [68, -54], 'F1')).toBe(false);
+    expect(isWalkable(campusIndex, [21.5, 49], 'F1')).toBe(false);
+    expect(isWalkable(campusIndex, [-52.5, 16], 'F1')).toBe(false);
+    // The open lot west of the hedge is not campus.
+    expect(isWalkable(campusIndex, [-150, 0], 'F1')).toBe(false);
     expect(isWalkable(campusIndex, [0, -70], 'F1')).toBe(false);
     expect(isWalkable(campusIndex, [500, 500], 'F1')).toBe(false);
   });

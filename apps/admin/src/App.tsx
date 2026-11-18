@@ -1,6 +1,7 @@
 import type { AdminMeDto, Permission } from '@campus/shared';
 import { useEffect, useState } from 'react';
 import { ApiFailure, api, gameUrl } from './api';
+import logoUrl from './assets/brand/vng-logo-orange.png';
 import { href, usePath } from './hooks';
 import { AnnouncementsPage } from './pages/Announcements';
 import { AuditPage } from './pages/Audit';
@@ -93,7 +94,10 @@ export function App() {
   return (
     <div className="layout">
       <nav className="sidebar" aria-label="Mục quản trị">
-        <p className="brand">Campus · Quản trị</p>
+        <p className="brand">
+          <img src={logoUrl} alt="VNG" width={90} height={36} />
+          <span>Campus · Quản trị</span>
+        </p>
         {allowed.map((item) => (
           <a
             key={item.path}

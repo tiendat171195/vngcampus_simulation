@@ -19,6 +19,9 @@ export const PALETTE = {
 
   wall: '#f5f2ea',
   wallAccent: '#f28c28',
+  /** VNG orange, as in the official artwork (vng.com.vn): the entrance canopy and signs. */
+  brandOrange: '#ed5a26',
+  canopy: '#eceef0',
   interiorWall: '#e9e4d9',
   glass: '#a9d6ea',
   slab: '#e6e1d6',

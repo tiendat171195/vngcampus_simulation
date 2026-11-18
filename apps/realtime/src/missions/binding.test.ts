@@ -101,7 +101,7 @@ describe('room missions', () => {
 
   it('counts arriving at the gate, saved before it is shown', async () => {
     await enter('s1', ME);
-    moveTo('s1', { x: 0, y: 0, z: -52 });
+    moveTo('s1', { x: 21, y: 0, z: 39 });
     await settle();
     expect(progressOf('o1')).toBe(1);
     expect(source.progress.get(`${mission.id}/${ME}`)?.progress.o1?.done).toBe(true);
@@ -118,7 +118,7 @@ describe('room missions', () => {
       players: () => [],
       now: () => clock,
     });
-    positions.set('s1', { x: 0, y: 0, z: -52 });
+    positions.set('s1', { x: 21, y: 0, z: 39 });
     await late.join('s1', ME, 'Đứng Sẵn');
     expect(progressOf('o1')).toBe(0);
     source.missions = [mission];
@@ -130,12 +130,12 @@ describe('room missions', () => {
   it('shows nothing and keeps nothing when the save fails; the next try works', async () => {
     await enter('s1', ME);
     source.fail = true;
-    moveTo('s1', { x: 0, y: 0, z: -52 });
+    moveTo('s1', { x: 21, y: 0, z: 39 });
     await settle();
     expect(progressOf('o1')).toBe(0);
     source.fail = false;
     moveTo('s1', { x: 0, y: 0, z: -30 });
-    moveTo('s1', { x: 0, y: 0, z: -52 });
+    moveTo('s1', { x: 21, y: 0, z: 39 });
     await settle();
     expect(progressOf('o1')).toBe(1);
   });
@@ -207,7 +207,7 @@ describe('room missions', () => {
     for (const other of ['u2', 'u3', 'u4', 'u5', 'u6'])
       await enter(`x-${other}`, other, { x: 1, y: 0, z: -30 });
     binding.emote('s1', 'wave');
-    moveTo('s1', { x: 0, y: 0, z: -52 });
+    moveTo('s1', { x: 21, y: 0, z: 39 });
     for (const item of last<MissionEntitiesMessage>(MSG.missionEntities).entities.filter(
       (e) => e.kind === 'item',
     )) {
@@ -263,8 +263,8 @@ describe('previews', () => {
       players: () => [],
       now: () => clock,
     });
-    positions.set('s1', { x: 0, y: 0, z: -52 });
-    positions.set('s2', { x: 0, y: 0, z: -52 });
+    positions.set('s1', { x: 21, y: 0, z: 39 });
+    positions.set('s2', { x: 21, y: 0, z: 39 });
     await room.join('s1', ME, 'Biên Tập', draft.id);
     await room.join('s2', 'u2', 'Người Khác');
     await settle();

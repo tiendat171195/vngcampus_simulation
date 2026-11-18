@@ -1,5 +1,6 @@
 import type { BootstrapResponse, SignInProvider, UserDto } from '@campus/shared';
 import { type FormEvent, useEffect, useState } from 'react';
+import logoUrl from '../assets/brand/vng-logo-white.png';
 import { type Phase, useSession } from '../game/core/session';
 import { loadName, nameProblem, saveName } from '../game/net/identity';
 import {
@@ -126,6 +127,8 @@ export function Splash() {
   return (
     <div className="splash" data-phase={phase}>
       <form className="splash-card" onSubmit={onSubmit} data-account={checking ? 'checking' : ''}>
+        {/* The official artwork, mono white on the dark card (VNG brand guidelines). */}
+        <img className="splash-logo" src={logoUrl} alt="VNG" width={100} height={40} />
         <p className="splash-kicker">Campus ảo</p>
         <h1>VNG Campus Online</h1>
         <p className="splash-lead">

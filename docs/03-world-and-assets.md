@@ -17,8 +17,25 @@
 | Tiện ích khác | Phòng chiếu phim, cửa hàng tiện lợi, khu vui chơi trẻ em | vng.com.vn, CafeF |
 | Phòng họp | Đặt tên theo thành phố: Bangkok, Bangalore, Jakarta, São Paulo… rải khắp khu làm việc | Người Quan Sát |
 | Nội thất | Văn phòng mở, ít tường ngăn, **vách ngăn là kệ cây xanh**, màu tươi sáng, nhiều giếng trời lấy sáng | CafeF, An Phát |
+| Cổng chính | "Cách điệu chữ V": mái che trắng trên các cột chữ V màu cam, ngay trước có đài phun nước; qua lễ tân là vào Atrium | Techsignin, SGGP, ảnh của VNG |
+| Mặt đứng | Trắng, dải mái trên cùng gồm các tấm vát; ban công mỗi tầng trồng cây rủ; khối tây mặt kính tối; **chữ VNG màu cam** trên dải trên cùng của mặt đứng phía nam (nhìn ra sông) | Ảnh flycam của VNG |
+| Atrium | Giếng trời dài trên mái; khán đài gỗ bậc thang hướng về màn LED trên vách ốp gỗ xương cá; hai bên là các tầng lửng lan can kính, cầu thang chéo lên tầng | Ảnh của VNG, Techsignin |
+| Mái | Khối chính phủ pin mặt trời; ô giữa không có pin là giếng trời Atrium; khối tây mái bằng, góc tây bắc đặt máy lạnh | Ảnh vệ tinh |
+| Khác | Chứng chỉ LEED Gold; hồ bơi có bể sục tròn ở đầu hồi, sàn gỗ quanh hồ | Tatinta, ảnh của VNG |
 
-**Chưa có nguồn công khai:** mặt bằng từng tầng, vị trí chính xác của từng khu trong nhà, vật liệu và màu mặt đứng, cổng và bãi xe, cầu thang/thang máy. Những phần này cần ảnh hoặc sơ đồ từ bạn (mục 8); trước lúc đó dùng vị trí giả định có gắn nhãn `placeholder`.
+**Chưa có nguồn công khai:** mặt bằng từng tầng, vị trí chính xác của từng khu trong nhà (canteen, hồ Koi, gym), cầu thang/thang máy. Những phần này cần ảnh hoặc sơ đồ từ bạn (mục 8); trước lúc đó dùng vị trí giả định có gắn nhãn `placeholder`.
+
+### 1.3 Đối chiếu với ảnh vệ tinh và ảnh chính thức (bản đồ 0.2, 18/11/2026)
+
+Đã chiếu ảnh vệ tinh (Esri World Imagery, mức 19, khoảng 0,3 m/điểm ảnh) sang hệ toạ độ campus rồi vẽ chồng bản đồ lên, kèm ảnh trong bài viết chính thức của VNG và báo chí. Ảnh chỉ dùng để đối chiếu, **không lưu vào repo** (bản quyền của chủ ảnh); repo chỉ giữ toạ độ suy ra.
+
+| Kết quả | Chi tiết |
+|---|---|
+| Khớp | Footprint OSM của hai khối và hồ bơi trùng mái nhìn từ trên xuống (sai lệch 1–2 m); đường nội bộ vòng quanh hai khối; vòng xoay phía sông; ki-ốt cà phê góc đông nam; giếng trời Atrium nằm đúng ô giữa mái (khoảng X −14…4, Z −10…12) |
+| Đã sửa | **Cổng chính** ở mặt nam nhìn ra sông (trước cửa có mái che chữ V cam và đài phun nước giữa vòng xoay), không phải giữa mặt đường Tân Thuận — phía đường lớn chỉ có dải cây. **Sảnh lễ tân** ngay sau cửa chính, dẫn vào Atrium. **Bãi xe**: một hàng đỗ xe vuông góc dọc đường phía sông (X −74…6), không phải khu đất trống phía tây. **Hàng rào tây** theo hàng cây ở X ≈ −126; khu đất trống bên ngoài không thuộc campus. **Sân giữa hai khối** là sân vườn có bồn cây tròn (tâm X −52,5; Z 16) chứ không phải sân đón khách. Thêm biển chữ VNG trên mặt đứng nam |
+| Vẫn giả định | Chốt bảo vệ (đặt ở lối xe góc đông bắc), toàn bộ nội thất trừ Atrium và sảnh |
+
+Nguồn: [bài "VNG Campus – mô hình văn phòng thông minh quốc tế" trên vng.com.vn](https://vng.com.vn/news/enterprise/vng-campus-3906.html), [Techsignin](https://www.techsignin.com/chinh-thuc-khai-truong-tru-so-vng-campus-tai-quan-7/), [SGGP](https://www.sggp.org.vn/vng-campus-mo-hinh-van-phong-thong-minh-quoc-te-post537236.html), [Tatinta](https://tatinta.com/diem-den/vng-campus-tru-so-chinh-vng/9159), ảnh vệ tinh Esri World Imagery (© Esri, Maxar và các nguồn khác).
 
 ### 1.2 Sơ đồ nền từ OpenStreetMap
 
@@ -36,7 +53,7 @@ OpenStreetMap đã có footprint của campus. Dữ liệu đã trích lưu ở 
 | Bờ sông Sài Gòn | (quan hệ 3850169) | — | Z ≈ +92…+99 |
 | Đường nội bộ | 899720023 và các way lân cận | vòng quanh hai block | — |
 
-Nhận xét: campus nằm trên một dải đất rộng khoảng 160 m giữa đường Tân Thuận và sông Sài Gòn, hai block xếp dọc theo đường. Footprint OSM **thô và nhỏ hơn thực tế** (tổng ~10.800 m² so với tầng lớn nhất hơn 13.000 m²), nên chỉ dùng làm khung định vị ban đầu.
+Nhận xét: campus nằm trên một dải đất rộng khoảng 160 m giữa đường Tân Thuận và sông Sài Gòn, hai block xếp dọc theo đường. Tổng footprint OSM ~10.900 m² (nhỏ hơn con số "tầng lớn nhất hơn 13.000 m²" — có thể con số đó tính cả hành lang ngoài, ban công); đối chiếu ảnh vệ tinh cho thấy đường viền OSM khớp mái thật (xem §1.3).
 
 ## 2. Hệ toạ độ và tỉ lệ
 
@@ -45,7 +62,7 @@ Nhận xét: campus nằm trên một dải đất rộng khoảng 160 m giữa 
 - **Trục xoay theo campus**, không theo hướng bắc: `+X` chạy dọc đường Tân Thuận về phía đông bắc (phương vị 38°), `+Z` hướng ra sông (phương vị 128°). Nhờ vậy tường nhà gần như thẳng theo trục, dễ dựng và dễ đặt toạ độ.
 - Nhìn từ trên xuống trong three.js: X sang phải, Z xuống dưới — trùng với sơ đồ ở trên.
 - Hướng bắc thật lưu trong metadata để đặt hướng nắng và la bàn.
-- **Biên thế giới MVP:** X −200…150, Z −90…110 (khoảng 350 × 200 m).
+- **Biên thế giới MVP:** X −200…150, Z −90…110 (khoảng 350 × 200 m). Hàng rào campus: phía đường ở Z −57, phía tây ở X −126 (bản đồ 0.2), phía đông X 90, phía sông cách bờ 4 m.
 - **Cao độ tầng (giả định, chờ xác minh):** F1 = 0 m (cao 5,0 m), F2 = 5,0 m, F3 = 9,5 m, mái = 14,0 m.
 
 ## 3. Phân khu
@@ -55,15 +72,16 @@ Mã khu (`area.*`) là khoá ổn định; nhiệm vụ và server tham chiếu 
 | Nhóm | Khu | Tầng | Nguồn | Ghi chú |
 |---|---|---|---|---|
 | Ngoài trời | `area.site` khuôn viên (bên trong hàng rào) | F1 | Suy ra từ đường và bờ sông | Vùng đi được ngoài trời; ra ngoài là hết bản đồ |
-| | `area.gate_main` cổng chính | F1 | Giả định | Đặt giữa mặt đường Tân Thuận, đối diện cửa bắc của block chính. Điểm xuất hiện đầu ngày |
-| | `area.parking` bãi xe | F1 | Giả định | Phía tây block 2 |
-| | `area.forecourt` sân đón khách | F1 | OSM (khoảng lõm giữa hai block) | Có đường xe vào từ phía sông |
+| | `area.gate_main` cổng chính | F1 | Ảnh + vệ tinh (0.2) | Sân trước cửa chính ở mặt nam, dưới mái che chữ V cam, nhìn ra đài phun nước. Điểm xuất hiện đầu ngày |
+| | `area.fountain` đài phun nước | F1 | Vệ tinh (0.2) | Giữa vòng xoay trước cổng; mặt nước, không đi vào được |
+| | `area.parking` bãi xe | F1 | Vệ tinh (0.2) | Hàng đỗ xe vuông góc dọc đường phía sông |
+| | `area.forecourt` sân vườn | F1 | OSM + vệ tinh (0.2) | Khoảng lõm giữa hai block; có `area.garden_planter` bồn cây tròn ở giữa (tên cũ "sân đón khách") |
 | | `area.pool` hồ bơi · `area.pool_deck` khu hồ bơi | F1 | OSM | Hồ là mặt nước, không đi vào được |
 | | `area.riverside` công viên ven sông | F1 | Suy ra | Lối dạo, ghế, điểm chụp ảnh |
 | | `area.cafe_terrace` sân cà phê ngoài trời | F1 | OSM (ki-ốt cà phê) | Dùng tên chung, chưa dùng tên thương hiệu |
 | | `area.river` sông Sài Gòn | F1 | OSM | Phông nền, không đi vào được |
 | Tầng trệt | `area.main.f1`, `area.block2.f1` | F1 | OSM | Toàn bộ mặt sàn của mỗi block |
-| | `area.lobby` sảnh lễ tân | F1 | Giả định | Cạnh cửa tây, nhìn ra sân đón khách |
+| | `area.lobby` sảnh lễ tân | F1 | Suy ra từ bài viết (0.2) | Ngay sau cửa chính phía nam, dẫn vào Atrium; kích thước vẫn giả định |
 | | `area.atrium` Atrium | F1 (thông tầng) | Giả định | Giữa block chính, 36 × 28 m, có hai cầu thang lớn |
 | | `area.canteen` canteen | F1 | Giả định | Góc đông bắc, cạnh hồ bơi |
 | | `area.koi` khu hồ Koi · `area.koi_pond` · `area.coffee_main` | F1 | Giả định | Phía nam Atrium; chỉ 8 ghế quanh hồ |
@@ -295,7 +313,9 @@ Lưu ý: nếu repo để công khai thì **không commit ảnh và sơ đồ n�
 | OpenStreetMap | ODbL 1.0 | Ghi "© OpenStreetMap contributors" trong màn hình giới thiệu; giữ file dữ liệu trích trong repo |
 | Bộ asset Quaternius | CC0 | Không bắt buộc ghi công, vẫn nên ghi |
 | Asset tự làm / AI tạo | — | Kiểm tra điều khoản của công cụ AI trước khi dùng cho mục đích chính thức |
-| Thương hiệu, logo VNG và đối tác (Phúc Long, Highlands…) | Thuộc chủ sở hữu | Cần được cho phép; khi chưa có thì dùng tên chung chung ("Quầy cà phê") |
+| Logo VNG | Nhãn hiệu của VNG | **Dùng từ 18/11/2026 theo yêu cầu của chủ dự án**: chỉ file gốc từ [thư viện của VNG](https://vng.com.vn/gallery/logo.1.html), không sửa, đúng tổ hợp màu và khoảng trống trong [hướng dẫn thương hiệu](https://vng.com.vn/guidelines/brand/logo.html) (xem `apps/web/src/assets/brand/README.md`) |
+| Thương hiệu đối tác (Phúc Long, Highlands…) | Thuộc chủ sở hữu | Cần được cho phép; khi chưa có thì dùng tên chung chung ("Quầy cà phê") |
+| Ảnh vệ tinh, ảnh báo chí và ảnh của VNG dùng để đối chiếu | Thuộc chủ ảnh | Chỉ dùng làm tham chiếu, không đưa vào repo; ghi nguồn ở §1.3 |
 
 ## 10. Nguồn tham khảo
 

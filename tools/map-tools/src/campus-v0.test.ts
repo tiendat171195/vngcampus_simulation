@@ -147,7 +147,42 @@ describe('campus v0', () => {
   });
 
   it('marks guessed interiors as placeholders', () => {
-    const guessed = ['area.lobby', 'area.canteen', 'area.koi', 'area.gate_main', 'area.gym'];
+    const guessed = ['area.lobby', 'area.canteen', 'area.koi', 'area.gym'];
     for (const id of guessed) expect(index.areas.get(id)?.tags, id).toContain('placeholder');
+  });
+});
+
+describe('outdoor layout checked against public sources (map 0.2)', () => {
+  const areaOf = (id: string) => map.areas.find((area) => area.id === id);
+
+  it('has the main entrance on the river side, in front of the doors under the canopy', () => {
+    const gate = areaOf('area.gate_main');
+    expect(gate?.tags).not.toContain('placeholder');
+    const door = map.structures[0]?.openings.find((o) => o.id === 'door.main.south');
+    const spawns = map.pois.filter((poi) => poi.id.startsWith('poi.spawn.gate_'));
+    expect(spawns).toHaveLength(8);
+    for (const spawn of spawns) {
+      expect(spawn.position[1]).toBeGreaterThan(30);
+      expect(
+        Math.hypot(spawn.position[0] - (door?.at[0] ?? 0), spawn.position[1] - (door?.at[1] ?? 0)),
+      ).toBeLessThan(10);
+    }
+    const canopy = map.props.find((group) => group.model === 'canopy_v')?.instances ?? [];
+    expect(canopy).toHaveLength(1);
+  });
+
+  it('parks cars along the river-side drive, not on the open lot to the west', () => {
+    const cars = map.props.find((group) => group.model === 'car')?.instances ?? [];
+    expect(cars.length).toBeGreaterThan(10);
+    for (const car of cars) {
+      expect(car.p[1]).toBeGreaterThan(57);
+      expect(car.p[0]).toBeGreaterThan(-126);
+    }
+  });
+
+  it('puts the VNG sign high on the south facade, facing the river', () => {
+    const [sign] = map.props.find((group) => group.model === 'logo_sign')?.instances ?? [];
+    expect(sign?.floor).toBe('F3');
+    expect(Math.abs((sign?.yawDeg ?? 90) - 0)).toBeLessThan(30);
   });
 });

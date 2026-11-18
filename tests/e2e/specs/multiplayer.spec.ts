@@ -13,19 +13,22 @@ test('a desktop and a phone player see each other and each other moving', async 
   const own = await ownPosition(desktop.page);
   expect(start?.z).toBeCloseTo(own.z, 0);
 
-  // An walks towards the building for two seconds.
+  // An walks towards the entrance doors for two seconds.
   await desktop.page.keyboard.down('KeyW');
   await desktop.page.waitForTimeout(2000);
   await desktop.page.keyboard.up('KeyW');
 
   await expect
-    .poll(async () => (await remotes(phone.page))[0]?.z ?? 0)
-    .toBeGreaterThan((start?.z ?? 0) + 1.5);
+    .poll(async () => {
+      const seen = (await remotes(phone.page))[0];
+      return Math.hypot((seen?.x ?? 0) - (start?.x ?? 0), (seen?.z ?? 0) - (start?.z ?? 0));
+    })
+    .toBeGreaterThan(1.5);
   await expect
     .poll(async () => {
       const seen = (await remotes(phone.page))[0];
       const actual = await ownPosition(desktop.page);
-      return Math.abs((seen?.z ?? 0) - actual.z);
+      return Math.hypot((seen?.x ?? 0) - actual.x, (seen?.z ?? 0) - actual.z);
     })
     .toBeLessThan(0.2);
 

@@ -7,7 +7,7 @@ type Triple = [x: number, y: number, z: number];
 
 const VIEWPOINTS: Record<ViewpointId, { position: Triple; target: Triple }> = {
   overview: { position: [-40, 150, 215], target: [-35, 0, 12] },
-  gate: { position: [0, 13, -84], target: [0, 3, -34] },
+  gate: { position: [30, 12, 78], target: [18, 4, 36] },
   atrium: { position: [0, 3.2, 14], target: [0, 5, -12] },
   pool: { position: [78, 20, -62], target: [50, 0, -18] },
   riverside: { position: [-70, 9, 104], target: [-25, 2, 40] },
